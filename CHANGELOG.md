@@ -6,38 +6,37 @@ records *what* changed and *why* so future sessions have context.
 
 ---
 
-## 2026-06-26 — Palette rebrand: royal purple + yellow (branch `feat/theme-purple-yellow`)
+## 2026-06-27 — Palette rebrand: royal purple + yellow (shipped to main)
 
 Moved off the teal/coral identity to **royal purple (primary) + yellow (Enroll
-CTA)**. On a branch for local review; **not merged/deployed** (live site stays
-teal until approved).
+CTA)**. Built on `feat/theme-purple-yellow`, reviewed locally, **merged to main
+and deployed**.
 
 - **Tokens renamed to role-based names** in `tokens.css` (no more misleading
-  `teal`/`coral` holding other colors): `teal→primary`, `teal-deep→primary-deep`,
-  `cyan→accent`, `coral→cta`, `coral-deep→cta-deep`; `signal` (amber) kept.
-- **Palette:** `--primary #A78BFA` (light royal violet, text-safe ~7:1) +
+  names holding other colors): `teal→primary`, `teal-deep→primary-deep`,
+  `cyan→accent`, `coral→cta`, `coral-deep→cta-deep`; `signal` (amber urgency) kept.
+- **Palette:** `--primary #A78BFA` (light royal violet, text-safe ~7:1) ·
   `--primary-deep #7C3AED` (royal purple, fills/gradients only) · `--accent
-  #C4B5FD` (lavender, gradients only) · `--cta #FACC15` / `--cta-deep #EAB308`
-  (vivid yellow Enroll). Coral fully retired.
+  #C084FC` (luminous violet, gradients + rail sweep only) · `--cta #FACC15` /
+  `--cta-deep #EAB308` (vivid yellow Enroll, ink text ~12.6:1). Coral retired.
 - **Mechanical rename** of all utility usages (`text-teal`→`text-primary`, etc.)
   across ~16 components + `var()` refs in keyframes (pulse-ring, cta-pulse,
   grad-pipeline, grad-border, focus ring).
+- **Pipeline label:** stage 1 `commit → code` (code·build·test·deploy·production);
+  curriculum heading → "From code to production". (Curriculum module label
+  "commit" kept — it tags the Git module, contextually correct.)
+- **Curriculum accordion** now expands/collapses **smoothly** (`::details-content`
+  + `interpolate-size`, graceful fallback to instant snap, reduced-motion-safe);
+  chevron eases + turns purple when open. Still 0 JS.
+- **PipelineAnim** kept the **original main-branch motion** (simple symmetric
+  sweep + sequential node light-up, 3s), just recolored — glow/comet/swell
+  variants were trialled and reverted to the cleaner original.
 - Verified: build clean · 0 JS · grep gate (zero teal/coral/cyan in src) ·
   contrast (text-primary 7.1:1, CTA ink-on-yellow 12.6:1, all pass) · desktop +
   380px screenshots · code-review subagent (no critical/should-fix).
 - Docs synced: BRAND.md §3 table + rules, CLAUDE.md golden rule 5 + quality floor.
-- **Open note for review:** amber `--signal` (countdown) now sits adjacent to the
-  yellow CTA in the nav + pricing card — close hues; eyeball before merge.
-
-### Follow-up — motion polish (same branch)
-- `--accent` brightened `#C4B5FD → #C084FC` (luminous violet) so the hero
-  pipeline sweep pops like the old cyan did (the pale lavender had gone flat).
-- `PipelineAnim`: sweep gained a soft glow; lit nodes now carry a `0 0 12px` glow
-  → the "deploying" pulse reads as light travelling the rail again.
-- `Curriculum`: native `<details>` now expand/collapse **smoothly**
-  (`::details-content` + `interpolate-size`, graceful fallback to instant snap,
-  auto-disabled under `prefers-reduced-motion`); chevron eases + turns purple when
-  open. Still 0 JS.
+- **Known cosmetic note:** amber `--signal` (countdown) sits adjacent to the
+  yellow CTA in the nav + pricing card (close hues) — accepted as-is for now.
 
 ---
 
