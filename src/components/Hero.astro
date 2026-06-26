@@ -1,7 +1,7 @@
 ---
 // Hero — the above-the-fold conversion core (ARCHITECTURE.md §4.2).
 // Badge · H1 · subhead · animated pipeline · batch date · Countdown · dual CTA.
-// Depth: dual ambient glow (teal + amber) over a faint pipeline grid (BRAND.md
+// Depth: dual ambient glow (primary + amber) over a faint pipeline grid (BRAND.md
 // §5 evolution). The animated pipeline is the one bold motion moment (§2).
 import { site } from "../config/site";
 import Button from "./primitives/Button.astro";
@@ -29,7 +29,7 @@ const scheduleBits = [
   <!-- depth: dual ambient glow over a faint pipeline grid (BRAND.md §5) -->
   <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
     <div
-      class="absolute -top-40 left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-teal/10 blur-[120px]"
+      class="absolute -top-40 left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]"
     >
     </div>
     <div
@@ -45,7 +45,7 @@ const scheduleBits = [
     <span
       class="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-line bg-surface/70 px-3.5 py-1.5 font-mono text-xs text-muted"
     >
-      <StatusDot tone="teal" />
+      <StatusDot tone="primary" />
       DevOps - Zero To Hero [Live]
     </span>
 
@@ -61,7 +61,7 @@ const scheduleBits = [
 
     <PipelineAnim />
 
-    <p class="font-mono text-sm text-teal">
+    <p class="font-mono text-sm text-primary">
       {scheduleBits.join(" · ")}
     </p>
 

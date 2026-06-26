@@ -6,6 +6,49 @@ records *what* changed and *why* so future sessions have context.
 
 ---
 
+## 2026-06-26 — Palette rebrand: royal purple + yellow (branch `feat/theme-purple-yellow`)
+
+Moved off the teal/coral identity to **royal purple (primary) + yellow (Enroll
+CTA)**. On a branch for local review; **not merged/deployed** (live site stays
+teal until approved).
+
+- **Tokens renamed to role-based names** in `tokens.css` (no more misleading
+  `teal`/`coral` holding other colors): `teal→primary`, `teal-deep→primary-deep`,
+  `cyan→accent`, `coral→cta`, `coral-deep→cta-deep`; `signal` (amber) kept.
+- **Palette:** `--primary #A78BFA` (light royal violet, text-safe ~7:1) +
+  `--primary-deep #7C3AED` (royal purple, fills/gradients only) · `--accent
+  #C4B5FD` (lavender, gradients only) · `--cta #FACC15` / `--cta-deep #EAB308`
+  (vivid yellow Enroll). Coral fully retired.
+- **Mechanical rename** of all utility usages (`text-teal`→`text-primary`, etc.)
+  across ~16 components + `var()` refs in keyframes (pulse-ring, cta-pulse,
+  grad-pipeline, grad-border, focus ring).
+- Verified: build clean · 0 JS · grep gate (zero teal/coral/cyan in src) ·
+  contrast (text-primary 7.1:1, CTA ink-on-yellow 12.6:1, all pass) · desktop +
+  380px screenshots · code-review subagent (no critical/should-fix).
+- Docs synced: BRAND.md §3 table + rules, CLAUDE.md golden rule 5 + quality floor.
+- **Open note for review:** amber `--signal` (countdown) now sits adjacent to the
+  yellow CTA in the nav + pricing card — close hues; eyeball before merge.
+
+---
+
+## 2026-06-26 — Dual-currency pricing (INR for India)
+
+India now bills in **INR**; rest of world stays **USD**. Restructured `site.ts`
+pricing into a currency-aware `price.{india,world}.{early,regular}` object of
+pre-formatted display strings (no math done on prices anywhere).
+
+- **India:** early **₹14,999**, regular ~~₹25,000~~ (the struck-through anchor +
+  the post-deadline full-price card).
+- **World:** early **$199**, regular ~~$249~~ — kept in the screen-reader
+  breakdown + at Learnyst checkout (golden rule 6 transparency); not shown
+  visually, so the box leads with a single currency.
+- **Buttons are now price-free:** "Pay · India" (flag) / "Pay · Global" (globe).
+  Prices left the buttons per owner request; region is still explicit.
+- SR price sentences built as frontmatter strings to dodge Astro's
+  whitespace-trim-around-`{expr}` gotcha. Build clean, 0 JS.
+
+---
+
 ## 2026-06-26 — Review pass (hero, nav, flow, pricing, voice)
 
 Seven owner-requested refinements:

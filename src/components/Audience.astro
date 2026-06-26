@@ -9,7 +9,7 @@ import { audience } from "../content/data";
   <div class="grid gap-6 md:grid-cols-2">
     <!-- FOR YOU -->
     <div class="surface-card rounded-[var(--radius-card)] border border-line bg-surface p-6 sm:p-8">
-      <h3 class="mb-5 flex items-center gap-2 text-teal">
+      <h3 class="mb-5 flex items-center gap-2 text-primary">
         <svg class="size-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
           <path
             d="M4 10.5l3.5 3.5L16 6"
@@ -24,7 +24,7 @@ import { audience } from "../content/data";
         {
           audience.forYou.map((item) => (
             <li class="flex items-start gap-3">
-              <span class="mt-2 size-1.5 shrink-0 rounded-full bg-teal" aria-hidden="true" />
+              <span class="mt-2 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
               <span class="text-text">{item}</span>
             </li>
           ))

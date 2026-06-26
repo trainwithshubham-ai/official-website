@@ -20,21 +20,21 @@ const { class: className = "" } = Astro.props;
     href={site.checkout.india}
     enroll
     data-region="india"
-    aria-label={`Pay for India — ${site.priceEarlyIndia} US dollars`}
+    aria-label={`Pay — India pricing, ${site.price.india.early} early bird`}
     class="w-full sm:w-auto"
   >
     <FlagIndia />
-    Pay · India <span class="font-normal opacity-75">·</span> ${site.priceEarlyIndia}
+    Pay · India
   </Button>
 
   <Button
     href={site.checkout.world}
     enroll
     data-region="world"
-    aria-label={`Pay globally — ${site.priceEarlyUS} US dollars`}
+    aria-label={`Pay — rest-of-world pricing, ${site.price.world.early} early bird`}
     class="w-full sm:w-auto"
   >
     <Globe />
-    Pay · Global <span class="font-normal opacity-75">·</span> ${site.priceEarlyUS}
+    Pay · Global
   </Button>
 </div>

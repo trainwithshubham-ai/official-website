@@ -65,8 +65,10 @@ npm run preview      # preview the build
    (4.9 ★ · 232). Show review cards as trimmed excerpts that link to the full
    review on Google; never edit a reviewer's words into something they didn't say.
    If content is missing, omit it — don't invent.
-5. **Coral is for the Enroll CTA only.** Teal is structural. Amber is urgency.
-   See BRAND.md §3. Don't introduce colors outside the palette.
+5. **Yellow (`--cta`) is for the Enroll CTA only.** Purple (`--primary`) is
+   structural; use light `--primary` (#A78BFA) for text/icons and deep
+   `--primary-deep` (#7C3AED) only for fills/gradients. Amber (`--signal`) is
+   urgency. See BRAND.md §3. Don't introduce colors outside the palette.
 6. **Honest scarcity.** The countdown is real (ties to `earlyBirdEndsISO`). When
    it expires, it flips to "early-bird ended · full price live" — it does not
    reset or fake new urgency. No "X seats left" unless it's literally true.
@@ -121,7 +123,7 @@ Follow ARCHITECTURE.md §8. Build and present **one section at a time** for revi
 ## Quality floor (must pass before deploy)
 
 - Responsive and excellent at **380px**. Pipeline rail collapses to vertical.
-- Visible keyboard focus (teal ring). `prefers-reduced-motion` kills animations.
+- Visible keyboard focus (purple ring). `prefers-reduced-motion` kills animations.
 - Lighthouse **Performance ≥ 95, Accessibility ≥ 95**. Near-zero JS.
 - Body-text contrast ≥ 4.5:1 (palette passes on `--ink`/`--surface`).
 - Semantic landmarks (`header`/`main`/`section`/`footer`), real heading order.
@@ -196,8 +198,10 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
 - Product: DevOps: Zero to Hero (AI Powered) · cohort batch · starts 18 Jul 2026
   · open to all levels (beginners welcome, no prior experience required)
 - Early bird ends: 11 Jul 2026, 23:59 IST
-- Price: ~~$249~~ → early bird **$149 India / $199 US** (shown transparently, no
-  IP geo-switch)
+- Price (dual currency, no IP geo-switch): India ~~₹25,000~~ → early bird
+  **₹14,999**; rest of world ~~$249~~ → early bird **$199**. Page leads with the
+  India price; the world price lives in the SR breakdown + at checkout. Region pay
+  buttons are price-free (flag / globe).
 - Proof: 10,000+ engineers trained; 4.9 ★ · 232 Google reviews (real, seeded in
   reviews.json); YouTube 1.5L+, LinkedIn 1L+, Instagram 10k+
 - Site should be **live ~30 Jun** to give an early-bird selling runway — 18 Jul

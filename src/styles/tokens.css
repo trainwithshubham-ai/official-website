@@ -2,7 +2,7 @@
  *
  * Hex values are the authoritative source of truth (BRAND.md wins).
  * Tailwind v4 reads these through the @theme block below, which turns each
- * token into a utility (e.g. --color-teal → bg-teal / text-teal / border-teal).
+ * token into a utility (e.g. --color-primary → bg-primary / text-primary / border-primary).
  * No tailwind.config file exists — this file IS the config.
  */
 @import "tailwindcss";
@@ -25,11 +25,11 @@
   --color-surface: #12181f; /* cards, elevated panels */
   --color-surface-2: #1a222c; /* higher elevation, inputs, hover */
   --color-line: #243240; /* hairline borders, pipeline rails */
-  --color-teal: #21d4b4; /* brand / healthy / completed-stage */
-  --color-teal-deep: #0e9384; /* teal gradients, pressed */
-  --color-cyan: #38e0e8; /* energy accent — Hero / pipeline gradients ONLY (BRAND §3) */
-  --color-coral: #ff6b57; /* CTA ONLY — Enroll / primary action */
-  --color-coral-deep: #e2503c; /* coral hover / pressed */
+  --color-primary: #a78bfa; /* brand / healthy / completed-stage — light royal violet (text-safe, ~6.9:1 on ink) */
+  --color-primary-deep: #7c3aed; /* royal purple — gradients, fills, pressed */
+  --color-accent: #c4b5fd; /* energy accent — Hero / pipeline gradients ONLY (BRAND §3) */
+  --color-cta: #facc15; /* CTA ONLY — Enroll / primary action (vivid yellow, ink text ~13:1) */
+  --color-cta-deep: #eab308; /* CTA hover / pressed */
   --color-signal: #f5a524; /* urgency — countdown, scarcity */
   --color-text: #e8eef2; /* primary text */
   --color-muted: #8a97a6; /* secondary text, mono labels */
@@ -99,9 +99,9 @@
     font-weight: 500;
   }
 
-  /* Visible keyboard focus — teal ring (BRAND.md §9). */
+  /* Visible keyboard focus — purple ring (BRAND.md §9). */
   :focus-visible {
-    outline: 2px solid var(--color-teal);
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
     border-radius: 2px;
   }
@@ -111,10 +111,10 @@
    Vibrancy layer (BRAND.md evolution) — depth, energy, motion.
    Dark-premium feel (Linear/Vercel/Stripe). All motion degrades via the global
    prefers-reduced-motion switch above; all color-mix/gradient effects degrade
-   via @supports. Coral is never used here.
+   via @supports. The CTA yellow is never used here.
    ========================================================================== */
 :root {
-  --grad-pipeline: linear-gradient(100deg, var(--color-teal), var(--color-cyan));
+  --grad-pipeline: linear-gradient(100deg, var(--color-primary), var(--color-accent));
   --sheen: inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
   --shadow-card: 0 10px 30px -16px rgba(0, 0, 0, 0.65);
 }
@@ -149,7 +149,7 @@
     }
   }
 
-  /* teal gradient hairline border — reserved for the two anchor cards.
+  /* purple gradient hairline border — reserved for the two anchor cards.
      Base rule carries the surface background so the card interior is correct
      even without color-mix; the @supports block layers the gradient border. */
   .grad-border {
@@ -163,8 +163,8 @@
         linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
         linear-gradient(
             135deg,
-            color-mix(in srgb, var(--color-teal) 55%, transparent),
-            color-mix(in srgb, var(--color-teal) 8%, transparent)
+            color-mix(in srgb, var(--color-primary) 55%, transparent),
+            color-mix(in srgb, var(--color-primary) 8%, transparent)
           )
           border-box;
     }
@@ -180,7 +180,7 @@
   }
   @keyframes pulse-ring {
     0% {
-      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-teal) 55%, transparent);
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 55%, transparent);
     }
     70%,
     100% {
@@ -188,7 +188,7 @@
     }
   }
 
-  /* gentle attention pulse for a standalone CTA (coral glow ring); reduced-motion
+  /* gentle attention pulse for a standalone CTA (yellow glow ring); reduced-motion
      drops it via the global switch + the no-preference guard */
   @media (prefers-reduced-motion: no-preference) {
     .pulse-cta {
@@ -197,7 +197,7 @@
   }
   @keyframes cta-pulse {
     0% {
-      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-coral) 55%, transparent);
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-cta) 55%, transparent);
     }
     70%,
     100% {

@@ -1,7 +1,7 @@
 ---
 // PipelineAnim — the signature "deploying" motion (BRAND.md §2, the one bold
 // motion moment). A compact commit→production rail: nodes light up in sequence
-// and a teal→cyan pulse sweeps the track. CSS-only, zero JS.
+// and a primary→accent pulse sweeps the track. CSS-only, zero JS.
 // Decorative: marked role="img" with an accessible label; reduced-motion shows a
 // static, fully-lit (finished) pipeline; labels hide below 400px.
 const stages = ["commit", "build", "test", "deploy", "production"];
@@ -57,7 +57,7 @@ const stages = ["commit", "build", "test", "deploy", "production"];
     background: linear-gradient(
       90deg,
       transparent,
-      var(--color-cyan),
+      var(--color-accent),
       transparent
     );
     animation: pipe-sweep 3s linear infinite;
@@ -106,17 +106,17 @@ const stages = ["commit", "build", "test", "deploy", "production"];
     }
     55%,
     100% {
-      background: var(--color-teal);
-      border-color: var(--color-teal);
-      box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-teal) 14%, transparent);
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
     }
   }
 
   /* finished, static pipeline for reduced-motion */
   @media (prefers-reduced-motion: reduce) {
     .node {
-      background: var(--color-teal);
-      border-color: var(--color-teal);
+      background: var(--color-primary);
+      border-color: var(--color-primary);
       animation: none;
     }
     .track::after {
