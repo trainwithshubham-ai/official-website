@@ -1,16 +1,16 @@
 ---
 // PipelineAnim — the signature "deploying" motion (BRAND.md §2, the one bold
-// motion moment). A compact commit→production rail: nodes light up in sequence
-// and a primary→accent pulse sweeps the track. CSS-only, zero JS.
+// motion moment). A compact code→production rail: nodes light up in sequence
+// and a glowing pulse sweeps the track. CSS-only, zero JS.
 // Decorative: marked role="img" with an accessible label; reduced-motion shows a
 // static, fully-lit (finished) pipeline; labels hide below 400px.
-const stages = ["commit", "build", "test", "deploy", "production"];
+const stages = ["code", "build", "test", "deploy", "production"];
 ---
 
 <div
   class="pipe"
   role="img"
-  aria-label="The curriculum runs like a deploy pipeline, from commit to production"
+  aria-label="The curriculum runs like a deploy pipeline, from code to production"
 >
   <ol class="track" aria-hidden="true">
     {
@@ -52,18 +52,20 @@ const stages = ["commit", "build", "test", "deploy", "production"];
     background: var(--color-line);
   }
   .track::after {
-    width: 42%;
-    left: -42%;
+    width: 46%;
+    left: -46%;
+    /* a glowing comet: soft tail → bright core → soft tail */
     background: linear-gradient(
       90deg,
       transparent,
-      color-mix(in srgb, var(--color-accent) 65%, transparent),
+      color-mix(in srgb, var(--color-accent) 45%, transparent),
       var(--color-accent),
+      color-mix(in srgb, var(--color-accent) 45%, transparent),
       transparent
     );
-    /* soft glow so the pulse reads as light travelling down the rail */
-    box-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 55%, transparent);
-    animation: pipe-sweep 3s linear infinite;
+    box-shadow: 0 0 14px color-mix(in srgb, var(--color-accent) 60%, transparent);
+    filter: blur(0.3px);
+    animation: pipe-sweep 2.8s linear infinite;
   }
 
   li {
@@ -81,8 +83,8 @@ const stages = ["commit", "build", "test", "deploy", "production"];
     border-radius: 9999px;
     background: var(--color-surface-2);
     border: 2px solid var(--color-line);
-    animation: pipe-light 3s ease-in-out infinite;
-    animation-delay: calc(var(--i) * 0.45s);
+    animation: pipe-light 2.8s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.42s);
   }
 
   .lbl {
@@ -100,20 +102,22 @@ const stages = ["commit", "build", "test", "deploy", "production"];
       left: 100%;
     }
   }
+  /* seamless breathing wave — 0% and 100% match so the loop never snaps; each
+     node swells to a glowing peak as the comet passes, then settles. */
   @keyframes pipe-light {
     0%,
-    35% {
+    100% {
       background: var(--color-surface-2);
       border-color: var(--color-line);
       box-shadow: 0 0 0 0 transparent;
     }
-    55%,
-    100% {
+    46%,
+    64% {
       background: var(--color-primary);
       border-color: var(--color-primary);
       box-shadow:
         0 0 0 4px color-mix(in srgb, var(--color-primary) 16%, transparent),
-        0 0 12px color-mix(in srgb, var(--color-primary) 50%, transparent);
+        0 0 14px color-mix(in srgb, var(--color-primary) 55%, transparent);
     }
   }
 

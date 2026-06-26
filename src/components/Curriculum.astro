@@ -1,6 +1,6 @@
 ---
 // Curriculum — the signature pipeline (BRAND.md §2, ARCHITECTURE.md §4.6).
-// Each module is a deploy stage on a vertical rail, from `commit` to
+// Each module is a deploy stage on a vertical rail, from `code` to
 // `production`. Accordions are native <details>/<summary> — ZERO JavaScript.
 // Data mirrors curriculumSchema in content.config.ts.
 import Section from "./primitives/Section.astro";
@@ -8,10 +8,10 @@ import ToolIcon from "./primitives/ToolIcon.astro";
 import { curriculum } from "../content/data";
 ---
 
-<Section id="curriculum" eyebrow="curriculum" title="From commit to production">
+<Section id="curriculum" eyebrow="curriculum" title="From code to production">
   <p class="mb-10 max-w-2xl text-pretty text-muted">
-    Every module is a stage in the pipeline — from your first commit to shipping
-    in production. Expand any stage to see what you'll build.
+    Every module is a stage in the pipeline — from your first line of code to
+    shipping in production. Expand any stage to see what you'll build.
   </p>
 
   <ol class="rail-list" role="list">
@@ -81,7 +81,7 @@ import { curriculum } from "../content/data";
     padding-bottom: 0;
   }
 
-  /* the connecting rail line (commit → production) */
+  /* the connecting rail line (code → production) */
   .stage::before {
     content: "";
     position: absolute;
