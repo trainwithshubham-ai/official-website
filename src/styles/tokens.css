@@ -1,0 +1,229 @@
+/* tokens.css — design tokens from BRAND.md §3–4.
+ *
+ * Hex values are the authoritative source of truth (BRAND.md wins).
+ * Tailwind v4 reads these through the @theme block below, which turns each
+ * token into a utility (e.g. --color-teal → bg-teal / text-teal / border-teal).
+ * No tailwind.config file exists — this file IS the config.
+ */
+@import "tailwindcss";
+
+/* Kill all motion for users who ask for it (BRAND.md §9). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@theme {
+  /* --- color (BRAND.md §3) --- */
+  --color-ink: #0a0e12; /* page background, deep blue-black */
+  --color-surface: #12181f; /* cards, elevated panels */
+  --color-surface-2: #1a222c; /* higher elevation, inputs, hover */
+  --color-line: #243240; /* hairline borders, pipeline rails */
+  --color-teal: #21d4b4; /* brand / healthy / completed-stage */
+  --color-teal-deep: #0e9384; /* teal gradients, pressed */
+  --color-cyan: #38e0e8; /* energy accent — Hero / pipeline gradients ONLY (BRAND §3) */
+  --color-coral: #ff6b57; /* CTA ONLY — Enroll / primary action */
+  --color-coral-deep: #e2503c; /* coral hover / pressed */
+  --color-signal: #f5a524; /* urgency — countdown, scarcity */
+  --color-text: #e8eef2; /* primary text */
+  --color-muted: #8a97a6; /* secondary text, mono labels */
+
+  /* --- type (BRAND.md §4) --- */
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* fluid type scale (clamp) */
+  --text-h1: clamp(2.5rem, 6vw, 4.25rem);
+  --text-h2: clamp(1.75rem, 4vw, 2.75rem);
+  --text-h3: 1.25rem;
+  --text-body: 1.0625rem;
+  --text-eyebrow: 0.8rem;
+
+  /* --- shape (BRAND.md §5) --- */
+  --radius-card: 12px;
+  --radius-btn: 8px;
+  --radius-pill: 999px;
+
+  /* content width */
+  --container-content: 1120px;
+}
+
+/* Base layer — the page defaults. Dark only. */
+@layer base {
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    /* background lives on html so the grain layer (z-index:-1) sits above the
+       base color but below content — it can never affect text contrast. */
+    background-color: var(--color-ink);
+  }
+
+  body {
+    background-color: transparent;
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Headlines: sentence case, Space Grotesk, tight tracking (BRAND.md §4). */
+  h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-h1);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-h2);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+
+  h3 {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    font-weight: 500;
+  }
+
+  /* Visible keyboard focus — teal ring (BRAND.md §9). */
+  :focus-visible {
+    outline: 2px solid var(--color-teal);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+/* ===========================================================================
+   Vibrancy layer (BRAND.md evolution) — depth, energy, motion.
+   Dark-premium feel (Linear/Vercel/Stripe). All motion degrades via the global
+   prefers-reduced-motion switch above; all color-mix/gradient effects degrade
+   via @supports. Coral is never used here.
+   ========================================================================== */
+:root {
+  --grad-pipeline: linear-gradient(100deg, var(--color-teal), var(--color-cyan));
+  --sheen: inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
+  --shadow-card: 0 10px 30px -16px rgba(0, 0, 0, 0.65);
+}
+
+/* page grain — kills the flat-black "cheap" look. Behind content (z-index:-1),
+   above the html base color, so it cannot reduce text contrast. */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@layer components {
+  /* layered, premium surface — top sheen + soft depth */
+  .surface-card {
+    box-shadow: var(--sheen), var(--shadow-card);
+  }
+
+  /* subtle hover lift for interactive cards (motion-safe only) */
+  @media (prefers-reduced-motion: no-preference) {
+    .lift {
+      transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+    }
+    .lift:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  /* teal gradient hairline border — reserved for the two anchor cards.
+     Base rule carries the surface background so the card interior is correct
+     even without color-mix; the @supports block layers the gradient border. */
+  .grad-border {
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+  }
+  @supports (color: color-mix(in srgb, white, black)) {
+    .grad-border {
+      border: 1px solid transparent;
+      background:
+        linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+        linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--color-teal) 55%, transparent),
+            color-mix(in srgb, var(--color-teal) 8%, transparent)
+          )
+          border-box;
+    }
+  }
+
+  /* "deploying" heartbeat on pipeline status dots */
+  .pulse-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    animation: pulse-ring 2.8s ease-out infinite;
+  }
+  @keyframes pulse-ring {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-teal) 55%, transparent);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 8px transparent;
+    }
+  }
+
+  /* gentle attention pulse for a standalone CTA (coral glow ring); reduced-motion
+     drops it via the global switch + the no-preference guard */
+  @media (prefers-reduced-motion: no-preference) {
+    .pulse-cta {
+      animation: cta-pulse 2.8s ease-out infinite;
+    }
+  }
+  @keyframes cta-pulse {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-coral) 55%, transparent);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 14px transparent;
+    }
+  }
+
+  /* CSS-only scroll reveal — content is ALWAYS visible unless this is supported
+     (no opacity:0 default outside the @supports block → no content-trap). */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal {
+        animation: reveal-in linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 16%;
+      }
+    }
+  }
+  @keyframes reveal-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

@@ -1,0 +1,46 @@
+---
+// Section — consistent vertical rhythm + a centered content column, with an
+// optional eyebrow + heading (BRAND.md §5). Components compose their body in the
+// default slot; pass `eyebrow`/`title` for the standard section header.
+import Eyebrow from "./Eyebrow.astro";
+
+interface Props {
+  id?: string;
+  eyebrow?: string;
+  title?: string;
+  /** Heading level for the title — keep the document outline correct. */
+  as?: "h2" | "h3";
+  class?: string;
+  /** Set false to let the section manage its own width (full-bleed visuals). */
+  contained?: boolean;
+}
+const {
+  id,
+  eyebrow,
+  title,
+  as: Heading = "h2",
+  class: className = "",
+  contained = true,
+} = Astro.props;
+---
+
+<section
+  id={id}
+  class:list={["reveal py-[clamp(4rem,9vw,7rem)]", className]}
+>
+  <div
+    class:list={[
+      contained && "mx-auto w-full max-w-[var(--container-content)] px-6",
+    ]}
+  >
+    {
+      (eyebrow || title) && (
+        <header class="mb-10 flex flex-col gap-3">
+          {eyebrow && <Eyebrow text={eyebrow} />}
+          {title && <Heading class="max-w-2xl text-balance">{title}</Heading>}
+        </header>
+      )
+    }
+    <slot />
+  </div>
+</section>

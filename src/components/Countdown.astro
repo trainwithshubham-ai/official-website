@@ -1,0 +1,195 @@
+---
+// Countdown — the ONLY interactive island (ARCHITECTURE.md §5).
+// Framed as the deploy window for early-bird pricing (BRAND.md §2, §6).
+//
+// One component, four mounts (nav / hero / pricing / final CTA). The <script>
+// below is emitted once by Astro no matter how many times the component renders;
+// it drives every [data-countdown] instance on the page.
+//
+// Honest scarcity: on expiry it does NOT reset or vanish — it flips to a calm
+// "early-bird ended · full price live" state via [data-expired] (CSS swap, no
+// layout shift, works even if JS is slow).
+import { site } from "../config/site";
+
+interface Props {
+  variant?: "full" | "chip";
+  /** Expose the deadline to screen readers. Set on exactly ONE mount per page
+   *  so the same deadline isn't announced multiple times. */
+  announceDeadline?: boolean;
+  class?: string;
+}
+const {
+  variant = "full",
+  announceDeadline = false,
+  class: className = "",
+} = Astro.props;
+
+// Static, screen-reader-friendly deadline (the ticking digits are aria-hidden).
+const deadlineLabel = new Date(site.earlyBirdEndsISO).toLocaleString("en-IN", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Asia/Kolkata",
+});
+
+const units = [
+  { key: "d", label: "days" },
+  { key: "h", label: "hrs" },
+  { key: "m", label: "min" },
+  { key: "s", label: "sec" },
+];
+---
+
+<div
+  class:list={["countdown", `countdown--${variant}`, className]}
+  data-countdown
+  data-deadline={site.earlyBirdEndsISO}
+  data-expired="false"
+>
+  <!-- live ticker (visual only) -->
+  <div class="cd-live" aria-hidden="true">
+    {
+      variant === "full" && (
+        <p class="font-mono text-[length:var(--text-eyebrow)] lowercase tracking-[0.08em] text-signal">
+          ❯ early-bird window closes
+        </p>
+      )
+    }
+    <div class="cd-units">
+      {
+        units.map((u) => (
+          <span class="cd-unit">
+            <span class="cd-num font-mono" data-unit={u.key}>--</span>
+            <span class="cd-lbl font-mono">{u.label}</span>
+          </span>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- expired state (revealed by CSS when [data-expired="true"]) -->
+  <p class="cd-ended font-mono text-[length:var(--text-eyebrow)] text-muted">
+    <span class="text-signal" aria-hidden="true">●</span> early-bird ended · full
+    price live
+  </p>
+
+  <!-- Accessible deadline — exposed on exactly ONE mount (announceDeadline) so
+       screen readers don't hear the same deadline repeated across the page. -->
+  {
+    announceDeadline && (
+      <span class="sr-only">Early-bird pricing ends {deadlineLabel} IST.</span>
+    )
+  }
+</div>
+
+<style>
+  .countdown {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .cd-units {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+  .cd-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 3.25rem;
+    padding: 0.5rem 0.5rem 0.4rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+  }
+  .cd-num {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .cd-lbl {
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  /* compact chip for the nav */
+  .countdown--chip .cd-units {
+    gap: 0.25rem;
+  }
+  .countdown--chip .cd-unit {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.15rem;
+    min-width: 0;
+    padding: 0.2rem 0.4rem;
+    background: transparent;
+    border: 0;
+  }
+  .countdown--chip .cd-num {
+    font-size: 0.95rem;
+    color: var(--color-signal);
+  }
+  .countdown--chip .cd-lbl {
+    font-size: 0.6rem;
+  }
+
+  /* expiry swap — no layout shift, CSS-driven */
+  .cd-ended {
+    display: none;
+  }
+  .countdown[data-expired="true"] .cd-live {
+    display: none;
+  }
+  .countdown[data-expired="true"] .cd-ended {
+    display: block;
+  }
+</style>
+
+<script>
+  // Drives every countdown on the page from a single timer. No framework.
+  const nodes = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-countdown]"),
+  );
+  const deadline = nodes[0]?.dataset.deadline;
+  if (deadline) {
+    const target = new Date(deadline).getTime();
+    const pad = (n: number) => String(n).padStart(2, "0");
+
+    const render = () => {
+      const diff = target - Date.now();
+      if (diff <= 0) {
+        nodes.forEach((n) => (n.dataset.expired = "true"));
+        // signal global expiry so Pricing can flip to full price (ARCHITECTURE §5)
+        document.documentElement.dataset.earlyBirdEnded = "true";
+        return false; // stop ticking
+      }
+      const s = Math.floor(diff / 1000);
+      const v = {
+        d: Math.floor(s / 86400),
+        h: Math.floor((s % 86400) / 3600),
+        m: Math.floor((s % 3600) / 60),
+        s: s % 60,
+      };
+      nodes.forEach((n) => {
+        for (const k of ["d", "h", "m", "s"] as const) {
+          const el = n.querySelector<HTMLElement>(`[data-unit="${k}"]`);
+          if (el) el.textContent = pad(v[k]);
+        }
+      });
+      return true;
+    };
+
+    if (render()) {
+      const id = setInterval(() => {
+        if (!render()) clearInterval(id);
+      }, 1000);
+    }
+  }
+</script>

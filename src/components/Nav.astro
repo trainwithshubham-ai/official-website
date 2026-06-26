@@ -1,0 +1,68 @@
+---
+// Nav — sticky, quiet, conversion-forward. Logo + jump links + a compact
+// Countdown chip + the Enroll CTA. JS-free: a persistent translucent backdrop
+// reads as "floating" without a scroll listener (interactivity budget = the
+// countdown only). Collapses gracefully to logo + Enroll at 380px.
+import { site } from "../config/site";
+import Button from "./primitives/Button.astro";
+import Countdown from "./Countdown.astro";
+
+const links = [
+  { href: "#curriculum", label: "Curriculum" },
+  { href: "#pricing", label: "Pricing" },
+  { href: "#reviews", label: "Reviews" },
+];
+---
+
+<header
+  class="sticky top-0 z-50 border-b border-line/70 bg-ink/80 backdrop-blur-xl supports-[backdrop-filter]:bg-ink/65"
+>
+  <nav
+    class="mx-auto flex h-20 max-w-[var(--container-content)] items-center gap-4 px-6"
+    aria-label="Primary"
+  >
+    <a
+      href="#top"
+      class="flex shrink-0 items-center gap-2.5"
+      aria-label={`${site.brand} — home`}
+    >
+      <img
+        src="/logo.png"
+        alt={site.brand}
+        width="56"
+        height="56"
+        class="size-14 rounded-md"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      />
+      <span class="hidden font-display text-lg font-medium sm:inline"
+        >{site.brand}</span
+      >
+    </a>
+
+    <ul class="ml-2 hidden items-center gap-6 md:flex">
+      {
+        links.map((l) => (
+          <li>
+            <a
+              href={l.href}
+              class="text-sm text-muted transition-colors hover:text-text"
+            >
+              {l.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="ml-auto flex items-center gap-3">
+      <!-- wrap to hide on mobile: the Countdown's scoped display:inline-flex would
+           otherwise override a `hidden` utility placed directly on it. -->
+      <div class="hidden lg:block">
+        <Countdown variant="chip" />
+      </div>
+      <Button href="#pricing" class="px-4 py-2 text-sm">Enroll now</Button>
+    </div>
+  </nav>
+</header>

@@ -1,0 +1,133 @@
+---
+// PipelineAnim — the signature "deploying" motion (BRAND.md §2, the one bold
+// motion moment). A compact commit→production rail: nodes light up in sequence
+// and a teal→cyan pulse sweeps the track. CSS-only, zero JS.
+// Decorative: marked role="img" with an accessible label; reduced-motion shows a
+// static, fully-lit (finished) pipeline; labels hide below 400px.
+const stages = ["commit", "build", "test", "deploy", "production"];
+---
+
+<div
+  class="pipe"
+  role="img"
+  aria-label="The curriculum runs like a deploy pipeline, from commit to production"
+>
+  <ol class="track" aria-hidden="true">
+    {
+      stages.map((s, i) => (
+        <li style={`--i:${i}`}>
+          <span class:list={["node", i === stages.length - 1 && "node--prod"]} />
+          <span class="lbl">{s}</span>
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<style>
+  .pipe {
+    width: 100%;
+    max-width: 30rem;
+  }
+  .track {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* base rail + animated sweep sit behind the nodes */
+  .track::before,
+  .track::after {
+    content: "";
+    position: absolute;
+    top: 5px;
+    height: 2px;
+    border-radius: 2px;
+  }
+  .track::before {
+    left: 6px;
+    right: 6px;
+    background: var(--color-line);
+  }
+  .track::after {
+    width: 38%;
+    left: -38%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-cyan),
+      transparent
+    );
+    animation: pipe-sweep 3s linear infinite;
+  }
+
+  li {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .node {
+    width: 12px;
+    height: 12px;
+    border-radius: 9999px;
+    background: var(--color-surface-2);
+    border: 2px solid var(--color-line);
+    animation: pipe-light 3s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.45s);
+  }
+
+  .lbl {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+
+  @keyframes pipe-sweep {
+    from {
+      left: -38%;
+    }
+    to {
+      left: 100%;
+    }
+  }
+  @keyframes pipe-light {
+    0%,
+    35% {
+      background: var(--color-surface-2);
+      border-color: var(--color-line);
+      box-shadow: 0 0 0 0 transparent;
+    }
+    55%,
+    100% {
+      background: var(--color-teal);
+      border-color: var(--color-teal);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-teal) 14%, transparent);
+    }
+  }
+
+  /* finished, static pipeline for reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    .node {
+      background: var(--color-teal);
+      border-color: var(--color-teal);
+      animation: none;
+    }
+    .track::after {
+      display: none;
+    }
+  }
+
+  /* simplify at 380px — keep the rail + nodes, drop the labels */
+  @media (max-width: 400px) {
+    .lbl {
+      display: none;
+    }
+  }
+</style>

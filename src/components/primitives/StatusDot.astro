@@ -1,0 +1,26 @@
+---
+// StatusDot — 8px observability-style status dot (BRAND.md §6).
+// teal = healthy/real/done (default), signal = urgency, coral = action.
+// Decorative by default; pass `label` to expose meaning to assistive tech.
+interface Props {
+  tone?: "teal" | "signal" | "coral" | "muted";
+  label?: string;
+  class?: string;
+}
+const { tone = "teal", label, class: className = "" } = Astro.props;
+const toneVar = {
+  teal: "var(--color-teal)",
+  signal: "var(--color-signal)",
+  coral: "var(--color-coral)",
+  muted: "var(--color-muted)",
+}[tone];
+---
+
+<span
+  class:list={["inline-block size-2 shrink-0 rounded-full", className]}
+  style={`background-color:${toneVar}`}
+  role={label ? "img" : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : "true"}
+>
+</span>

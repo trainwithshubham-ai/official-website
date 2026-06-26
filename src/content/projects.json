@@ -1,0 +1,32 @@
+[
+  {
+    "title": "End-to-end CI/CD pipeline",
+    "desc": "Ship an application automatically on every commit, with tests and quality gates.",
+    "tools": ["GitHub Actions", "Docker"]
+  },
+  {
+    "title": "Kubernetes microservices deploy",
+    "desc": "Containerize and run a multi-service app on Kubernetes, packaged with Helm.",
+    "tools": ["Kubernetes", "Helm"]
+  },
+  {
+    "title": "Infrastructure as Code",
+    "desc": "Provision a complete cloud environment using reusable Terraform modules.",
+    "tools": ["Terraform", "AWS"]
+  },
+  {
+    "title": "GitOps with ArgoCD",
+    "desc": "Deploy to production declaratively, continuously synced from Git.",
+    "tools": ["ArgoCD", "Kubernetes"]
+  },
+  {
+    "title": "Monitoring & alerting stack",
+    "desc": "Instrument a system and build dashboards and alerts that catch real issues.",
+    "tools": ["Prometheus", "Grafana"]
+  },
+  {
+    "title": "AI-assisted DevOps workflow",
+    "desc": "Automate routine ops and troubleshooting with AI in the loop.",
+    "tools": ["AI", "Bash"]
+  }
+]

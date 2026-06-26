@@ -1,0 +1,183 @@
+---
+// BaseLayout — <head>, meta/OG, self-hosted fonts, analytics slots, UTM capture.
+// Carries NO section markup; pages compose sections inside the <slot/>.
+import { site } from "../config/site";
+import "../styles/tokens.css";
+
+// Self-hosted fonts (BRAND.md §4) — only the weights AND subsets we use.
+// latin-only subsets keep the shipped payload + critical CSS small (this is an
+// English-audience page); unicode-range would gate downloads anyway, but this
+// also stops the unused latin-ext/vietnamese faces from shipping at all.
+import "@fontsource/space-grotesk/latin-500.css";
+import "@fontsource/space-grotesk/latin-700.css";
+import "@fontsource/inter/latin-400.css";
+import "@fontsource/inter/latin-500.css";
+import "@fontsource/inter/latin-600.css";
+import "@fontsource/jetbrains-mono/latin-500.css";
+// Preload only the LCP face — the Space Grotesk 700 H1 — to cut the FOUT window.
+import sg700 from "@fontsource/space-grotesk/files/space-grotesk-latin-700-normal.woff2?url";
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** OG/Twitter image, relative to site root. */
+  image?: string;
+}
+
+const {
+  title = `${site.product} — ${site.brand}`,
+  description = "DevOps: Zero to Hero — AI-powered live classes. From fundamentals to production: Docker, Kubernetes, Terraform, AWS, CI/CD, observability and Agentic AI.",
+  image = "/og-image.png",
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, site.domain).href;
+const ogImage = new URL(image, site.domain).href;
+
+// Analytics only render when real IDs are wired (placeholders start with "TODO").
+const ga4Enabled = !site.ga4Id.startsWith("TODO");
+const pixelEnabled = !site.metaPixelId.startsWith("TODO");
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#0A0E12" />
+
+    <!-- favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- preload the LCP headline font (Space Grotesk 700) -->
+    <link rel="preload" href={sg700} as="font" type="font/woff2" crossorigin />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.brand} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!--
+      Attribution without a backend (ARCHITECTURE.md §6):
+      capture incoming utm_* params into sessionStorage so every Enroll CTA can
+      forward them to checkout at click time. sessionStorage is the ONE allowed
+      storage use (golden rule).
+    -->
+    <script is:inline>
+      (function () {
+        try {
+          var qs = new URLSearchParams(window.location.search);
+          var utm = {};
+          qs.forEach(function (value, key) {
+            if (key.indexOf("utm_") === 0) utm[key] = value;
+          });
+          if (Object.keys(utm).length) {
+            sessionStorage.setItem("tws_utm", JSON.stringify(utm));
+          }
+        } catch (e) {
+          /* storage blocked — attribution degrades silently */
+        }
+      })();
+    </script>
+
+    <script is:inline>
+      /* Enroll-click attribution (ARCHITECTURE.md §6): every [data-enroll] CTA
+         forwards stored utm_* params (+ src=site) to checkout at click time and
+         fires one enroll_click event for GA4 / Meta Pixel funnel tracking. */
+      document.addEventListener("click", function (e) {
+        var t = e.target;
+        var a = t && t.closest ? t.closest("[data-enroll]") : null;
+        if (!a || a.tagName !== "A") return;
+        try {
+          var url = new URL(a.href, window.location.origin);
+          var stored = sessionStorage.getItem("tws_utm");
+          if (stored) {
+            var utm = JSON.parse(stored);
+            Object.keys(utm).forEach(function (k) {
+              if (!url.searchParams.has(k)) url.searchParams.set(k, utm[k]);
+            });
+          }
+          url.searchParams.set("src", "site");
+          a.href = url.toString();
+        } catch (err) {
+          /* malformed/placeholder checkout URL — let the click proceed as-is */
+        }
+        var region = a.getAttribute("data-region") || undefined;
+        if (typeof window.gtag === "function")
+          window.gtag("event", "enroll_click", { region: region });
+        if (typeof window.fbq === "function")
+          window.fbq("track", "InitiateCheckout", { region: region });
+      });
+    </script>
+
+    {
+      ga4Enabled && (
+        <Fragment>
+          <script
+            is:inline
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${site.ga4Id}`}
+          />
+          <script is:inline define:vars={{ ga4Id: site.ga4Id }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", ga4Id);
+          </script>
+        </Fragment>
+      )
+    }
+
+    {
+      pixelEnabled && (
+        <script is:inline define:vars={{ pixelId: site.metaPixelId }}>
+          !(function (f, b, e, v, n, t, s) {
+            if (f.fbq) return;
+            n = f.fbq = function () {
+              n.callMethod
+                ? n.callMethod.apply(n, arguments)
+                : n.queue.push(arguments);
+            };
+            if (!f._fbq) f._fbq = n;
+            n.push = n;
+            n.loaded = !0;
+            n.version = "2.0";
+            n.queue = [];
+            t = b.createElement(e);
+            t.async = !0;
+            t.src = v;
+            s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s);
+          })(
+            window,
+            document,
+            "script",
+            "https://connect.facebook.net/en_US/fbevents.js",
+          );
+          fbq("init", pixelId);
+          fbq("track", "PageView");
+        </script>
+      )
+    }
+  </head>
+  <body>
+    <!-- page grain (BRAND.md §3): behind content, can't affect contrast -->
+    <div class="grain" aria-hidden="true"></div>
+    <slot />
+  </body>
+</html>

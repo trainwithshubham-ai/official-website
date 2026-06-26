@@ -1,0 +1,59 @@
+---
+// Audience — "this is for you / not for you" (ARCHITECTURE.md §4.4).
+// Welcoming, effort-based filter (no experience gate). Data: audience.json.
+import Section from "./primitives/Section.astro";
+import { audience } from "../content/data";
+---
+
+<Section id="audience" eyebrow="who this is for" title="Is this you?">
+  <div class="grid gap-6 md:grid-cols-2">
+    <!-- FOR YOU -->
+    <div class="surface-card rounded-[var(--radius-card)] border border-line bg-surface p-6 sm:p-8">
+      <h3 class="mb-5 flex items-center gap-2 text-teal">
+        <svg class="size-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path
+            d="M4 10.5l3.5 3.5L16 6"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
+        </svg>
+        This is for you
+      </h3>
+      <ul class="flex flex-col gap-3" role="list">
+        {
+          audience.forYou.map((item) => (
+            <li class="flex items-start gap-3">
+              <span class="mt-2 size-1.5 shrink-0 rounded-full bg-teal" aria-hidden="true" />
+              <span class="text-text">{item}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <!-- NOT FOR YOU -->
+    <div class="surface-card rounded-[var(--radius-card)] border border-line bg-surface p-6 sm:p-8">
+      <h3 class="mb-5 flex items-center gap-2 text-muted">
+        <svg class="size-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path
+            d="M6 6l8 8M14 6l-8 8"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"></path>
+        </svg>
+        Maybe not right now
+      </h3>
+      <ul class="flex flex-col gap-3" role="list">
+        {
+          audience.notForYou.map((item) => (
+            <li class="flex items-start gap-3">
+              <span class="mt-2 size-1.5 shrink-0 rounded-full bg-muted" aria-hidden="true" />
+              <span class="text-muted">{item}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</Section>

@@ -1,0 +1,48 @@
+---
+// Button — the only two button styles (BRAND.md §6).
+//   primary = coral fill, ink text  → THE Enroll CTA (coral is sacred, §3)
+//   ghost   = transparent, teal border/text → secondary ("See the curriculum")
+// Renders <a> when `href` is set, else <button>. Labels are verbs, never "Submit".
+//
+// `enroll`: marks this as an Enroll CTA → adds data-enroll so the global handler
+// in BaseLayout forwards UTM params to checkout and fires `enroll_click` (§6).
+interface Props {
+  variant?: "primary" | "ghost";
+  href?: string;
+  enroll?: boolean;
+  type?: "button" | "submit";
+  class?: string;
+  [key: string]: unknown;
+}
+const {
+  variant = "primary",
+  href,
+  enroll = false,
+  type = "button",
+  class: className = "",
+  ...rest
+} = Astro.props;
+
+const base =
+  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-btn)] px-5 py-3 font-medium leading-none transition-[transform,background-color,border-color] duration-150 motion-safe:hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2";
+
+const variants = {
+  // coral fill, ink text, lift + coral-deep on hover
+  primary:
+    "bg-coral text-ink hover:bg-coral-deep focus-visible:outline-coral",
+  // transparent, teal 1px border, teal text
+  ghost:
+    "border border-teal text-teal hover:bg-teal/10 focus-visible:outline-teal",
+};
+
+const Tag = href ? "a" : "button";
+const isExternal = !!href && /^https?:\/\//.test(href);
+const enrollAttrs = enroll ? { "data-enroll": "" } : {};
+const tagAttrs = href
+  ? { href, ...(isExternal ? { rel: "noopener" } : {}), ...enrollAttrs }
+  : { type, ...enrollAttrs };
+---
+
+<Tag class:list={[base, variants[variant], className]} {...tagAttrs} {...rest}>
+  <slot />
+</Tag>

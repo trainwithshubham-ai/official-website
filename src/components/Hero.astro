@@ -1,0 +1,103 @@
+---
+// Hero — the above-the-fold conversion core (ARCHITECTURE.md §4.2).
+// Badge · H1 · subhead · animated pipeline · batch date · Countdown · dual CTA.
+// Depth: dual ambient glow (teal + amber) over a faint pipeline grid (BRAND.md
+// §5 evolution). The animated pipeline is the one bold motion moment (§2).
+import { site } from "../config/site";
+import Button from "./primitives/Button.astro";
+import Countdown from "./Countdown.astro";
+import StatusDot from "./primitives/StatusDot.astro";
+import PipelineAnim from "./PipelineAnim.astro";
+
+const batchDate = new Date(site.batchStartISO).toLocaleDateString("en-IN", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+// Class days/time are TODO placeholders in site.ts — only show once real.
+const daysReady = !site.classDays.startsWith("TODO");
+const timeReady = !site.classTime.startsWith("TODO");
+const scheduleBits = [
+  `Starts ${batchDate}`,
+  daysReady ? site.classDays : null,
+  timeReady ? site.classTime : null,
+].filter(Boolean);
+---
+
+<section id="top" class="relative overflow-hidden">
+  <!-- depth: dual ambient glow over a faint pipeline grid (BRAND.md §5) -->
+  <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+    <div
+      class="absolute -top-40 left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-teal/10 blur-[120px]"
+    >
+    </div>
+    <div
+      class="absolute -top-10 right-[-12rem] h-[26rem] w-[26rem] rounded-full bg-signal/[0.06] blur-[120px]"
+    >
+    </div>
+    <div class="hero-grid absolute inset-0"></div>
+  </div>
+
+  <div
+    class="mx-auto flex max-w-[var(--container-content)] flex-col items-center gap-7 px-6 pt-20 pb-16 text-center sm:pt-28 sm:pb-24"
+  >
+    <span
+      class="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-line bg-surface/70 px-3.5 py-1.5 font-mono text-xs text-muted"
+    >
+      <StatusDot tone="teal" />
+      DevOps - Zero To Hero [Live]
+    </span>
+
+    <h1 class="max-w-4xl text-balance">
+      Become an AI-powered DevOps engineer who ships to production.
+    </h1>
+
+    <p class="max-w-2xl text-pretty text-lg text-muted">
+      Start from the fundamentals and go all the way to shipping real systems —
+      pipelines, Kubernetes, Terraform and observability, with AI in your
+      workflow. No prior experience required.
+    </p>
+
+    <PipelineAnim />
+
+    <p class="font-mono text-sm text-teal">
+      {scheduleBits.join(" · ")}
+    </p>
+
+    <Countdown variant="full" announceDeadline class="items-center" />
+
+    <div class="mt-2 flex flex-col items-center gap-4 sm:flex-row">
+      <Button href="#pricing">Enroll now</Button>
+      <Button href="#curriculum" variant="ghost">See the curriculum</Button>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* faint infra grid behind the hero, faded with a radial mask (BRAND.md §5) */
+  .hero-grid {
+    background-image:
+      linear-gradient(
+        to right,
+        color-mix(in srgb, var(--color-line) 55%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--color-line) 55%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(
+      ellipse 70% 60% at 50% 0%,
+      black,
+      transparent 75%
+    );
+    mask-image: radial-gradient(
+      ellipse 70% 60% at 50% 0%,
+      black,
+      transparent 75%
+    );
+  }
+</style>

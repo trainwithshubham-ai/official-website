@@ -1,0 +1,32 @@
+---
+// Projects — "build a portfolio, not just notes" (ARCHITECTURE.md §4.7).
+// Concrete, production-grade builds. Data: projects.json.
+import Section from "./primitives/Section.astro";
+import ToolIcon from "./primitives/ToolIcon.astro";
+import { projects } from "../content/data";
+---
+
+<Section
+  id="projects"
+  eyebrow="projects"
+  title="Build a portfolio, not just notes"
+>
+  <ul class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list">
+    {
+      projects.map((p) => (
+        <li class="surface-card lift flex flex-col rounded-[var(--radius-card)] border border-line bg-surface p-6 hover:border-teal/40">
+          <h3 class="text-text">{p.title}</h3>
+          <p class="mt-2 grow text-pretty text-sm text-muted">{p.desc}</p>
+          <ul class="mt-4 flex flex-wrap gap-2" role="list">
+            {p.tools.map((t) => (
+              <li class="inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border border-line px-2.5 py-0.5 font-mono text-xs text-muted">
+                <ToolIcon name={t} class="text-[0.95rem] text-teal" />
+                {t}
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))
+    }
+  </ul>
+</Section>

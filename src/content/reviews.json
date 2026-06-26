@@ -1,0 +1,51 @@
+[
+  {
+    "name": "Beethika Saini Thakur",
+    "rating": 5,
+    "role": "Sr. DevOps Engineer",
+    "company": "Mastercard",
+    "photo": "/students/beethika.jpg",
+    "text": "It boosted my confidence for interviews, and the learnings played a big role in helping me land my dream job at my dream company."
+  },
+  {
+    "name": "Muhammad Usman Arif",
+    "rating": 5,
+    "role": "DevOps Engineer",
+    "company": "Inovio Tech",
+    "photo": "/students/usman.jpg",
+    "outcome": "Landed his first job after the cohort.",
+    "text": "I got my first job after taking the course with Shubham — it's been really helpful for learning new skills."
+  },
+  {
+    "name": "Priyanka Pardeshi",
+    "rating": 5,
+    "role": "Associate Software Engineer",
+    "company": "Red Hat",
+    "photo": "/students/priyanka.jpg",
+    "text": "A strong blend of theory and hands-on practice — Linux, Git, Docker, Jenkins, Kubernetes, Terraform, AWS. It boosted my confidence with cloud and automation."
+  },
+  {
+    "name": "Debabrata Puhan",
+    "rating": 5,
+    "role": "Linux Admin & Ansible Automation",
+    "company": "Accenture",
+    "photo": "/students/debabrata.jpg",
+    "text": "You are honestly the best teacher I have come across. Your teaching style is smart, practical, and genuinely career-focused — especially for DevOps and AI."
+  },
+  {
+    "name": "Mahesh Bagul",
+    "rating": 5,
+    "role": "Senior DevOps Engineer",
+    "company": "Volkswagen",
+    "photo": "/students/mahesh.jpg",
+    "text": "It was a great experience learning with Shubham."
+  },
+  {
+    "name": "Vaibhav Mane",
+    "rating": 5,
+    "role": "Site Reliability Engineer",
+    "company": "Securonix",
+    "photo": "/students/vaibhav.jpg",
+    "text": "From the basics of Linux to CI/CD with GitHub Actions and containers with Docker and Kubernetes — your practical teaching makes complex DevOps tools accessible."
+  }
+]

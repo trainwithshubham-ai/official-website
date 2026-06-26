@@ -1,0 +1,124 @@
+---
+// LogoMarquee — "our learners now work at" auto-scrolling wordmark strip.
+// CSS-only infinite loop (track duplicated; translateX -50% loops seamlessly),
+// pauses on hover/focus. ZERO JS. Real alumni employers only (golden rule 4).
+// a11y: the animated track is decorative (aria-hidden); a single sr-only list
+// carries the names; under prefers-reduced-motion the animation is replaced by a
+// static wrapped row.
+import { companies } from "../content/data";
+import Eyebrow from "./primitives/Eyebrow.astro";
+import CompanyLogo from "./primitives/CompanyLogo.astro";
+---
+
+<section aria-label="Companies where our learners now work" class="py-12">
+  <Eyebrow text="our learners now work at" class="mb-8 block text-center" />
+
+  <!-- animated marquee (decorative; sr list below carries the content) -->
+  <div class="marquee" aria-hidden="true">
+    <ul class="track">
+      {companies.map((c) => (
+        <li class="logo"><CompanyLogo name={c} /></li>
+      ))}
+      {companies.map((c) => (
+        <li class="logo"><CompanyLogo name={c} /></li>
+      ))}
+    </ul>
+  </div>
+
+  <!-- static fallback shown only under reduced-motion -->
+  <ul class="static" aria-hidden="true">
+    {companies.map((c) => (
+      <li class="logo"><CompanyLogo name={c} /></li>
+    ))}
+  </ul>
+
+  <span class="sr-only">
+    Our learners now work at {companies.join(", ")}.
+  </span>
+</section>
+
+<style>
+  .marquee {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 8%,
+      #000 92%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 8%,
+      #000 92%,
+      transparent
+    );
+  }
+  .track {
+    display: flex;
+    width: max-content;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    animation: marquee 45s linear infinite;
+  }
+  /* Spacing lives on each item (not as a flex `gap`) so the duplicated set tiles
+     uniformly and translateX(-50%) lands exactly — no off-by-one-gap seam. */
+  .track .logo {
+    padding-inline: 1.75rem;
+  }
+  .marquee:hover .track {
+    animation-play-state: paused;
+  }
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    color: var(--color-muted);
+    transition: color 0.15s ease;
+  }
+  .marquee .logo:hover {
+    color: var(--color-text);
+  }
+
+  /* static fallback (hidden unless reduced-motion) */
+  .static {
+    display: none;
+    margin: 0;
+    padding: 0 1.5rem;
+    list-style: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.25rem 3rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee {
+      display: none;
+    }
+    .static {
+      display: flex;
+    }
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

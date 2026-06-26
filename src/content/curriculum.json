@@ -1,0 +1,123 @@
+[
+  {
+    "stage": "01",
+    "label": "plan",
+    "title": "Introduction to DevOps",
+    "bullets": [
+      "Understand the DevOps culture, lifecycle and where the field is heading",
+      "See the real career paths and how modern teams actually work",
+      "Plan and track work with Agile and Jira"
+    ],
+    "tags": ["DevOps", "Agile", "Jira"]
+  },
+  {
+    "stage": "02",
+    "label": "commit",
+    "title": "Linux, shell scripting & Git",
+    "bullets": [
+      "Work confidently in the Linux shell — files, processes, permissions",
+      "Automate routine tasks with Bash scripting",
+      "Master Git & GitHub: branching, pull requests and open-source contribution"
+    ],
+    "tags": ["Linux", "Bash", "Git", "GitHub"]
+  },
+  {
+    "stage": "03",
+    "label": "design",
+    "title": "Networking & system design",
+    "bullets": [
+      "Understand OSI / TCP-IP, DNS and how traffic actually flows",
+      "Work with load balancers and core network security",
+      "Reason about how systems are designed to scale"
+    ],
+    "tags": ["Networking", "DNS", "Load Balancing"]
+  },
+  {
+    "stage": "04",
+    "label": "build",
+    "title": "Docker & containerization",
+    "bullets": [
+      "Containerize real applications with clean, multi-stage Dockerfiles",
+      "Manage images, volumes and networks; debug running containers",
+      "Run multi-service apps locally with Docker Compose"
+    ],
+    "tags": ["Docker", "Compose"]
+  },
+  {
+    "stage": "05",
+    "label": "integrate",
+    "title": "CI/CD & DevSecOps",
+    "bullets": [
+      "Build pipelines that test, build and ship on every commit",
+      "Work across Jenkins, GitLab CI/CD and GitHub Actions",
+      "Bake security into the pipeline with a DevSecOps mindset"
+    ],
+    "tags": ["Jenkins", "GitHub Actions", "GitLab CI", "DevSecOps"]
+  },
+  {
+    "stage": "06",
+    "label": "cloud",
+    "title": "AWS cloud (Solutions Architect)",
+    "bullets": [
+      "Navigate the core AWS services architects use daily",
+      "Design with compute, networking, storage and databases",
+      "Go serverless with modern AWS frameworks"
+    ],
+    "tags": ["AWS", "VPC", "IAM", "Serverless"]
+  },
+  {
+    "stage": "07",
+    "label": "provision",
+    "title": "Infrastructure as Code",
+    "bullets": [
+      "Provision cloud infrastructure declaratively with Terraform",
+      "Configure and manage servers with Ansible",
+      "Structure reusable modules and manage remote state"
+    ],
+    "tags": ["Terraform", "Ansible", "IaC"]
+  },
+  {
+    "stage": "08",
+    "label": "orchestrate",
+    "title": "Kubernetes & GitOps",
+    "bullets": [
+      "Deploy, scale and operate applications on Kubernetes",
+      "Package and release with Helm",
+      "Ship to production the GitOps way with ArgoCD"
+    ],
+    "tags": ["Kubernetes", "Helm", "ArgoCD"]
+  },
+  {
+    "stage": "09",
+    "label": "observe",
+    "title": "Monitoring & observability",
+    "bullets": [
+      "Instrument systems with metrics, logs and traces",
+      "Build dashboards and alerts with Prometheus and Grafana",
+      "Trace requests end-to-end with OpenTelemetry"
+    ],
+    "tags": ["Prometheus", "Grafana", "OpenTelemetry"]
+  },
+  {
+    "stage": "10",
+    "label": "operate",
+    "title": "Agentic AI for DevOps",
+    "bullets": [
+      "Build AI agents that automate real DevOps workflows",
+      "Work hands-on with modern agentic AI frameworks",
+      "Put AI to work on troubleshooting, operations and automation"
+    ],
+    "tags": ["Agentic AI", "LLMs", "Automation"]
+  },
+  {
+    "stage": "11",
+    "label": "production",
+    "title": "Capstone project & job assistance",
+    "bullets": [
+      "Build and present a production-grade capstone project, end to end",
+      "Sharpen your LinkedIn and resume for DevOps roles",
+      "Practise with mock interviews and structured job prep"
+    ],
+    "tags": ["Capstone", "Career", "Interviews"]
+  }
+]

@@ -1,0 +1,164 @@
+---
+// Pricing — the conversion core (ARCHITECTURE.md §4.10).
+// Transparent dual pricing (India / US, no IP geo-switch — golden rule 6),
+// the early-bird window Countdown, inclusions, and the Enroll CTA.
+//
+// Honest scarcity: when the countdown expires it sets html[data-early-bird-ended]
+// (see Countdown.astro). CSS below swaps the early-bird card for the full-price
+// card — no JS here, no layout shift, and it can't show a fake discount.
+import { site } from "../config/site";
+import Section from "./primitives/Section.astro";
+import Countdown from "./Countdown.astro";
+import EnrollButtons from "./EnrollButtons.astro";
+import { inclusions } from "../content/data";
+
+const refundReady = !site.refundPolicy.startsWith("TODO");
+// Build-time gate: if the early-bird window has already passed at build, ship the
+// full-price card as the DEFAULT (no fake-discount flash before JS runs). The
+// runtime swap (html[data-early-bird-ended], set by Countdown) still handles a
+// tab that's open across the deadline. Site rebuilds on every push, so this stays
+// accurate. (ARCHITECTURE §5 / golden rule 6 — honesty over fake urgency.)
+const earlyBirdOver = Date.now() > new Date(site.earlyBirdEndsISO).getTime();
+---
+
+<Section id="pricing" eyebrow="pricing" title="Enroll at the early-bird price">
+  <div
+    class:list={[
+      "pricing-card surface-card grad-border mx-auto w-full max-w-xl rounded-[var(--radius-card)] p-8 text-center sm:p-10",
+      earlyBirdOver && "is-expired",
+    ]}
+  >
+    <!-- EARLY-BIRD (default) -->
+    <div class="price-early">
+      <p
+        class="font-mono text-[length:var(--text-eyebrow)] lowercase tracking-[0.08em] text-signal"
+      >
+        ❯ early-bird price
+      </p>
+      <!-- one prominent anchor (no two competing prices); exact region prices
+           live on the pay buttons below. SR gets the full breakdown. -->
+      <div aria-hidden="true">
+        <div class="mt-3 flex items-end justify-center gap-2">
+          <span class="pb-1 text-lg text-muted">from</span>
+          <span class="font-display text-5xl font-bold text-text"
+            >${site.priceEarlyIndia}</span
+          >
+          <span class="pb-1.5 text-sm text-muted"
+            >· regularly <s>${site.priceFull}</s></span
+          >
+        </div>
+        <p class="mt-2 text-sm text-muted">
+          Price rises to full when the early-bird window closes — pick your region
+          below.
+        </p>
+      </div>
+      <p class="sr-only">
+        Early-bird pricing in US dollars: ${site.priceEarlyIndia} for India,
+        ${site.priceEarlyUS} for the rest of the world. Regular price
+        ${site.priceFull}. The price rises to full when the early-bird window
+        closes; choose your region to pay.
+      </p>
+
+      <div class="mt-6 flex justify-center">
+        <Countdown variant="full" class="items-center" />
+      </div>
+    </div>
+
+    <!-- FULL PRICE (revealed by CSS after expiry, or default if built post-deadline) -->
+    <div class="price-full">
+      <p
+        class="font-mono text-[length:var(--text-eyebrow)] lowercase tracking-[0.08em] text-muted"
+      >
+        ❯ full price
+      </p>
+      <div class="mt-4" aria-hidden="true">
+        <span class="font-display text-5xl font-bold text-text"
+          >${site.priceFull}</span
+        >
+        <p class="mt-3 text-sm text-muted">The early-bird window has closed.</p>
+      </div>
+      <p class="sr-only">
+        Full price ${site.priceFull} US dollars. The early-bird window has closed.
+      </p>
+    </div>
+
+    <!-- inclusions -->
+    <!-- list block is centered (mx-auto w-fit) for box symmetry, but items stay
+         left-aligned so the checkmarks form a clean column -->
+    <ul class="mx-auto mt-8 flex w-fit flex-col gap-3 text-left">
+      {
+        inclusions.map((item) => (
+          <li class="flex items-start gap-3">
+            <svg
+              class="mt-0.5 size-5 shrink-0 text-teal"
+              viewBox="0 0 20 20"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M4 10.5l3.5 3.5L16 6"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span class="text-text">{item}</span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <!-- CTA — one button per region (transparent, learner picks; golden rule 6) -->
+    <EnrollButtons class="mt-8" />
+
+    <!-- trust row — CONFIRMED signals only (no invented guarantee; golden rule 4) -->
+    <ul
+      class="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted"
+      role="list"
+    >
+      {
+        ["4 years of recordings access", "Verifiable credential"].map((t) => (
+          <li class="inline-flex items-center gap-1.5">
+            <svg class="size-3.5 text-teal" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path
+                d="M4 10.5l3.5 3.5L16 6"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            {t}
+          </li>
+        ))
+      }
+    </ul>
+
+    {
+      refundReady && (
+        <p class="mt-4 text-center text-sm text-muted">{site.refundPolicy}</p>
+      )
+    }
+  </div>
+</Section>
+
+<style>
+  .price-full {
+    display: none;
+  }
+  /* runtime swap — Countdown sets this on expiry while a tab is open */
+  :global(html[data-early-bird-ended]) .price-early {
+    display: none;
+  }
+  :global(html[data-early-bird-ended]) .price-full {
+    display: block;
+  }
+  /* build-time swap — page was built after the deadline */
+  .pricing-card.is-expired .price-early {
+    display: none;
+  }
+  .pricing-card.is-expired .price-full {
+    display: block;
+  }
+</style>

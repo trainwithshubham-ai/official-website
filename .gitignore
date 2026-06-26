@@ -1,0 +1,14 @@
+# build output
+dist/
+# astro generated types
+.astro/
+# dependencies
+node_modules/
+# logs
+npm-debug.log*
+# environment / editor
+.env
+.env.production
+.DS_Store
+# local agent settings
+.claude/

@@ -1,0 +1,64 @@
+---
+// TrustBar — proof band right under the Hero (ARCHITECTURE.md §4.3).
+// Real numbers only (golden rule 4): students trained, the 4.9★·232 Google
+// badge, and social counts. All values come from site.ts.
+import { site } from "../config/site";
+
+// Link the Google badge to the public profile if set, else the review CTA.
+const googleHref = site.googleProfileUrl.startsWith("TODO")
+  ? site.googleReviewUrl
+  : site.googleProfileUrl;
+
+const socials = [
+  { ...site.social.youtube, name: "YouTube" },
+  { ...site.social.linkedin, name: "LinkedIn" },
+  { ...site.social.instagram, name: "Instagram" },
+];
+---
+
+<section aria-label="Proof and social reach" class="border-y border-line">
+  <div
+    class="mx-auto flex max-w-[var(--container-content)] flex-wrap items-center justify-center gap-x-8 gap-y-4 px-6 py-6 text-sm"
+  >
+    <p class="text-muted">
+      <span class="font-display font-medium text-text">{site.studentsTrained}</span
+      > engineers trained
+    </p>
+
+    <span aria-hidden="true" class="hidden h-4 w-px bg-line sm:block"></span>
+
+    <a
+      href={googleHref}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="group inline-flex items-center gap-2 text-muted transition-colors hover:text-text"
+    >
+      <span class="text-signal" aria-hidden="true">★</span>
+      <span class="font-display font-medium text-text">{site.googleRating}</span>
+      <span class="group-hover:underline"
+        >· {site.googleReviewCount} Google reviews</span
+      >
+      <span class="sr-only">(opens in new tab)</span>
+    </a>
+
+    <span aria-hidden="true" class="hidden h-4 w-px bg-line sm:block"></span>
+
+    <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+      {
+        socials.map((s) => (
+          <li>
+            <a
+              href={s.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-muted transition-colors hover:text-text"
+            >
+              {s.name} <span class="text-text">{s.label}</span>
+              <span class="sr-only">(opens in new tab)</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

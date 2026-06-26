@@ -1,0 +1,30 @@
+[
+  {
+    "q": "Do I need prior experience?",
+    "a": "No. This is a zero-to-hero course — we start from the fundamentals and build up to production-grade skills. Come ready to practice."
+  },
+  {
+    "q": "Will the sessions be recorded?",
+    "a": "Yes. You get access to the recordings so you can revisit anything at your own pace."
+  },
+  {
+    "q": "What are the class days and timings?",
+    "a": "Live classes run on weekends — {classDays}, {classTime}. The batch starts {batchStart}, and recordings are available if you ever miss one."
+  },
+  {
+    "q": "Is it live or self-paced?",
+    "a": "Live, interactive cohort sessions — you learn and build alongside others, with recordings to catch up if you miss one."
+  },
+  {
+    "q": "Do I get a certificate or credential?",
+    "a": "Yes — finish the cohort and you earn a verifiable DevOps Engineer (Associate) credential: a shareable digital badge you can add to LinkedIn and your résumé."
+  },
+  {
+    "q": "What language are the sessions in?",
+    "a": "Sessions are delivered in clear, accessible English."
+  },
+  {
+    "q": "How do I enroll?",
+    "a": "Hit Enroll, complete checkout, and you'll receive your batch details by email."
+  }
+]

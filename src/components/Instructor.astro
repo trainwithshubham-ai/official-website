@@ -1,0 +1,90 @@
+---
+// Instructor — Shubham, with the human "Hello Dosto" note (BRAND.md §7,
+// ARCHITECTURE.md §4.9). Real proof from site.ts; bio kept honest and general.
+import Section from "./primitives/Section.astro";
+import { site } from "../config/site";
+
+const socials = [
+  { ...site.social.youtube, name: "YouTube" },
+  { ...site.social.linkedin, name: "LinkedIn" },
+  { ...site.social.instagram, name: "Instagram" },
+];
+---
+
+<Section id="instructor" eyebrow="instructor" title="Hello Dosto">
+  <div class="grid gap-8 md:grid-cols-[1.4fr_1fr] md:items-start">
+    <!-- bio -->
+    <div class="flex flex-col gap-4 text-pretty text-muted">
+      <p>
+        I'm Shubham. I started <span class="text-text">TrainWithShubham</span> to
+        teach DevOps the way it's actually done in production — hands-on, with real
+        tools and real systems, not slideware.
+      </p>
+      <p>
+        More than <span class="text-text">{site.studentsTrained}</span> engineers
+        have learned with us so far. This cohort is the English, AI-powered edition
+        of that work: we go from the fundamentals all the way to shipping
+        production-grade systems, with AI in your workflow throughout.
+      </p>
+      <p>
+        Come in curious and ready to build. {site.tagline}
+      </p>
+    </div>
+
+    <!-- card -->
+    <aside
+      class="surface-card rounded-[var(--radius-card)] border border-line bg-surface p-6"
+    >
+      <picture>
+        <source srcset="/instructor-shubham.webp" type="image/webp" />
+        <img
+          src="/instructor-shubham.jpg"
+          alt="Shubham, founder of TrainWithShubham"
+          width="600"
+          height="600"
+          class="aspect-square w-full rounded-[var(--radius-card)] object-cover ring-1 ring-line"
+          loading="lazy"
+          decoding="async"
+        />
+      </picture>
+      <div class="mt-4">
+        <p class="font-display font-medium text-text">Shubham</p>
+        <p class="text-sm text-muted">Founder, {site.brand}</p>
+      </div>
+
+      <dl class="mt-6 flex gap-6">
+        <div>
+          <dt class="text-xs text-muted">Trained</dt>
+          <dd class="font-display text-xl font-medium text-text">
+            {site.studentsTrained}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-xs text-muted">Rated</dt>
+          <dd class="font-display text-xl font-medium text-text">
+            <span class="text-signal" aria-hidden="true">★</span>
+            {site.googleRating}
+          </dd>
+        </div>
+      </dl>
+
+      <ul class="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm" role="list">
+        {
+          socials.map((s) => (
+            <li>
+              <a
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${s.name} (opens in new tab)`}
+                class="text-teal transition-colors hover:underline"
+              >
+                {s.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </aside>
+  </div>
+</Section>

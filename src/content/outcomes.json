@@ -1,0 +1,18 @@
+[
+  {
+    "title": "Build real CI/CD pipelines",
+    "body": "Automate test, build and deploy so every commit ships safely — not by hand."
+  },
+  {
+    "title": "Run workloads on Kubernetes",
+    "body": "Deploy, scale and operate containerized apps the way production actually does."
+  },
+  {
+    "title": "Automate your infrastructure",
+    "body": "Provision cloud environments with Terraform — repeatable, reviewable, version-controlled."
+  },
+  {
+    "title": "Work AI-first",
+    "body": "Put AI to work across scripting, troubleshooting and ops to move faster and smarter."
+  }
+]

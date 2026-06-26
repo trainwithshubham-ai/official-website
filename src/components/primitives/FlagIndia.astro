@@ -1,0 +1,24 @@
+---
+// FlagIndia — tiny inline India flag (functional region marker, aria-hidden).
+// A small color exception (a flag must use its real colors); kept in a ringed
+// chip so it reads on any background. Sizes via width/height props.
+interface Props {
+  width?: number;
+  height?: number;
+  class?: string;
+}
+const { width = 20, height = 13, class: className = "" } = Astro.props;
+---
+
+<svg
+  viewBox="0 0 24 16"
+  width={width}
+  height={height}
+  aria-hidden="true"
+  class:list={["shrink-0 overflow-hidden rounded-[2px] ring-1 ring-black/25", className]}
+>
+  <rect width="24" height="16" fill="#fff"></rect>
+  <rect width="24" height="5.33" fill="#FF9933"></rect>
+  <rect y="10.67" width="24" height="5.33" fill="#138808"></rect>
+  <circle cx="12" cy="8" r="1.7" fill="none" stroke="#000080" stroke-width="0.7"></circle>
+</svg>

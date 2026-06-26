@@ -1,0 +1,40 @@
+---
+// EnrollButtons — the two region-specific Learnyst checkout CTAs. The region
+// lives on the button (India flag / globe) so the learner never has to compare
+// two prices to find theirs (no IP geo-switch — golden rule 6). Both are
+// `data-enroll`: BaseLayout forwards UTM (+ src), preserves ?priceId, and fires
+// enroll_click with the data-region.
+import { site } from "../config/site";
+import Button from "./primitives/Button.astro";
+import FlagIndia from "./primitives/FlagIndia.astro";
+import Globe from "./primitives/Globe.astro";
+
+interface Props {
+  class?: string;
+}
+const { class: className = "" } = Astro.props;
+---
+
+<div class:list={["flex flex-col gap-3 sm:flex-row sm:justify-center", className]}>
+  <Button
+    href={site.checkout.india}
+    enroll
+    data-region="india"
+    aria-label={`Pay for India — ${site.priceEarlyIndia} US dollars`}
+    class="w-full sm:w-auto"
+  >
+    <FlagIndia />
+    Pay · India <span class="font-normal opacity-75">·</span> ${site.priceEarlyIndia}
+  </Button>
+
+  <Button
+    href={site.checkout.world}
+    enroll
+    data-region="world"
+    aria-label={`Pay globally — ${site.priceEarlyUS} US dollars`}
+    class="w-full sm:w-auto"
+  >
+    <Globe />
+    Pay · Global <span class="font-normal opacity-75">·</span> ${site.priceEarlyUS}
+  </Button>
+</div>

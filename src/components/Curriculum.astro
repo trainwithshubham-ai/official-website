@@ -1,0 +1,209 @@
+---
+// Curriculum — the signature pipeline (BRAND.md §2, ARCHITECTURE.md §4.6).
+// Each module is a deploy stage on a vertical rail, from `commit` to
+// `production`. Accordions are native <details>/<summary> — ZERO JavaScript.
+// Data mirrors curriculumSchema in content.config.ts.
+import Section from "./primitives/Section.astro";
+import ToolIcon from "./primitives/ToolIcon.astro";
+import { curriculum } from "../content/data";
+---
+
+<Section id="curriculum" eyebrow="curriculum" title="From commit to production">
+  <p class="mb-10 max-w-2xl text-pretty text-muted">
+    Every module is a stage in the pipeline — from your first commit to shipping
+    in production. Expand any stage to see what you'll build.
+  </p>
+
+  <ol class="rail-list" role="list">
+    {
+      curriculum.map((s, i) => (
+        <li class="stage">
+          <span
+            class:list={["dot", i === curriculum.length - 1 && "pulse-dot"]}
+            aria-hidden="true"
+          />
+          <details class="surface-card card" open={i === 0}>
+            <summary>
+              <span class="grow">
+                <span class="stage-label">
+                  stage {s.stage} · {s.label}
+                </span>
+                <h3 class="mt-1">{s.title}</h3>
+                <span class="tags">
+                  {s.tags.map((t) => (
+                    <span class="tag">
+                      <ToolIcon name={t} class="text-[0.95rem] text-teal" />
+                      {t}
+                    </span>
+                  ))}
+                </span>
+              </span>
+              <svg
+                class="chev"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M5 7.5L10 12.5L15 7.5"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </summary>
+            <ul class="bullets" role="list">
+              {s.bullets.map((b) => (
+                <li>{b}</li>
+              ))}
+            </ul>
+          </details>
+        </li>
+      ))
+    }
+  </ol>
+</Section>
+
+<style>
+  .rail-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .stage {
+    position: relative;
+    padding-left: 2.5rem;
+    padding-bottom: 1.25rem;
+  }
+  .stage:last-child {
+    padding-bottom: 0;
+  }
+
+  /* the connecting rail line (commit → production) */
+  .stage::before {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-line);
+  }
+  .stage:first-child::before {
+    top: calc(1.4rem + 7px);
+  }
+  .stage:last-child::before {
+    bottom: auto;
+    height: calc(1.4rem + 7px);
+  }
+
+  /* status node — teal = a real, sequential stage (BRAND §6) */
+  .dot {
+    position: absolute;
+    left: 0;
+    top: 1.4rem;
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    background: var(--color-teal);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-teal) 14%, transparent);
+  }
+
+  .card {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    transition: border-color 0.15s ease;
+  }
+  .card:hover {
+    border-color: var(--color-teal); /* fallback if color-mix unsupported */
+  }
+  @supports (color: color-mix(in srgb, red, blue)) {
+    .card:hover {
+      border-color: color-mix(in srgb, var(--color-teal) 40%, var(--color-line));
+    }
+  }
+
+  summary {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem 1.25rem;
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  /* unmistakable, inset focus ring so it never merges with the card/rail edge */
+  summary:focus-visible {
+    outline: 2px solid var(--color-teal);
+    outline-offset: -2px;
+    border-radius: var(--radius-card);
+  }
+  .grow {
+    flex: 1;
+  }
+
+  .stage-label {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--color-teal);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-muted);
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-pill);
+  }
+
+  .chev {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+    color: var(--color-muted);
+    transition: transform 0.2s ease;
+  }
+  .card[open] .chev {
+    transform: rotate(180deg);
+  }
+
+  .bullets {
+    margin: 0;
+    padding: 0 1.25rem 1.4rem 1.25rem;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .bullets li {
+    position: relative;
+    padding-left: 1.4rem;
+    color: var(--color-text);
+  }
+  .bullets li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.6rem;
+    width: 8px;
+    height: 2px;
+    background: var(--color-teal);
+  }
+</style>
