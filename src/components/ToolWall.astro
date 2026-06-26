@@ -1,6 +1,6 @@
 ---
 // ToolWall — the tools you'll actually use (ARCHITECTURE.md §4.8).
-// Monochrome teal logo + name tiles (BRAND.md §6) — dev-native, no rainbow brand
+// Monochrome primary logo + name tiles (BRAND.md §6) — dev-native, no rainbow brand
 // colors fighting the palette. Data: tools.json (all current entries have a
 // vendored icon; one without an icon would simply show the name).
 import Section from "./primitives/Section.astro";
@@ -16,7 +16,7 @@ import { tools } from "../content/data";
     {
       tools.map((t) => (
         <li class="surface-card flex items-center gap-2.5 rounded-[var(--radius-card)] border border-line bg-surface px-4 py-3">
-          <ToolIcon name={t} class="text-[1.15rem] text-teal" />
+          <ToolIcon name={t} class="text-[1.15rem] text-primary" />
           <span class="font-mono text-sm text-text">{t}</span>
         </li>
       ))

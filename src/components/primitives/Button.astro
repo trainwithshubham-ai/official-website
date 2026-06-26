@@ -1,7 +1,7 @@
 ---
 // Button — the only two button styles (BRAND.md §6).
-//   primary = coral fill, ink text  → THE Enroll CTA (coral is sacred, §3)
-//   ghost   = transparent, teal border/text → secondary ("See the curriculum")
+//   primary = yellow CTA fill, ink text  → THE Enroll CTA (the CTA color is sacred, §3)
+//   ghost   = transparent, purple border/text → secondary ("See the curriculum")
 // Renders <a> when `href` is set, else <button>. Labels are verbs, never "Submit".
 //
 // `enroll`: marks this as an Enroll CTA → adds data-enroll so the global handler
@@ -27,12 +27,12 @@ const base =
   "inline-flex items-center justify-center gap-2 rounded-[var(--radius-btn)] px-5 py-3 font-medium leading-none transition-[transform,background-color,border-color] duration-150 motion-safe:hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2";
 
 const variants = {
-  // coral fill, ink text, lift + coral-deep on hover
+  // yellow CTA fill, ink text, lift + cta-deep on hover
   primary:
-    "bg-coral text-ink hover:bg-coral-deep focus-visible:outline-coral",
-  // transparent, teal 1px border, teal text
+    "bg-cta text-ink hover:bg-cta-deep focus-visible:outline-cta",
+  // transparent, purple 1px border, purple text
   ghost:
-    "border border-teal text-teal hover:bg-teal/10 focus-visible:outline-teal",
+    "border border-primary text-primary hover:bg-primary/10 focus-visible:outline-primary",
 };
 
 const Tag = href ? "a" : "button";

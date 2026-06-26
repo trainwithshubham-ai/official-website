@@ -1,6 +1,6 @@
 ---
 // Curriculum — the signature pipeline (BRAND.md §2, ARCHITECTURE.md §4.6).
-// Each module is a deploy stage on a vertical rail, from `commit` to
+// Each module is a deploy stage on a vertical rail, from `code` to
 // `production`. Accordions are native <details>/<summary> — ZERO JavaScript.
 // Data mirrors curriculumSchema in content.config.ts.
 import Section from "./primitives/Section.astro";
@@ -8,10 +8,10 @@ import ToolIcon from "./primitives/ToolIcon.astro";
 import { curriculum } from "../content/data";
 ---
 
-<Section id="curriculum" eyebrow="curriculum" title="From commit to production">
+<Section id="curriculum" eyebrow="curriculum" title="From code to production">
   <p class="mb-10 max-w-2xl text-pretty text-muted">
-    Every module is a stage in the pipeline — from your first commit to shipping
-    in production. Expand any stage to see what you'll build.
+    Every module is a stage in the pipeline — from your first line of code to
+    shipping in production. Expand any stage to see what you'll build.
   </p>
 
   <ol class="rail-list" role="list">
@@ -32,7 +32,7 @@ import { curriculum } from "../content/data";
                 <span class="tags">
                   {s.tags.map((t) => (
                     <span class="tag">
-                      <ToolIcon name={t} class="text-[0.95rem] text-teal" />
+                      <ToolIcon name={t} class="text-[0.95rem] text-primary" />
                       {t}
                     </span>
                   ))}
@@ -81,7 +81,7 @@ import { curriculum } from "../content/data";
     padding-bottom: 0;
   }
 
-  /* the connecting rail line (commit → production) */
+  /* the connecting rail line (code → production) */
   .stage::before {
     content: "";
     position: absolute;
@@ -99,7 +99,7 @@ import { curriculum } from "../content/data";
     height: calc(1.4rem + 7px);
   }
 
-  /* status node — teal = a real, sequential stage (BRAND §6) */
+  /* status node — primary = a real, sequential stage (BRAND §6) */
   .dot {
     position: absolute;
     left: 0;
@@ -107,8 +107,8 @@ import { curriculum } from "../content/data";
     width: 14px;
     height: 14px;
     border-radius: 9999px;
-    background: var(--color-teal);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-teal) 14%, transparent);
+    background: var(--color-primary);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
   }
 
   .card {
@@ -118,11 +118,11 @@ import { curriculum } from "../content/data";
     transition: border-color 0.15s ease;
   }
   .card:hover {
-    border-color: var(--color-teal); /* fallback if color-mix unsupported */
+    border-color: var(--color-primary); /* fallback if color-mix unsupported */
   }
   @supports (color: color-mix(in srgb, red, blue)) {
     .card:hover {
-      border-color: color-mix(in srgb, var(--color-teal) 40%, var(--color-line));
+      border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-line));
     }
   }
 
@@ -139,7 +139,7 @@ import { curriculum } from "../content/data";
   }
   /* unmistakable, inset focus ring so it never merges with the card/rail edge */
   summary:focus-visible {
-    outline: 2px solid var(--color-teal);
+    outline: 2px solid var(--color-primary);
     outline-offset: -2px;
     border-radius: var(--radius-card);
   }
@@ -151,7 +151,7 @@ import { curriculum } from "../content/data";
     font-family: var(--font-mono);
     font-size: 0.78rem;
     letter-spacing: 0.06em;
-    color: var(--color-teal);
+    color: var(--color-primary);
   }
 
   .tags {
@@ -178,10 +178,37 @@ import { curriculum } from "../content/data";
     flex-shrink: 0;
     margin-top: 0.15rem;
     color: var(--color-muted);
-    transition: transform 0.2s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .card[open] .chev {
     transform: rotate(180deg);
+  }
+  .card[open] summary .chev {
+    color: var(--color-primary);
+  }
+
+  /* Smooth accordion expand/collapse. Modern CSS: animates to/from the
+     intrinsic height via interpolate-size. Degrades to an instant snap where
+     unsupported, and the global prefers-reduced-motion switch zeroes it out. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (interpolate-size: allow-keywords) {
+      .card {
+        interpolate-size: allow-keywords;
+      }
+      .card::details-content {
+        block-size: 0;
+        overflow: clip;
+        opacity: 0;
+        transition:
+          block-size 0.34s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.3s ease,
+          content-visibility 0.34s allow-discrete;
+      }
+      .card[open]::details-content {
+        block-size: auto;
+        opacity: 1;
+      }
+    }
   }
 
   .bullets {
@@ -204,6 +231,6 @@ import { curriculum } from "../content/data";
     top: 0.6rem;
     width: 8px;
     height: 2px;
-    background: var(--color-teal);
+    background: var(--color-primary);
   }
 </style>

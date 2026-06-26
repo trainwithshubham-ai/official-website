@@ -38,7 +38,7 @@ the CI/CD pipeline — is the spine of the design.
 - The **countdown** is framed as a **deploy window** — the window to ship your
   enrollment at early-bird price.
 - Status semantics from observability tooling carry meaning, not decoration:
-  **teal = healthy/done**, **coral = the action to take**, **amber = urgency**.
+  **purple = healthy/done**, **yellow = the action to take**, **amber = urgency**.
 
 Spend the boldness here. Everything around the pipeline stays quiet and
 disciplined.
@@ -47,39 +47,44 @@ disciplined.
 
 ## 3. Color
 
-Dark only. A deep blue-black base (not pure `#000`), one elevated surface, and
-three functional accents whose meaning comes from dashboards engineers already
-read every day.
+Dark only. A deep blue-black base (not pure `#000`), one elevated surface, and a
+**royal-purple + yellow** accent system whose meaning comes from dashboards
+engineers already read every day.
 
-| Token            | Hex        | Role                                              |
-| ---------------- | ---------- | ------------------------------------------------- |
-| `--ink`          | `#0A0E12`  | Page background (deep blue-black)                 |
-| `--surface`      | `#12181F`  | Cards, sections, elevated panels                  |
-| `--surface-2`    | `#1A222C`  | Higher elevation, inputs, hover states            |
-| `--line`         | `#243240`  | Hairline borders, pipeline rails                  |
-| `--teal`         | `#21D4B4`  | Primary brand / healthy / completed-stage         |
-| `--teal-deep`    | `#0E9384`  | Teal gradients, pressed states                    |
-| `--cyan`         | `#38E0E8`  | Energy accent — Hero/pipeline gradients ONLY      |
-| `--coral`        | `#FF6B57`  | **CTA only** — Enroll / primary action            |
-| `--coral-deep`   | `#E2503C`  | Coral hover / pressed                             |
-| `--signal`       | `#F5A524`  | Urgency — countdown, "early bird ends", scarcity  |
-| `--text`         | `#E8EEF2`  | Primary text (off-white)                          |
-| `--muted`        | `#8A97A6`  | Secondary text, captions, mono labels             |
+| Token             | Hex        | Role                                              |
+| ----------------- | ---------- | ------------------------------------------------- |
+| `--ink`           | `#0A0E12`  | Page background (deep blue-black)                 |
+| `--surface`       | `#12181F`  | Cards, sections, elevated panels                  |
+| `--surface-2`     | `#1A222C`  | Higher elevation, inputs, hover states            |
+| `--line`          | `#243240`  | Hairline borders, pipeline rails                  |
+| `--primary`       | `#A78BFA`  | Primary brand / healthy / completed-stage (light royal violet — text-safe) |
+| `--primary-deep`  | `#7C3AED`  | Royal purple — gradients, fills, pressed (fills/large only, ~3.4:1) |
+| `--accent`        | `#C084FC`  | Energy accent — Hero/pipeline gradients + rail sweep ONLY (luminous violet) |
+| `--cta`           | `#FACC15`  | **CTA only** — Enroll / primary action (vivid yellow) |
+| `--cta-deep`      | `#EAB308`  | CTA hover / pressed                               |
+| `--signal`        | `#F5A524`  | Urgency — countdown, "early bird ends", scarcity  |
+| `--text`          | `#E8EEF2`  | Primary text (off-white)                          |
+| `--muted`         | `#8A97A6`  | Secondary text, captions, mono labels             |
 
 **Rules**
-- **Coral is sacred.** It means "the thing to click." Reserve it for the primary
-  Enroll CTA and nothing else. If everything is coral, nothing is.
-- Teal is the *structural* brand color — rails, completed status dots, links,
-  underlines, icon strokes. It is not a button color.
+- **The yellow CTA (`--cta`) is sacred.** It means "the thing to click." Reserve
+  it for the primary Enroll CTA and nothing else. If everything is yellow, nothing
+  is. (This replaced the old coral CTA.)
+- Purple is the *structural* brand color — rails, completed status dots, links,
+  underlines, icon strokes, focus rings. It is not a button color. Use the
+  **light** `--primary` (#A78BFA, ~7:1 on ink) for any text/icon/small element;
+  reserve the **deep** `--primary-deep` (#7C3AED, ~3.4:1) for fills, gradient
+  stops, and large/decorative areas only — never small text.
 - Amber (`--signal`) appears only where time pressure is real: the countdown and
-  the early-bird messaging. Don't sprinkle it.
+  the early-bird messaging. Don't sprinkle it. It sits warm-but-distinct from the
+  purer yellow CTA — keep them from touching where possible.
 - No gradients on text. Tasteful gradients are allowed in the **pipeline
-  (teal→cyan)**, the hero glow, and the **gradient hairline border on the two
+  (primary→accent)**, the hero glow, and the **gradient hairline border on the two
   anchor cards** (Pricing, Credential); everywhere else, flat.
-- **Cyan (`--cyan`) is the energy accent** — used only in Hero / pipeline
+- **`--accent` (lavender) is the energy accent** — used only in Hero / pipeline
   gradients to add vibrancy. Never as text, never as a button, never a third
-  "brand" color. It rides with teal, not against it.
-- Never introduce a color outside this table. No purple, no blue-link blue.
+  "brand" color. It rides with purple, not against it.
+- Never introduce a color outside this table. No blue-link blue, no green.
 
 ---
 
@@ -125,7 +130,7 @@ workhorse body, and a real monospace that does actual semantic work.
 - Hairline borders (`--line`) over heavy shadows — but surfaces carry subtle
   **depth**: a 1px top sheen + soft shadow (`.surface-card`), and a faint page
   **grain** for tactility (kills flat-black cheapness; Linear/Vercel/Stripe feel).
-- Behind the hero: a **dual ambient glow** (teal + a faint amber) over a masked
+- Behind the hero: a **dual ambient glow** (purple + a faint amber) over a masked
   **pipeline grid**. Subtle, premium — depth, not flash.
 - **Motion budget:** the **animated "deploying" pipeline** in the hero is the one
   bold moment (BRAND §2). Quiet supporting motion is allowed — scroll-reveal
@@ -138,30 +143,30 @@ workhorse body, and a real monospace that does actual semantic work.
 
 ## 6. Components — visual rules
 
-- **Primary CTA button:** coral fill, ink text, `8px` radius, weight 600,
-  subtle lift on hover (translateY -1px + coral-deep). Label is a verb:
+- **Primary CTA button:** yellow fill, ink text, `8px` radius, weight 600,
+  subtle lift on hover (translateY -1px + cta-deep). Label is a verb:
   "Enroll now", "Get the early-bird seat". Never "Submit", never "Click here".
-- **Secondary button:** transparent, `--teal` 1px border, teal text. For
+- **Secondary button:** transparent, `--primary` 1px border, purple text. For
   "See the curriculum".
 - **Countdown:** mono digits, amber accent, labeled `❯ early-bird window closes`.
   When it expires it does **not** disappear — it flips to a calm "Early-bird
   ended · full price now live" state and pricing updates. Honesty over fake urgency.
-- **Stage card (curriculum):** surface bg, left status dot (teal = the arc is
+- **Stage card (curriculum):** surface bg, left status dot (purple = the arc is
   real), mono stage label (`stage 03 · containers`), title, 3–4 outcome bullets.
-- **Status dot:** 8px teal circle = a real, sequential stage. Only use numbered
+- **Status dot:** 8px purple circle = a real, sequential stage. Only use numbered
   / sequential markers here, because the curriculum genuinely **is** a sequence.
-- **Tool wall:** monochrome/teal-tinted logos on surface tiles, evenly spaced,
+- **Tool wall:** monochrome/purple-tinted logos on surface tiles, evenly spaced,
   no rainbow brand colors fighting the palette.
 - **Tool logos (`ToolIcon.astro`):** the shared icon system — hand-vendored
   single-path SVGs (Simple Icons, CC0 paths; AWS uses a neutral cloud since
   Amazon's mark isn't available), rendered `fill="currentColor"` and tinted
-  **teal**. Used as icon + label chips in the curriculum tags, the tool wall, and
+  **purple**. Used as icon + label chips in the curriculum tags, the tool wall, and
   project tags. Monochrome only (BRAND §3); conceptual tags with no tool logo
   stay text. Trademarks belong to their owners — monochrome, nominative use to
   denote what's taught.
 - **Reviews:** the aggregate badge reads `4.9 ★ · 232 Google reviews` — stars in
   `--signal` (amber), the rest muted, with the Google mark for trust. Review
-  cards sit on `--surface` with a teal left-rule, show name + relative date +
+  cards sit on `--surface` with a purple left-rule, show name + relative date +
   five amber stars + a trimmed excerpt, and link out to the full review. The
   "Verified on Google" link is the proof a skeptic clicks — make it obvious.
 
@@ -215,7 +220,7 @@ hype, and never condescending or gatekeeping. Beginners and pros both feel at ho
 
 ## 9. Quality floor (non-negotiable)
 
-- Responsive to 380px, visible keyboard focus rings (teal), `prefers-reduced-motion`
+- Responsive to 380px, visible keyboard focus rings (purple), `prefers-reduced-motion`
   respected (kill the hero glow animation + scroll reveals).
 - Lighthouse: Performance ≥ 95, Accessibility ≥ 95. Near-zero runtime JS.
 - Contrast ≥ 4.5:1 for body text on `--ink`/`--surface` (the palette above passes).

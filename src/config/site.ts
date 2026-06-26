@@ -16,10 +16,17 @@ export const site = {
   // --- scarcity ---
   earlyBirdEndsISO: "2026-07-11T23:59:00+05:30", // countdown target
 
-  // --- pricing (USD) ---
-  priceFull: 249,
-  priceEarlyIndia: 149,
-  priceEarlyUS: 199,
+  // --- pricing ---
+  // India bills in INR, rest of world in USD — shown transparently (no IP
+  // geo-switch, golden rule 6). The page LEADS with the India price; the world
+  // price stays in the screen-reader text and at Learnyst checkout. `regular` is
+  // the pre-early-bird list price: the struck-through anchor now, and the
+  // post-deadline full-price card after the window closes. Pre-formatted display
+  // strings (currency symbol included) — no math is done on these anywhere.
+  price: {
+    india: { early: "₹14,999", regular: "₹25,000" },
+    world: { early: "$199", regular: "$249" },
+  },
 
   // --- conversion ---
   // Two Learnyst checkout links — shown transparently, the learner picks their

@@ -152,7 +152,7 @@ trainwithshubham-ai/
 │  ├─ layouts/BaseLayout.astro # <head>, meta/OG, fonts, GA4 + Pixel, UTM capture
 │  ├─ components/
 │  │  ├─ primitives/
-│  │  │  ├─ Button.astro       # variants: primary(coral) | ghost(teal)
+│  │  │  ├─ Button.astro       # variants: primary(yellow CTA) | ghost(purple)
 │  │  │  ├─ Section.astro      # consistent vertical rhythm + eyebrow slot
 │  │  │  ├─ Eyebrow.astro      # mono "❯ label"
 │  │  │  └─ StatusDot.astro
@@ -189,7 +189,7 @@ trainwithshubham-ai/
 
 1. `Nav` — sticky, scroll-aware; contains a compact `Countdown` chip.
 2. `Hero` — badge (DevOps · Zero to Hero [Live]), H1, subhead, batch date/time,
-   animated pipeline, `Countdown`, dual CTA (`Button` coral + ghost). No price line.
+   animated pipeline, `Countdown`, dual CTA (`Button` yellow CTA + ghost). No price line.
 3. `TrustBar` — `studentsTrained` (10,000+) + **4.9 ★ · 232 Google reviews**
    badge + social counts.
 4. `LogoMarquee` — "our learners now work at" CSS-only auto-scrolling wordmark
@@ -212,9 +212,11 @@ trainwithshubham-ai/
 11. `Instructor` — Shubham (real photo), "Hello Dosto" note, socials.
 12. `Audience` — "this is for you / not for you" two-column. **Placed right before
     Pricing — last qualifier before the price.**
-13. `Pricing` — **centered/symmetric** card: one "from $149" anchor (exact region
-    prices on the buttons, not two competing numbers), centered `Countdown`,
-    `inclusions.json`, trust row, and two region CTAs (`EnrollButtons` →
+13. `Pricing` — **centered/symmetric** card: leads with the India price ("from
+    ₹14,999 · regularly ₹2̶5̶,̶0̶0̶0̶"), one currency on screen (no competing numbers).
+    The world price ($199 · $249) lives in the screen-reader breakdown + at
+    checkout (golden rule 6 transparency). Centered `Countdown`, `inclusions.json`,
+    trust row, and two **price-free** region CTAs (`EnrollButtons` → flag/globe →
     `site.checkout.india` / `site.checkout.world`, UTM-appended). **Late.**
 14. `FAQ` — `faq.json`, native `<details>`.
 15. `FinalCTA` — closing band + `Countdown` + `EnrollButtons` (no separate price
