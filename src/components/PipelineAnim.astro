@@ -1,7 +1,7 @@
 ---
 // PipelineAnim — the signature "deploying" motion (BRAND.md §2, the one bold
 // motion moment). A compact code→production rail: nodes light up in sequence
-// and a glowing pulse sweeps the track. CSS-only, zero JS.
+// and a primary→accent pulse sweeps the track. CSS-only, zero JS.
 // Decorative: marked role="img" with an accessible label; reduced-motion shows a
 // static, fully-lit (finished) pipeline; labels hide below 400px.
 const stages = ["code", "build", "test", "deploy", "production"];
@@ -52,20 +52,15 @@ const stages = ["code", "build", "test", "deploy", "production"];
     background: var(--color-line);
   }
   .track::after {
-    width: 52%;
-    left: -52%;
-    /* a comet: long soft tail trailing left → bright head at the leading edge */
+    width: 38%;
+    left: -38%;
     background: linear-gradient(
       90deg,
-      transparent 0%,
-      color-mix(in srgb, var(--color-accent) 16%, transparent) 45%,
-      color-mix(in srgb, var(--color-accent) 50%, transparent) 80%,
-      var(--color-accent) 96%,
-      transparent 100%
+      transparent,
+      var(--color-accent),
+      transparent
     );
-    box-shadow: 0 0 9px color-mix(in srgb, var(--color-accent) 45%, transparent);
-    filter: blur(0.2px);
-    animation: pipe-sweep 1.9s linear infinite;
+    animation: pipe-sweep 3s linear infinite;
   }
 
   li {
@@ -83,8 +78,8 @@ const stages = ["code", "build", "test", "deploy", "production"];
     border-radius: 9999px;
     background: var(--color-surface-2);
     border: 2px solid var(--color-line);
-    animation: pipe-light 1.9s ease-in-out infinite;
-    animation-delay: calc(var(--i) * 0.28s);
+    animation: pipe-light 3s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.45s);
   }
 
   .lbl {
@@ -94,44 +89,26 @@ const stages = ["code", "build", "test", "deploy", "production"];
     color: var(--color-muted);
   }
 
-  /* travels left → right, but swells in the middle of the run: thin + faint at
-     the start and end, fullest as it crosses the centre of the rail. */
   @keyframes pipe-sweep {
-    0% {
-      left: -52%;
-      opacity: 0;
-      transform: scaleY(0.35);
+    from {
+      left: -38%;
     }
-    22% {
-      opacity: 1;
-      transform: scaleY(1);
-    }
-    78% {
-      opacity: 1;
-      transform: scaleY(1);
-    }
-    100% {
+    to {
       left: 100%;
-      opacity: 0;
-      transform: scaleY(0.35);
     }
   }
-  /* seamless breathing wave — 0% and 100% match so the loop never snaps; each
-     node swells to a glowing peak as the comet passes, then settles. */
   @keyframes pipe-light {
     0%,
-    100% {
+    35% {
       background: var(--color-surface-2);
       border-color: var(--color-line);
       box-shadow: 0 0 0 0 transparent;
     }
-    46%,
-    64% {
+    55%,
+    100% {
       background: var(--color-primary);
       border-color: var(--color-primary);
-      box-shadow:
-        0 0 0 4px color-mix(in srgb, var(--color-primary) 16%, transparent),
-        0 0 14px color-mix(in srgb, var(--color-primary) 55%, transparent);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
     }
   }
 
