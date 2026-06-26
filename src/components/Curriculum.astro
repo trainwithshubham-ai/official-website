@@ -178,10 +178,37 @@ import { curriculum } from "../content/data";
     flex-shrink: 0;
     margin-top: 0.15rem;
     color: var(--color-muted);
-    transition: transform 0.2s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .card[open] .chev {
     transform: rotate(180deg);
+  }
+  .card[open] summary .chev {
+    color: var(--color-primary);
+  }
+
+  /* Smooth accordion expand/collapse. Modern CSS: animates to/from the
+     intrinsic height via interpolate-size. Degrades to an instant snap where
+     unsupported, and the global prefers-reduced-motion switch zeroes it out. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (interpolate-size: allow-keywords) {
+      .card {
+        interpolate-size: allow-keywords;
+      }
+      .card::details-content {
+        block-size: 0;
+        overflow: clip;
+        opacity: 0;
+        transition:
+          block-size 0.34s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.3s ease,
+          content-visibility 0.34s allow-discrete;
+      }
+      .card[open]::details-content {
+        block-size: auto;
+        opacity: 1;
+      }
+    }
   }
 
   .bullets {

@@ -59,7 +59,7 @@ engineers already read every day.
 | `--line`          | `#243240`  | Hairline borders, pipeline rails                  |
 | `--primary`       | `#A78BFA`  | Primary brand / healthy / completed-stage (light royal violet — text-safe) |
 | `--primary-deep`  | `#7C3AED`  | Royal purple — gradients, fills, pressed (fills/large only, ~3.4:1) |
-| `--accent`        | `#C4B5FD`  | Energy accent — Hero/pipeline gradients ONLY (lavender) |
+| `--accent`        | `#C084FC`  | Energy accent — Hero/pipeline gradients + rail sweep ONLY (luminous violet) |
 | `--cta`           | `#FACC15`  | **CTA only** — Enroll / primary action (vivid yellow) |
 | `--cta-deep`      | `#EAB308`  | CTA hover / pressed                               |
 | `--signal`        | `#F5A524`  | Urgency — countdown, "early bird ends", scarcity  |

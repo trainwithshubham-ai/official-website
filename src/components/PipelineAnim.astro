@@ -52,14 +52,17 @@ const stages = ["commit", "build", "test", "deploy", "production"];
     background: var(--color-line);
   }
   .track::after {
-    width: 38%;
-    left: -38%;
+    width: 42%;
+    left: -42%;
     background: linear-gradient(
       90deg,
       transparent,
+      color-mix(in srgb, var(--color-accent) 65%, transparent),
       var(--color-accent),
       transparent
     );
+    /* soft glow so the pulse reads as light travelling down the rail */
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 55%, transparent);
     animation: pipe-sweep 3s linear infinite;
   }
 
@@ -108,7 +111,9 @@ const stages = ["commit", "build", "test", "deploy", "production"];
     100% {
       background: var(--color-primary);
       border-color: var(--color-primary);
-      box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
+      box-shadow:
+        0 0 0 4px color-mix(in srgb, var(--color-primary) 16%, transparent),
+        0 0 12px color-mix(in srgb, var(--color-primary) 50%, transparent);
     }
   }
 

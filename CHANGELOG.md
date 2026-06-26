@@ -29,6 +29,16 @@ teal until approved).
 - **Open note for review:** amber `--signal` (countdown) now sits adjacent to the
   yellow CTA in the nav + pricing card — close hues; eyeball before merge.
 
+### Follow-up — motion polish (same branch)
+- `--accent` brightened `#C4B5FD → #C084FC` (luminous violet) so the hero
+  pipeline sweep pops like the old cyan did (the pale lavender had gone flat).
+- `PipelineAnim`: sweep gained a soft glow; lit nodes now carry a `0 0 12px` glow
+  → the "deploying" pulse reads as light travelling the rail again.
+- `Curriculum`: native `<details>` now expand/collapse **smoothly**
+  (`::details-content` + `interpolate-size`, graceful fallback to instant snap,
+  auto-disabled under `prefers-reduced-motion`); chevron eases + turns purple when
+  open. Still 0 JS.
+
 ---
 
 ## 2026-06-26 — Dual-currency pricing (INR for India)

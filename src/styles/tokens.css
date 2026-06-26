@@ -27,7 +27,7 @@
   --color-line: #243240; /* hairline borders, pipeline rails */
   --color-primary: #a78bfa; /* brand / healthy / completed-stage — light royal violet (text-safe, ~6.9:1 on ink) */
   --color-primary-deep: #7c3aed; /* royal purple — gradients, fills, pressed */
-  --color-accent: #c4b5fd; /* energy accent — Hero / pipeline gradients ONLY (BRAND §3) */
+  --color-accent: #c084fc; /* energy accent — luminous violet, Hero / pipeline gradients ONLY (BRAND §3) */
   --color-cta: #facc15; /* CTA ONLY — Enroll / primary action (vivid yellow, ink text ~13:1) */
   --color-cta-deep: #eab308; /* CTA hover / pressed */
   --color-signal: #f5a524; /* urgency — countdown, scarcity */
