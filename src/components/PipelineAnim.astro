@@ -94,12 +94,26 @@ const stages = ["code", "build", "test", "deploy", "production"];
     color: var(--color-muted);
   }
 
+  /* travels left → right, but swells in the middle of the run: thin + faint at
+     the start and end, fullest as it crosses the centre of the rail. */
   @keyframes pipe-sweep {
-    from {
-      left: -38%;
+    0% {
+      left: -52%;
+      opacity: 0;
+      transform: scaleY(0.35);
     }
-    to {
+    22% {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+    78% {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+    100% {
       left: 100%;
+      opacity: 0;
+      transform: scaleY(0.35);
     }
   }
   /* seamless breathing wave — 0% and 100% match so the loop never snaps; each
