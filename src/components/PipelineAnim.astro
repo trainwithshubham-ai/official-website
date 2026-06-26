@@ -52,18 +52,19 @@ const stages = ["code", "build", "test", "deploy", "production"];
     background: var(--color-line);
   }
   .track::after {
-    width: 46%;
-    left: -46%;
-    /* a comet: tight bright core, quick fade to crisp edges (low edge glow) */
+    width: 52%;
+    left: -52%;
+    /* a comet: long soft tail trailing left → bright head at the leading edge */
     background: linear-gradient(
       90deg,
-      transparent,
-      color-mix(in srgb, var(--color-accent) 30%, transparent),
-      var(--color-accent),
-      color-mix(in srgb, var(--color-accent) 30%, transparent),
-      transparent
+      transparent 0%,
+      color-mix(in srgb, var(--color-accent) 16%, transparent) 45%,
+      color-mix(in srgb, var(--color-accent) 50%, transparent) 80%,
+      var(--color-accent) 96%,
+      transparent 100%
     );
-    box-shadow: 0 0 6px color-mix(in srgb, var(--color-accent) 35%, transparent);
+    box-shadow: 0 0 9px color-mix(in srgb, var(--color-accent) 45%, transparent);
+    filter: blur(0.2px);
     animation: pipe-sweep 1.9s linear infinite;
   }
 
