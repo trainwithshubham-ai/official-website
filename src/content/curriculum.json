@@ -57,7 +57,7 @@
   {
     "stage": "06",
     "label": "cloud",
-    "title": "AWS cloud (Solutions Architect)",
+    "title": "AWS cloud Fundamentals",
     "bullets": [
       "Navigate the core AWS services architects use daily",
       "Design with compute, networking, storage and databases",
@@ -105,9 +105,10 @@
     "bullets": [
       "Build AI agents that automate real DevOps workflows",
       "Work hands-on with modern agentic AI frameworks",
-      "Put AI to work on troubleshooting, operations and automation"
+      "Put AI to work on troubleshooting, operations and automation",
+      "Build a Production Ready Agent Harness"
     ],
-    "tags": ["Agentic AI", "LLMs", "Automation"]
+    "tags": ["Agentic AI", "LLMs", "Automation", "LangChain", "Amazon Bedrock AgentCore"]
   },
   {
     "stage": "11",
@@ -118,6 +119,6 @@
       "Sharpen your LinkedIn and resume for DevOps roles",
       "Practise with mock interviews and structured job prep"
     ],
-    "tags": ["Capstone", "Career", "Interviews"]
+    "tags": ["Capstone", "Career", "Interviews", "AI Ready"]
   }
 ]

@@ -6,6 +6,16 @@ records *what* changed and *why* so future sessions have context.
 
 ---
 
+## 2026-06-27 — Curriculum + projects content refresh
+
+Owner content edits (zod-validated, 0 JS):
+- Curriculum: stage 06 "AWS cloud (Solutions Architect)" → "AWS cloud
+  Fundamentals"; Agentic AI stage gains a "Production Ready Agent Harness" bullet
+  + tags (LangChain, Amazon Bedrock AgentCore); capstone gains an "AI Ready" tag.
+- Projects: "Infrastructure as Code" → "Multi-Environment Infrastructure as Code"
+  (+ Ansible); "AI-assisted DevOps workflow" → "AIOps workflow" (AI Agents,
+  Python). New tags without a ToolIcon glyph stay text-only by design.
+
 ## 2026-06-27 — Palette rebrand: royal purple + yellow (shipped to main)
 
 Moved off the teal/coral identity to **royal purple (primary) + yellow (Enroll

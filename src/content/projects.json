@@ -10,9 +10,9 @@
     "tools": ["Kubernetes", "Helm"]
   },
   {
-    "title": "Infrastructure as Code",
+    "title": "Multi-Environment Infrastructure as Code",
     "desc": "Provision a complete cloud environment using reusable Terraform modules.",
-    "tools": ["Terraform", "AWS"]
+    "tools": ["Terraform", "AWS", "Ansible"]
   },
   {
     "title": "GitOps with ArgoCD",
@@ -25,8 +25,8 @@
     "tools": ["Prometheus", "Grafana"]
   },
   {
-    "title": "AI-assisted DevOps workflow",
-    "desc": "Automate routine ops and troubleshooting with AI in the loop.",
-    "tools": ["AI", "Bash"]
+    "title": "AIOps workflow",
+    "desc": "Automate routine ops and troubleshooting with AI Agents in the loop.",
+    "tools": ["AI Agents", "Python"]
   }
 ]
