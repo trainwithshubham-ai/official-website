@@ -33,7 +33,7 @@ export const site = {
   // region (no IP geo-switch, golden rule 6). Same course, two price tiers.
   checkout: {
     india:
-      "https://courses.trainwithshubham.ai/learn/fast-checkout/278132?priceId=280682",
+      "https://courses.trainwithshubham.ai/learn/fast-checkout/278132?priceId=281722",
     world:
       "https://courses.trainwithshubham.ai/learn/fast-checkout/278132?priceId=280727",
   },
