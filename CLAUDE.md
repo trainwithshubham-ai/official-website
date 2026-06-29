@@ -12,7 +12,7 @@ A single-page, dark-theme, conversion-focused **sales page** for one product:
 **DevOps: Zero to Hero (AI Powered)** — a cohort batch that starts
 **18 Jul 2026**. The page's only job: convert a motivated learner — anyone from
 a complete beginner to a working engineer — into an enrolled student before the
-early-bird window closes (**11 Jul 2026, 23:59 IST**). The course is **zero to
+early-bird window closes (**3 Jul 2026, 23:59 IST**). The course is **zero to
 hero**: welcoming, no prior experience required.
 
 - Hosted on **GitHub Pages**, apex `trainwithshubham.ai`. Static. No backend.
@@ -202,7 +202,7 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
 
 - Product: DevOps: Zero to Hero (AI Powered) · cohort batch · starts 18 Jul 2026
   · open to all levels (beginners welcome, no prior experience required)
-- Early bird ends: 11 Jul 2026, 23:59 IST
+- Early bird ends: 3 Jul 2026, 23:59 IST
 - Price (dual currency, no IP geo-switch): India ~~₹25,000~~ → early bird
   **₹14,999**; rest of world ~~$249~~ → early bird **$199**. Page leads with the
   India price; the world price lives in the SR breakdown + at checkout. Region pay

@@ -11,7 +11,7 @@ design decision. If the code and this file disagree, this file wins.
 A one-page, dark-theme, conversion-focused sales page for a **DevOps cohort
 batch** that starts **18 Jul 2026**. The page has exactly one job: turn a
 motivated learner into an enrolled student before the early-bird window closes
-(**11 Jul 2026, 23:59 IST**).
+(**3 Jul 2026, 23:59 IST**).
 
 - **Audience:** anyone who wants to become an AI-powered DevOps engineer — from
   complete beginners to working Cloud / Platform engineers. This is a **zero to

@@ -33,7 +33,7 @@ export const site = {
   oneOffBatch: true,
 
   // --- scarcity ---
-  earlyBirdEndsISO: "2026-07-11T23:59:00+05:30", // countdown target
+  earlyBirdEndsISO: "2026-07-03T23:59:00+05:30", // countdown target
 
   // --- pricing (USD) ---
   priceFull: 249,
