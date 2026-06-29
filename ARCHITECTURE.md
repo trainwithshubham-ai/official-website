@@ -268,6 +268,14 @@ The page has no database, but attribution still works:
   `region` of `india`/`world`) is sent on CTA click for funnel tracking and Pixel
   retargeting of reel traffic. Generic top CTAs (Nav/Hero) jump to `#pricing`
   rather than checkout, since the price tier is chosen there.
+- **Region guess (timezone, never IP).** A third tiny inline script reads the
+  browser timezone (`Asia/Kolkata|Asia/Calcutta` → `india`, else `world`) and sets
+  `data-region-guess` on each `[data-enroll-group]`. CSS then *only* emphasises the
+  likely-correct Enroll button and personalises the welcoming geo-pricing note —
+  both prices stay fully visible and are never switched (golden rule 6). The
+  geo-restricted Learnyst checkouts (India `priceId` ≠ world) open in a **new tab**
+  so a wrong-region click is recoverable (the sales page stays put). Degrades
+  silently: no JS → both buttons equal, neutral note, new tab still works.
 
 ---
 

@@ -1,9 +1,12 @@
 ---
 // EnrollButtons — the two region-specific Learnyst checkout CTAs. The region
-// lives on the button (India flag / globe) so the learner never has to compare
-// two prices to find theirs (no IP geo-switch — golden rule 6). Both are
-// `data-enroll`: BaseLayout forwards UTM (+ src), preserves ?priceId, and fires
-// enroll_click with the data-region.
+// lives on the button (India flag / globe) so the learner picks their own price
+// (we NEVER IP-geo-switch the displayed price — both stay visible; golden rule).
+// A tiny timezone guess (BaseLayout, Asia/Kolkata → India) only *emphasises* the
+// likely-correct button and personalises the note — it never hides or swaps a
+// price. Checkouts open in a new tab (Button.astro) so a wrong-region click is
+// recoverable. Both buttons are `data-enroll`: BaseLayout forwards UTM (+ src),
+// preserves ?priceId, and fires enroll_click with the data-region.
 import { site } from "../config/site";
 import Button from "./primitives/Button.astro";
 import FlagIndia from "./primitives/FlagIndia.astro";
@@ -11,30 +14,107 @@ import Globe from "./primitives/Globe.astro";
 
 interface Props {
   class?: string;
+  /** Show the welcoming geo-pricing note under the buttons (Pricing box only). */
+  note?: boolean;
 }
-const { class: className = "" } = Astro.props;
+const { class: className = "", note = false } = Astro.props;
 ---
 
-<div class:list={["flex flex-col gap-3 sm:flex-row sm:justify-center", className]}>
-  <Button
-    href={site.checkout.india}
-    enroll
-    data-region="india"
-    aria-label={`Pay — India pricing, ${site.price.india.early} early bird`}
-    class="w-full sm:w-auto"
-  >
-    <FlagIndia />
-    Pay · India
-  </Button>
+<div class:list={["enroll-group", className]} data-enroll-group>
+  <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
+    <Button
+      href={site.checkout.india}
+      enroll
+      data-region="india"
+      data-region-btn="india"
+      aria-label={`Pay — India pricing, ${site.price.india.early} early bird (opens in a new tab)`}
+      class="region-btn w-full sm:w-auto"
+    >
+      <FlagIndia />
+      Pay · India
+    </Button>
 
-  <Button
-    href={site.checkout.world}
-    enroll
-    data-region="world"
-    aria-label={`Pay — rest-of-world pricing, ${site.price.world.early} early bird`}
-    class="w-full sm:w-auto"
-  >
-    <Globe />
-    Pay · Global
-  </Button>
+    <Button
+      href={site.checkout.world}
+      enroll
+      data-region="world"
+      data-region-btn="world"
+      aria-label={`Pay — rest-of-world pricing, ${site.price.world.early} early bird (opens in a new tab)`}
+      class="region-btn w-full sm:w-auto"
+    >
+      <Globe />
+      Pay · Global
+    </Button>
+  </div>
+
+  {
+    note && (
+      <p class="geo-note">
+        {/* base shows without JS; CSS swaps to a region variant once the
+            timezone guess sets data-region-guess on the group wrapper. */}
+        <span class="geo-base">
+          Pricing is regional — ₹ in India, $ everywhere else. Pick the one for
+          where you're paying from; it opens in a new tab.
+        </span>
+        <span class="geo-india">
+          Looks like you're in India 🇮🇳 — the ₹ price is yours. Paying from
+          outside India? The $ option works too.
+        </span>
+        <span class="geo-world">
+          Looks like you're outside India 🌐 — the $ price is yours. In India? The
+          ₹ option works too.
+        </span>
+      </p>
+    )
+  }
 </div>
+
+<style>
+  /* Subtle "this one's likely yours" mark — paint-only (outline + glow), so it
+     never shifts layout (no CLS). Both buttons stay full CTAs and clickable.
+     :global because .region-btn renders on the child Button's <a> (Astro scoped
+     CSS doesn't cross component boundaries). */
+  :global(
+      .enroll-group[data-region-guess="india"]
+        .region-btn[data-region-btn="india"]
+    ),
+  :global(
+      .enroll-group[data-region-guess="world"]
+        .region-btn[data-region-btn="world"]
+    ) {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 22%, transparent);
+  }
+
+  /* Welcoming geo note. All three variants are stacked in ONE grid cell so the
+     box always sizes to the tallest variant — swapping which one is visible can
+     never change the height (zero CLS, even at 380px where they differ in line
+     count). We toggle `visibility`, not `display`, to keep them all in layout. */
+  .geo-note {
+    margin-top: 0.85rem;
+    display: grid;
+    text-align: center;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+  .geo-note > span {
+    grid-area: 1 / 1; /* overlap in the same cell */
+  }
+  /* Default (no JS / unknown region): base visible, others hidden-but-present. */
+  .geo-india,
+  .geo-world {
+    visibility: hidden;
+  }
+  .enroll-group[data-region-guess="india"] .geo-base,
+  .enroll-group[data-region-guess="world"] .geo-base {
+    visibility: hidden;
+  }
+  .enroll-group[data-region-guess="india"] .geo-india {
+    visibility: visible;
+  }
+  .enroll-group[data-region-guess="world"] .geo-world {
+    visibility: visible;
+  }
+</style>

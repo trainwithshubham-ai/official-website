@@ -6,6 +6,23 @@ records *what* changed and *why* so future sessions have context.
 
 ---
 
+## 2026-06-29 — Geo-aware Enroll buttons (fix wrong-region checkout break)
+
+The two Learnyst checkouts are geo-restricted (India `priceId` only works in
+India, Global only outside) — a wrong-region click hit a broken page AND replaced
+the sales page. Subtle client-side fix (no backend, no IP):
+- **New tab:** enroll checkouts open in a new tab (`Button.astro`), so a wrong
+  click is recoverable — the sales page stays open.
+- **Timezone region guess (never IP):** inline script in `BaseLayout` sets
+  `data-region-guess` (`Asia/Kolkata` → india, else world) on each
+  `[data-enroll-group]`. CSS subtly rings the likely-correct button (paint-only)
+  and personalises a welcoming geo-pricing note (`EnrollButtons`, Pricing box).
+- Both prices stay fully visible; nothing switched (golden rule 6). Graceful with
+  JS off (both equal, neutral note, new tab still works).
+- Note variants stacked in one grid cell (sizes to tallest) → **CLS 0.002** even
+  at 380px. Verified: build clean, 0 JS bundles, DOM dump flips india/world under
+  `TZ=Asia/Kolkata` vs `America/New_York`, Lighthouse 99/100/100, code-review clean.
+
 ## 2026-06-27 — Curriculum + projects content refresh
 
 Owner content edits (zod-validated, 0 JS):

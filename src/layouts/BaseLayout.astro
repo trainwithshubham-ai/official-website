@@ -123,6 +123,33 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
       });
     </script>
 
+    <script is:inline>
+      /* Region guess from the browser TIMEZONE (never IP) — Asia/Kolkata ⇒ India.
+         Only emphasises the likely-correct Enroll button + personalises the
+         geo-pricing note; both prices stay fully visible and are never switched.
+         Sets data-region-guess on each [data-enroll-group]; CSS does the rest.
+         Degrades silently — no JS ⇒ both buttons equal + neutral note. */
+      (function () {
+        function mark() {
+          try {
+            var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+            var guess = /Asia\/(Kolkata|Calcutta)/.test(tz) ? "india" : "world";
+            var groups = document.querySelectorAll("[data-enroll-group]");
+            for (var i = 0; i < groups.length; i++) {
+              groups[i].setAttribute("data-region-guess", guess);
+            }
+          } catch (e) {
+            /* no Intl / blocked — leave both buttons equal */
+          }
+        }
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", mark);
+        } else {
+          mark();
+        }
+      })();
+    </script>
+
     {
       ga4Enabled && (
         <Fragment>

@@ -38,8 +38,17 @@ const variants = {
 const Tag = href ? "a" : "button";
 const isExternal = !!href && /^https?:\/\//.test(href);
 const enrollAttrs = enroll ? { "data-enroll": "" } : {};
+// Enroll checkouts are region-locked on Learnyst; open them in a new tab so a
+// wrong-region click never destroys the sales page (the errored tab is
+// disposable — the learner just returns and picks the other region).
+const newTabAttrs =
+  enroll && isExternal
+    ? { target: "_blank", rel: "noopener noreferrer" }
+    : isExternal
+      ? { rel: "noopener" }
+      : {};
 const tagAttrs = href
-  ? { href, ...(isExternal ? { rel: "noopener" } : {}), ...enrollAttrs }
+  ? { href, ...newTabAttrs, ...enrollAttrs }
   : { type, ...enrollAttrs };
 ---
 
