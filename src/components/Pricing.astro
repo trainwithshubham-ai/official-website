@@ -10,6 +10,7 @@ import { site } from "../config/site";
 import Section from "./primitives/Section.astro";
 import Countdown from "./Countdown.astro";
 import EnrollButtons from "./EnrollButtons.astro";
+import BonusBar from "./BonusBar.astro";
 import { inclusions } from "../content/data";
 
 const refundReady = !site.refundPolicy.startsWith("TODO");
@@ -107,10 +108,13 @@ const fullPriceSr = `Full price ${site.price.india.regular} for India, ${site.pr
       }
     </ul>
 
+    <!-- daily bonus (real, repeatable; honest end-of-day IST timer) -->
+    <BonusBar class="mt-8" />
+
     <!-- CTA — one button per region (transparent, learner picks; golden rule 6).
          `note` shows the welcoming geo-pricing helper here (the main conversion
          point); FinalCTA reuses the buttons without it. -->
-    <EnrollButtons class="mt-8" note />
+    <EnrollButtons class="mt-5" note />
 
     <!-- trust row — CONFIRMED signals only (no invented guarantee; golden rule 4) -->
     <ul

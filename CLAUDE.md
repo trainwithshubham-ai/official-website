@@ -69,9 +69,14 @@ npm run preview      # preview the build
    structural; use light `--primary` (#A78BFA) for text/icons and deep
    `--primary-deep` (#7C3AED) only for fills/gradients. Amber (`--signal`) is
    urgency. See BRAND.md §3. Don't introduce colors outside the palette.
-6. **Honest scarcity.** The countdown is real (ties to `earlyBirdEndsISO`). When
-   it expires, it flips to "early-bird ended · full price live" — it does not
-   reset or fake new urgency. No "X seats left" unless it's literally true.
+6. **Honest scarcity.** The early-bird countdown is real (ties to
+   `earlyBirdEndsISO`). When it expires, it flips to "early-bird ended · full
+   price live" — it does not reset or fake new urgency. No "X seats left" unless
+   it's literally true. The **daily bonus timer** (`Countdown mode="daily"`,
+   `BonusBar`) is allowed because it is real: a genuinely repeatable bonus
+   (`site.bonus`) with the timer counting to **tonight's midnight IST**, which
+   then truly rolls to the next day — a real end-of-day deadline, NOT a fake
+   per-visit 24h reset. If the bonus stops being offered, set `bonus.enabled:false`.
 7. **TODO placeholders are explicit.** Where a real value is missing
    (`checkoutUrl`, `ga4Id`, `metaPixelId`, class days/time, refund terms), wire a
    clearly-named placeholder and leave a `// TODO:` so Shubham can swap it. Don't

@@ -6,6 +6,23 @@ records *what* changed and *why* so future sessions have context.
 
 ---
 
+## 2026-06-29 — Daily bonus timer (honest "evergreen") + #90DaysOfDevOps ebook
+
+To stop learners waiting for the last day, added a **real, repeatable daily bonus**
+instead of a fake evergreen reset:
+- `site.bonus` — "Enroll today → free **#90DaysOfDevOps ebook**." (`enabled` toggle;
+  TODO: confirm delivery.)
+- `Countdown` gains `mode="daily"` + a slim `bonus` variant. Daily mode counts to
+  **tonight's midnight IST** and genuinely rolls to the next day — a real
+  end-of-day deadline, NOT a per-visit 24h reset (a DevOps audience would catch a
+  fake one on refresh; golden rule 6 stays intact). One shared `setInterval` now
+  drives both fixed (early-bird) and daily nodes.
+- New `BonusBar` (slim `grad-border` strip) in the Pricing box, above the Enroll
+  buttons. The early-bird countdown to 11 Jul is unchanged as the macro deadline.
+- Verified: build clean, **0 JS bundles**, IST-midnight math exact (targets 00:00,
+  0–24h), DOM dump shows digits populate (bonus 13:38:32, early-bird 12d…) and
+  fixed countdowns unaffected, Lighthouse 98/100/100, CLS 0.002.
+
 ## 2026-06-29 — Geo-aware Enroll buttons (fix wrong-region checkout break)
 
 The two Learnyst checkouts are geo-restricted (India `priceId` only works in

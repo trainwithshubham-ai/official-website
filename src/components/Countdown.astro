@@ -9,10 +9,18 @@
 // Honest scarcity: on expiry it does NOT reset or vanish — it flips to a calm
 // "early-bird ended · full price live" state via [data-expired] (CSS swap, no
 // layout shift, works even if JS is slow).
+//
+// Two modes (one shared script):
+//   • fixed  (default) — counts to site.earlyBirdEndsISO, the real macro deadline.
+//   • daily  — counts to TONIGHT'S midnight IST for the repeatable daily bonus,
+//     then genuinely rolls to the next day. A real end-of-day deadline, never a
+//     fake per-visit 24h reset (golden rule 6 stays intact).
 import { site } from "../config/site";
 
 interface Props {
-  variant?: "full" | "chip";
+  variant?: "full" | "chip" | "bonus";
+  /** "daily" rolls to the next IST midnight (bonus); "fixed" is the early-bird date. */
+  mode?: "fixed" | "daily";
   /** Expose the deadline to screen readers. Set on exactly ONE mount per page
    *  so the same deadline isn't announced multiple times. */
   announceDeadline?: boolean;
@@ -20,6 +28,7 @@ interface Props {
 }
 const {
   variant = "full",
+  mode = "fixed",
   announceDeadline = false,
   class: className = "",
 } = Astro.props;
@@ -45,41 +54,52 @@ const units = [
 <div
   class:list={["countdown", `countdown--${variant}`, className]}
   data-countdown
-  data-deadline={site.earlyBirdEndsISO}
+  data-mode={mode}
+  data-deadline={mode === "fixed" ? site.earlyBirdEndsISO : undefined}
   data-expired="false"
 >
-  <!-- live ticker (visual only) -->
-  <div class="cd-live" aria-hidden="true">
-    {
-      variant === "full" && (
-        <p class="font-mono text-[length:var(--text-eyebrow)] lowercase tracking-[0.08em] text-signal">
-          ❯ early-bird window closes
-        </p>
-      )
-    }
-    <div class="cd-units">
-      {
-        units.map((u) => (
-          <span class="cd-unit">
-            <span class="cd-num font-mono" data-unit={u.key}>--</span>
-            <span class="cd-lbl font-mono">{u.label}</span>
-          </span>
-        ))
-      }
-    </div>
-  </div>
-
-  <!-- expired state (revealed by CSS when [data-expired="true"]) -->
-  <p class="cd-ended font-mono text-[length:var(--text-eyebrow)] text-muted">
-    <span class="text-signal" aria-hidden="true">●</span> early-bird ended · full
-    price live
-  </p>
-
-  <!-- Accessible deadline — exposed on exactly ONE mount (announceDeadline) so
-       screen readers don't hear the same deadline repeated across the page. -->
   {
-    announceDeadline && (
-      <span class="sr-only">Early-bird pricing ends {deadlineLabel} IST.</span>
+    variant === "bonus" ? (
+      /* slim inline HH:MM:SS for the daily bonus (digits aria-hidden) */
+      <span class="cd-bonus font-mono" aria-hidden="true">
+        <span data-unit="h">--</span>:<span data-unit="m">--</span>:
+        <span data-unit="s">--</span>
+      </span>
+    ) : (
+      <Fragment>
+        {/* live ticker (visual only) */}
+        <div class="cd-live" aria-hidden="true">
+          {variant === "full" && (
+            <p class="font-mono text-[length:var(--text-eyebrow)] lowercase tracking-[0.08em] text-signal">
+              ❯ early-bird window closes
+            </p>
+          )}
+          <div class="cd-units">
+            {units.map((u) => (
+              <span class="cd-unit">
+                <span class="cd-num font-mono" data-unit={u.key}>
+                  --
+                </span>
+                <span class="cd-lbl font-mono">{u.label}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* expired state (revealed by CSS when [data-expired="true"]) */}
+        <p class="cd-ended font-mono text-[length:var(--text-eyebrow)] text-muted">
+          <span class="text-signal" aria-hidden="true">
+            ●
+          </span>{" "}
+          early-bird ended · full price live
+        </p>
+
+        {/* Accessible deadline — exposed on exactly ONE mount (announceDeadline)
+            so screen readers don't hear the same deadline repeated. */}
+        {announceDeadline && (
+          <span class="sr-only">Early-bird pricing ends {deadlineLabel} IST.</span>
+        )}
+      </Fragment>
     )
   }
 </div>
@@ -140,6 +160,16 @@ const units = [
     font-size: 0.6rem;
   }
 
+  /* slim inline timer for the daily bonus */
+  .cd-bonus {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-signal);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
   /* expiry swap — no layout shift, CSS-driven */
   .cd-ended {
     display: none;
@@ -153,22 +183,53 @@ const units = [
 </style>
 
 <script>
-  // Drives every countdown on the page from a single timer. No framework.
+  // Drives every countdown on the page from ONE timer. No framework.
+  // Per node: mode="fixed" → counts to its data-deadline, then flips to the
+  // expired state (and signals global expiry). mode="daily" → counts to the next
+  // midnight IST and ROLLS to the following day (the repeatable bonus deadline);
+  // it never expires. IST is a fixed +5:30 offset (no DST).
   const nodes = Array.from(
     document.querySelectorAll<HTMLElement>("[data-countdown]"),
   );
-  const deadline = nodes[0]?.dataset.deadline;
-  if (deadline) {
-    const target = new Date(deadline).getTime();
+  if (nodes.length) {
     const pad = (n: number) => String(n).padStart(2, "0");
+    const IST = 19_800_000; // +5:30 in ms
+    const DAY = 86_400_000;
+    const nextISTMidnight = () =>
+      (Math.floor((Date.now() + IST) / DAY) + 1) * DAY - IST;
 
-    const render = () => {
-      const diff = target - Date.now();
+    type St = {
+      n: HTMLElement;
+      daily: boolean;
+      target: number;
+      done: boolean;
+    };
+    const states: St[] = nodes.map((n) => {
+      const daily = n.dataset.mode === "daily";
+      return {
+        n,
+        daily,
+        target: daily
+          ? nextISTMidnight()
+          : new Date(n.dataset.deadline || "").getTime(),
+        done: false,
+      };
+    });
+
+    const renderNode = (st: St) => {
+      if (st.done) return;
+      let diff = st.target - Date.now();
       if (diff <= 0) {
-        nodes.forEach((n) => (n.dataset.expired = "true"));
-        // signal global expiry so Pricing can flip to full price (ARCHITECTURE §5)
-        document.documentElement.dataset.earlyBirdEnded = "true";
-        return false; // stop ticking
+        if (st.daily) {
+          st.target = nextISTMidnight(); // roll to the next day — real deadline
+          diff = st.target - Date.now();
+        } else {
+          st.n.dataset.expired = "true";
+          // signal global expiry so Pricing can flip to full price (ARCHITECTURE §5)
+          document.documentElement.dataset.earlyBirdEnded = "true";
+          st.done = true;
+          return;
+        }
       }
       const s = Math.floor(diff / 1000);
       const v = {
@@ -177,19 +238,16 @@ const units = [
         m: Math.floor((s % 3600) / 60),
         s: s % 60,
       };
-      nodes.forEach((n) => {
-        for (const k of ["d", "h", "m", "s"] as const) {
-          const el = n.querySelector<HTMLElement>(`[data-unit="${k}"]`);
-          if (el) el.textContent = pad(v[k]);
-        }
-      });
-      return true;
+      for (const k of ["d", "h", "m", "s"] as const) {
+        const el = st.n.querySelector<HTMLElement>(`[data-unit="${k}"]`);
+        if (el) el.textContent = pad(v[k]);
+      }
     };
 
-    if (render()) {
-      const id = setInterval(() => {
-        if (!render()) clearInterval(id);
-      }, 1000);
-    }
+    states.forEach(renderNode);
+    const id = setInterval(() => {
+      states.forEach(renderNode);
+      if (states.every((st) => st.done)) clearInterval(id); // only fixed nodes "finish"
+    }, 1000);
   }
 </script>

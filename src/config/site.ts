@@ -14,7 +14,19 @@ export const site = {
   classTime: "8–10 PM IST",
 
   // --- scarcity ---
-  earlyBirdEndsISO: "2026-07-11T23:59:00+05:30", // countdown target
+  earlyBirdEndsISO: "2026-07-11T23:59:00+05:30", // real macro deadline (countdown target)
+
+  // --- daily bonus (honest "evergreen") ---
+  // A REAL, repeatable bonus: enroll on any given day (before midnight IST) and
+  // get the ebook. The bonus timer counts to TONIGHT'S midnight IST and genuinely
+  // rolls each day — a real end-of-day deadline, NOT a fake per-visit 24h reset
+  // (golden rule 6). Set enabled:false to remove it instantly.
+  bonus: {
+    enabled: true,
+    name: "#90DaysOfDevOps ebook",
+    blurb: "Enroll today and get the #90DaysOfDevOps ebook — free.",
+    // TODO: confirm delivery (Learnyst auto-grant on enrollment / emailed link).
+  },
 
   // --- pricing ---
   // India bills in INR, rest of world in USD — shown transparently (no IP

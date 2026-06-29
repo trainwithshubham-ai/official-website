@@ -247,6 +247,12 @@ no cross-talk.**
     toggles `data-expired` on a root element; CSS handles the visual swap so there
     is no layout shift and it works even if JS is slow.
   - Reused in nav / hero / pricing / final CTA — **one component, four mounts.**
+  - **Two modes, one shared script.** `mode="fixed"` (default) counts each node's
+    `data-deadline` (the early-bird date). `mode="daily"` (the `BonusBar` timer)
+    counts to the next **midnight IST** and rolls to the following day — a real
+    end-of-day deadline for the repeatable `site.bonus`, never a fake per-visit
+    reset (golden rule 6). The script ticks all `[data-countdown]` nodes from one
+    `setInterval`; daily nodes never "expire."
 - **Accordions** (Curriculum, FAQ) use native `<details>/<summary>` — zero JS.
 - **Scroll reveals** (optional): CSS-only or a 1–2KB IntersectionObserver, gated
   behind `prefers-reduced-motion`. Skippable for v1.

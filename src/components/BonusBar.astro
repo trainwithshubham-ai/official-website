@@ -1,0 +1,72 @@
+---
+// BonusBar — a slim, honest "enroll today" bonus strip for the Pricing box.
+// The bonus is REAL and repeatable; the timer (Countdown mode="daily") counts to
+// tonight's midnight IST and rolls daily — a real end-of-day deadline, not a
+// fake per-visit reset (golden rule 6). Renders only when site.bonus.enabled.
+import { site } from "../config/site";
+import Countdown from "./Countdown.astro";
+
+interface Props {
+  class?: string;
+}
+const { class: className = "" } = Astro.props;
+---
+
+{
+  site.bonus.enabled && (
+    <div class:list={["bonus-bar grad-border", className]} role="note">
+      <p class="bonus-copy">
+        <span class="bonus-ic" aria-hidden="true">
+          🎁
+        </span>
+        <span>
+          Enroll <strong>today</strong> and get the{" "}
+          <strong class="bonus-name">{site.bonus.name}</strong> — free.
+        </span>
+      </p>
+      <p class="bonus-timer">
+        <span class="bonus-lbl font-mono">offer ends in</span>
+        <Countdown variant="bonus" mode="daily" />
+      </p>
+    </div>
+  )
+}
+
+<style>
+  .bonus-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+    padding: 0.7rem 1rem;
+    border-radius: var(--radius-pill);
+    text-align: center;
+  }
+  .bonus-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.9rem;
+    color: var(--color-text);
+  }
+  .bonus-ic {
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+  .bonus-name {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+  .bonus-timer {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+  .bonus-lbl {
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+</style>
