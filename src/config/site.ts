@@ -9,7 +9,7 @@ export const site = {
   tagline: "Happy Learning", // warm sign-off (footer / instructor / closing CTA)
 
   // --- batch ---
-  batchStartISO: "2026-07-18T20:00:00+05:30",
+  batchStartISO: "2026-07-26T20:00:00+05:30",
   classDays: "Sat & Sun",
   classTime: "8–10 PM IST",
 

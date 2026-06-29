@@ -9,7 +9,7 @@ design decision. If the code and this file disagree, this file wins.
 ## 1. What we're building
 
 A one-page, dark-theme, conversion-focused sales page for a **DevOps cohort
-batch** that starts **18 Jul 2026**. The page has exactly one job: turn a
+batch** that starts **26 Jul 2026**. The page has exactly one job: turn a
 motivated learner into an enrolled student before the early-bird window closes
 (**3 Jul 2026, 23:59 IST**).
 

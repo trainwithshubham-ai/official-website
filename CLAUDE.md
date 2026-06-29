@@ -10,7 +10,7 @@ those two files win over your instincts.
 
 A single-page, dark-theme, conversion-focused **sales page** for one product:
 **DevOps: Zero to Hero (AI Powered)** — a cohort batch that starts
-**18 Jul 2026**. The page's only job: convert a motivated learner — anyone from
+**26 Jul 2026**. The page's only job: convert a motivated learner — anyone from
 a complete beginner to a working engineer — into an enrolled student before the
 early-bird window closes (**3 Jul 2026, 23:59 IST**). The course is **zero to
 hero**: welcoming, no prior experience required.
@@ -200,7 +200,7 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
 
 ## Key facts (mirror of `site.ts` — edit there, not here)
 
-- Product: DevOps: Zero to Hero (AI Powered) · cohort batch · starts 18 Jul 2026
+- Product: DevOps: Zero to Hero (AI Powered) · cohort batch · starts 26 Jul 2026
   · open to all levels (beginners welcome, no prior experience required)
 - Early bird ends: 3 Jul 2026, 23:59 IST
 - Price (dual currency, no IP geo-switch): India ~~₹25,000~~ → early bird
@@ -209,5 +209,5 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
   buttons are price-free (flag / globe).
 - Proof: 10,000+ engineers trained; 4.9 ★ · 232 Google reviews (real, seeded in
   reviews.json); YouTube 1.5L+, LinkedIn 1L+, Instagram 10k+
-- Site should be **live ~30 Jun** to give an early-bird selling runway — 18 Jul
+- Site should be **live ~30 Jun** to give an early-bird selling runway — 26 Jul
   is the batch start, not the site launch.

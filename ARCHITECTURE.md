@@ -27,7 +27,7 @@ export const site = {
   tagline: "Production-grade DevOps. Not demos.",
 
   // --- batch ---
-  batchStartISO: "2026-07-18T20:00:00+05:30",
+  batchStartISO: "2026-07-26T20:00:00+05:30",
   classDays: "TODO — confirm days (e.g. Sat & Sun)",
   classTime: "TODO — confirm time IST",
   oneOffBatch: true,
