@@ -6,6 +6,25 @@ records *what* changed and *why* so future sessions have context.
 
 ---
 
+## 2026-06-29 — Enrollment-easing UX: currency cue, mobile urgency, FAQ
+
+From a conversion-funnel audit; owner-selected scope:
+- **Currency cue on Pay buttons** — `Pay · India · ₹` / `Pay · Global · $` (symbol
+  only, faint separator). aria-labels still carry the full price; region ring +
+  geo note unchanged.
+- **Mobile/tablet urgency** — slim `lg:hidden` strip in the sticky header with
+  "❯ early-bird ends in" + the Countdown chip, so phone users feel the deadline
+  before Pricing. Seconds hidden + chip compacted to fit 380–412px; label hides on
+  expiry (chip flips to "ended" itself). Reuses the shared countdown island — no
+  new JS. Desktop nav chip unchanged.
+- **FAQ +3** — "What if I miss a live class?", "How long do I have access?" (4 yrs,
+  matches inclusions), "Can I expense this with my employer?" (invoice, owner-confirmed).
+- Verified: build clean, 0 JS bundles, one h1, mobile Lighthouse 98/100/100/100,
+  CLS 0.002; code-review clean.
+
+Deferred (need owner data): refund/guarantee line, GA4 + Meta Pixel IDs, EMI /
+payment methods — left as clearly-marked TODOs.
+
 ## 2026-06-29 — Daily bonus timer (honest "evergreen") + #90DaysOfDevOps ebook
 
 To stop learners waiting for the last day, added a **real, repeatable daily bonus**

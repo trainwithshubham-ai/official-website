@@ -65,4 +65,44 @@ const links = [
       <Button href="#pricing" class="px-4 py-2 text-sm">Enroll now</Button>
     </div>
   </nav>
+
+  <!-- Mobile/tablet urgency: the desktop nav chip is hidden below lg, so phone
+       users would feel no deadline until Pricing. This slim strip keeps the
+       early-bird countdown persistent. The "ends in" label hides on expiry (the
+       chip itself flips to "early-bird ended" via its cd-ended state) so the
+       strip never contradicts itself. Reuses the shared Countdown island. -->
+  <div
+    class="nav-urgency flex items-center justify-center gap-2 border-t border-line/60 px-4 py-1.5 lg:hidden"
+  >
+    <span
+      class="nav-urgency-lbl font-mono text-[0.7rem] lowercase tracking-[0.06em] text-muted"
+    >
+      ❯ early-bird ends in
+    </span>
+    <Countdown variant="chip" />
+  </div>
 </header>
+
+<style>
+  /* On expiry the chip flips to "early-bird ended · full price" itself, so drop
+     the now-false "ends in" lead-in. */
+  :global(html[data-early-bird-ended]) .nav-urgency-lbl {
+    display: none;
+  }
+  /* In the slim mobile strip, drop the seconds unit: it keeps the label + chip
+     within 380px and reads calmer (no per-second flicker in the nav). The
+     full-precision countdowns in Pricing / Hero are untouched. */
+  :global(.nav-urgency .cd-unit:last-child) {
+    display: none;
+  }
+  /* Compact the chip so "early-bird ends in" + d/h/m fits at 380px. */
+  :global(.nav-urgency .cd-units) {
+    gap: 0.2rem;
+  }
+  :global(.nav-urgency .cd-num) {
+    font-size: 0.8rem;
+  }
+  :global(.nav-urgency .cd-lbl) {
+    font-size: 0.5rem;
+  }
+</style>

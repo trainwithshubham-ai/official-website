@@ -16,12 +16,24 @@
     "a": "Live, interactive cohort sessions — you learn and build alongside others, with recordings to catch up if you miss one."
   },
   {
+    "q": "What if I miss a live class?",
+    "a": "No problem — every session is recorded and in your dashboard within hours, plus weekly doubt-clearing sessions to catch up. You never fall behind."
+  },
+  {
+    "q": "How long do I have access?",
+    "a": "Four years — to every recording, resource, and the learner community, long after the live cohort wraps."
+  },
+  {
     "q": "Do I get a certificate or credential?",
     "a": "Yes — finish the cohort and you earn a verifiable DevOps Engineer (Associate) credential: a shareable digital badge you can add to LinkedIn and your résumé."
   },
   {
     "q": "What language are the sessions in?",
     "a": "Sessions are delivered in clear, accessible English."
+  },
+  {
+    "q": "Can I expense this with my employer?",
+    "a": "Yes — you'll get an invoice after enrollment that you can submit to your company's L&D or reimbursement team."
   },
   {
     "q": "How do I enroll?",
