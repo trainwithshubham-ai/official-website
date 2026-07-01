@@ -37,7 +37,7 @@ export const site = {
   // strings (currency symbol included) — no math is done on these anywhere.
   price: {
     india: { early: "₹14,999", regular: "₹25,000" },
-    world: { early: "$199", regular: "$249" },
+    world: { early: "$249", regular: "$299" },
   },
 
   // --- conversion ---
