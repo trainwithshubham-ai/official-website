@@ -1,0 +1,71 @@
+---
+// ProofStrip — a slim, outcomes-focused proof beat placed right before Pricing.
+// Clustering social proof at the decision point is the single most common trait
+// of high-converting course pages, so we surface a few REAL learners (the ones
+// with a concrete role at a known company) a second time here, trimmed to one
+// punchy line. Reuses reviews.json — no new or fabricated content (golden rule 4).
+import { getCollection } from "astro:content";
+import Section from "./primitives/Section.astro";
+
+// Featured by name; order preserved. Deliberately DIFFERENT people from the
+// Reviews grid's first row (Beethika/Sneha/Priyanka) so the same faces don't
+// appear twice on one page — these add more recognizable employers.
+const FEATURED = [
+  "Debabrata Puhan",
+  "Mahesh Bagul",
+  "Tanu Anuria",
+];
+
+const all = (await getCollection("reviews")).map((e) => e.data);
+let featured = all
+  .filter((r) => FEATURED.includes(r.name))
+  .sort((a, b) => FEATURED.indexOf(a.name) - FEATURED.indexOf(b.name));
+// Fallback so the sm:grid-cols-3 row never renders half-empty if a FEATURED
+// name stops matching (e.g. a typo fix in reviews.json): top up from other
+// testimonials that list a company.
+if (featured.length < 3) {
+  const extra = all.filter((r) => !featured.includes(r) && r.company);
+  featured = [...featured, ...extra].slice(0, 3);
+}
+
+// Tighter trim than the main Reviews grid — this is a glanceable strip.
+function excerpt(text: string, max = 120) {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const i = cut.lastIndexOf(" ");
+  return (i > 0 ? cut.slice(0, i) : cut).trimEnd() + "…";
+}
+const subline = (r: { role?: string; company?: string }) =>
+  [r.role, r.company].filter(Boolean).join(" · ");
+---
+
+<Section eyebrow="proof" title="Learners now working at companies you know">
+  <ul class="grid gap-5 sm:grid-cols-3" role="list">
+    {
+      featured.map((r) => (
+        <li class="surface-card flex flex-col gap-5 rounded-[var(--radius-card)] border border-line border-l-2 border-l-primary bg-surface p-6">
+          <p class="grow text-pretty text-sm text-text">
+            “{excerpt(r.text)}”
+          </p>
+          <div class="flex items-center gap-3">
+            {r.photo ? (
+              <img
+                src={r.photo}
+                alt=""
+                width="40"
+                height="40"
+                class="size-10 shrink-0 rounded-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : null}
+            <div class="min-w-0">
+              <p class="truncate text-sm font-medium text-text">{r.name}</p>
+              <p class="truncate text-xs text-muted">{subline(r)}</p>
+            </div>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</Section>

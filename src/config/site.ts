@@ -51,6 +51,45 @@ export const site = {
   },
   refundPolicy: "TODO — confirm money-back terms",
 
+  // --- LMS (Learnyst) ---
+  // The student platform on a SEPARATE host. This page only links out to it; it
+  // never embeds or fetches the LMS (golden rule 8). Add future destinations
+  // (store, free masterclasses, ebooks) here and wire them into the footer array.
+  lms: {
+    base: "https://courses.trainwithshubham.ai",
+    signIn: "https://courses.trainwithshubham.ai/learn/account/signin",
+    explore: "https://courses.trainwithshubham.ai/learn", // catalog / "All courses"
+    // TODO: add when live —
+    // masterclasses: "https://courses.trainwithshubham.ai/...",
+    // ebooks:        "https://courses.trainwithshubham.ai/...",
+    // store:         "https://courses.trainwithshubham.ai/...",
+  },
+
+  // --- community ---
+  // Two honest lanes (golden rules 4 & 6). PUBLIC: the #90DaysOfDevOps
+  // open-source challenge — anyone can fork it; the GitHub metrics are REAL
+  // snapshots (refresh if you feature them). STUDENT-ONLY: the Discord (the
+  // invite is delivered on enrollment — there is deliberately NO public join
+  // link) and the ebook bonus. So the Discord "join" path is Enroll, not a link.
+  community: {
+    challenge: {
+      name: "#90DaysOfDevOps",
+      repo: "https://github.com/TrainWithShubham/90DaysOfDevOps",
+      forks: "8,000+", // 8,230 forks — engineers who forked to take the challenge
+      stars: "1,300+", // 1,317 stars
+    },
+    discord: {
+      members: "10,000+", // enrolled learners; invite comes with enrollment
+      perks: [
+        "Doubt-solving",
+        "Daily job postings",
+        "Peer-to-peer study groups",
+        "Resource drops",
+        "Community interactions",
+      ],
+    },
+  },
+
   // --- proof (established TWS brand) ---
   studentsTrained: "10,000+",
   googleRating: 4.9,

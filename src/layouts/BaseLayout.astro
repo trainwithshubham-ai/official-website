@@ -124,6 +124,23 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
     </script>
 
     <script is:inline>
+      /* Outbound wayfinding tracking: any [data-track] link (footer "All courses"
+         / "Log in", the community #90DaysOfDevOps + YouTube links, future
+         store/masterclass links) fires one outbound_click event, the data-track
+         value as its label. Kept separate from enroll — no UTM forwarding and no
+         checkout event; a login/catalog/community click is not an
+         InitiateCheckout. No-ops safely until GA4 is wired (ga4Id still TODO). */
+      document.addEventListener("click", function (e) {
+        var t = e.target;
+        var a = t && t.closest ? t.closest("[data-track]") : null;
+        if (!a) return;
+        var label = a.getAttribute("data-track") || undefined;
+        if (typeof window.gtag === "function")
+          window.gtag("event", "outbound_click", { label: label });
+      });
+    </script>
+
+    <script is:inline>
       /* Region guess from the browser TIMEZONE (never IP) — Asia/Kolkata ⇒ India.
          Only emphasises the likely-correct Enroll button + personalises the
          geo-pricing note; both prices stay fully visible and are never switched.

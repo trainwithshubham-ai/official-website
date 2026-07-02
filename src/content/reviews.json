@@ -8,13 +8,13 @@
     "text": "It boosted my confidence for interviews, and the learnings played a big role in helping me land my dream job at my dream company."
   },
   {
-    "name": "Muhammad Usman Arif",
+    "name": "Sneha Sanam",
     "rating": 5,
-    "role": "DevOps Engineer",
-    "company": "Inovio Tech",
-    "photo": "/students/usman.jpg",
-    "outcome": "Landed his first job after the cohort.",
-    "text": "I got my first job after taking the course with Shubham — it's been really helpful for learning new skills."
+    "role": "Cloud Support Associate",
+    "company": "Amazon Web Services",
+    "photo": "/students/sneha.jpg",
+    "outcome": "Restarted her career after a break — now at AWS.",
+    "text": "When I joined, I had almost no knowledge of cloud computing. I didn't even understand what 'cloud' meant at the beginning. The hackathons and real-world projects gave me strong hands-on experience and boosted my confidence."
   },
   {
     "name": "Priyanka Pardeshi",
@@ -47,5 +47,30 @@
     "company": "Securonix",
     "photo": "/students/vaibhav.jpg",
     "text": "From the basics of Linux to CI/CD with GitHub Actions and containers with Docker and Kubernetes — your practical teaching makes complex DevOps tools accessible."
+  },
+  {
+    "name": "Muhammad Usman Arif",
+    "rating": 5,
+    "role": "DevOps Engineer",
+    "company": "Inovio Tech",
+    "photo": "/students/usman.jpg",
+    "outcome": "Landed his first job after the cohort.",
+    "text": "I got my first job after taking the course with Shubham — it's been really helpful for learning new skills."
+  },
+  {
+    "name": "Tanu Anuria",
+    "rating": 5,
+    "role": "Cloud Support Engineer",
+    "company": "HCL Technologies",
+    "photo": "/students/tanu.jpg",
+    "text": "The experience is great — you explain the topic very well and also show practically how things actually work in production."
+  },
+  {
+    "name": "Yash Shaw",
+    "rating": 5,
+    "role": "Software Engineer, DevOps & AI",
+    "company": "CTB",
+    "photo": "/students/yash.jpg",
+    "text": "It wasn't just a course but a complete package which holds power to transform one's entire life. I highly recommend the live batch to anyone trying to break into DevOps."
   }
 ]
