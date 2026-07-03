@@ -2,9 +2,11 @@
 // EnrollButtons — the two region-specific Learnyst checkout CTAs. The region
 // lives on the button (India flag / globe) so the learner picks their own price
 // (we NEVER IP-geo-switch the displayed price — both stay visible; golden rule).
-// A tiny timezone guess (BaseLayout, Asia/Kolkata → India) only *emphasises* the
-// likely-correct button and personalises the note — it never hides or swaps a
-// price. Checkouts open in a new tab (Button.astro) so a wrong-region click is
+// A tiny timezone guess (BaseLayout, Asia/Kolkata → India, never IP) sets the
+// likely region as the solid-yellow PRIMARY and the other as a purple-outline
+// secondary — visual weight only (no reorder; stable DOM/focus order). Both
+// buttons stay fully visible, clickable and priced (headline shows both). It
+// never hides or swaps a price. Checkouts open in a new tab so a wrong click is
 // recoverable. Both buttons are `data-enroll`: BaseLayout forwards UTM (+ src),
 // preserves ?priceId, and fires enroll_click with the data-region.
 import { site } from "../config/site";
@@ -25,24 +27,26 @@ const { class: className = "", note = false } = Astro.props;
     <Button
       href={site.checkout.india}
       enroll
+      variant="ghost"
       data-region="india"
       data-region-btn="india"
       aria-label={`Pay — India pricing, ${site.price.india.early} early bird (opens in a new tab)`}
-      class="region-btn w-full sm:w-auto"
+      class="region-btn w-full sm:w-auto sm:min-w-[13rem]"
     >
-      <FlagIndia />
+      <FlagIndia width={18} height={12} />
       Pay · India <span class="font-normal opacity-75">·</span> ₹
     </Button>
 
     <Button
       href={site.checkout.world}
       enroll
+      variant="ghost"
       data-region="world"
       data-region-btn="world"
       aria-label={`Pay — rest-of-world pricing, ${site.price.world.early} early bird (opens in a new tab)`}
-      class="region-btn w-full sm:w-auto"
+      class="region-btn w-full sm:w-auto sm:min-w-[13rem]"
     >
-      <Globe />
+      <Globe size={18} />
       Pay · Global <span class="font-normal opacity-75">·</span> $
     </Button>
   </div>
@@ -70,21 +74,51 @@ const { class: className = "", note = false } = Astro.props;
 </div>
 
 <style>
-  /* Subtle "this one's likely yours" mark — paint-only (outline + glow), so it
-     never shifts layout (no CLS). Both buttons stay full CTAs and clickable.
-     :global because .region-btn renders on the child Button's <a> (Astro scoped
-     CSS doesn't cross component boundaries). */
+  /* Region hierarchy — PAINT ONLY (no layout shift, no reorder, both buttons stay
+     clickable and in stable DOM/focus order). Buttons render as `ghost`
+     (purple-outline secondary); the LIKELY region — the timezone guess, India by
+     default when there's no guess/no JS (India-majority audience; the page leads
+     with the India price) — is promoted to the solid-yellow PRIMARY CTA. The
+     guess is timezone-based, never IP (golden rule 6); the headline shows both
+     prices regardless, so this is emphasis, never a price swap.
+     NB: mirrors Button.astro's `primary` variant via the same tokens
+     (--color-cta / --color-ink / --color-cta-deep) — keep in sync if that
+     variant changes structurally. :global because .region-btn is the child <a>.
+     Deliberately NO CSS `order`: reordering focusable buttons would break
+     keyboard/SR focus order (WCAG 2.4.3) — the yellow fill carries the emphasis. */
   :global(
-      .enroll-group[data-region-guess="india"]
+      .enroll-group:not([data-region-guess="world"])
         .region-btn[data-region-btn="india"]
     ),
   :global(
       .enroll-group[data-region-guess="world"]
         .region-btn[data-region-btn="world"]
     ) {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 3px;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 22%, transparent);
+    background-color: var(--color-cta);
+    color: var(--color-ink);
+    border-color: transparent;
+  }
+  :global(
+      .enroll-group:not([data-region-guess="world"])
+        .region-btn[data-region-btn="india"]:hover
+    ),
+  :global(
+      .enroll-group[data-region-guess="world"]
+        .region-btn[data-region-btn="world"]:hover
+    ) {
+    background-color: var(--color-cta-deep);
+  }
+  /* Match the primary CTA's focus ring (yellow), not the ghost's purple, so the
+     promoted button's focus affordance matches its look. */
+  :global(
+      .enroll-group:not([data-region-guess="world"])
+        .region-btn[data-region-btn="india"]:focus-visible
+    ),
+  :global(
+      .enroll-group[data-region-guess="world"]
+        .region-btn[data-region-btn="world"]:focus-visible
+    ) {
+    outline-color: var(--color-cta);
   }
 
   /* Welcoming geo note. All three variants are stacked in ONE grid cell so the

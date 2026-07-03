@@ -61,8 +61,7 @@ const fullPriceSr = `Full price ${site.price.india.regular} for India, ${site.pr
           >
         </div>
         <p class="mt-2 text-sm text-muted">
-          ₹ for India, $ for the rest of the world. Price rises when the
-          early-bird window closes — pick your region below.
+          Price rises when the early-bird window closes.
         </p>
       </div>
       <p class="sr-only">{earlyBirdSr}</p>
@@ -86,10 +85,7 @@ const fullPriceSr = `Full price ${site.price.india.regular} for India, ${site.pr
         <span class="font-display text-2xl font-semibold text-muted"
           >/ {site.price.world.regular}</span
         >
-        <p class="mt-3 text-sm text-muted">
-          ₹ for India, $ for the rest of the world. The early-bird window has
-          closed.
-        </p>
+        <p class="mt-3 text-sm text-muted">The early-bird window has closed.</p>
       </div>
       <p class="sr-only">{fullPriceSr}</p>
     </div>
@@ -128,29 +124,6 @@ const fullPriceSr = `Full price ${site.price.india.regular} for India, ${site.pr
          `note` shows the welcoming geo-pricing helper here (the main conversion
          point); FinalCTA reuses the buttons without it. -->
     <EnrollButtons class="mt-5" note />
-
-    <!-- trust row — CONFIRMED signals only (no invented guarantee; golden rule 4) -->
-    <ul
-      class="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted"
-      role="list"
-    >
-      {
-        ["4 years of recordings access", "Verifiable credential"].map((t) => (
-          <li class="inline-flex items-center gap-1.5">
-            <svg class="size-3.5 text-primary" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path
-                d="M4 10.5l3.5 3.5L16 6"
-                stroke="currentColor"
-                stroke-width="2.2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-            {t}
-          </li>
-        ))
-      }
-    </ul>
 
     {
       refundReady && (
