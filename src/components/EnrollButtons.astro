@@ -54,8 +54,8 @@ const { class: className = "", note = false } = Astro.props;
   {
     note && (
       <p class="geo-note">
-        {/* base shows without JS; CSS swaps to a region variant once the
-            timezone guess sets data-region-guess on the group wrapper. */}
+        {/* base shows without JS; CSS swaps to a region variant from the
+            html[data-region-guess] flag (set pre-paint in BaseLayout). */}
         <span class="geo-base">
           Pricing is regional — ₹ in India, $ everywhere else. Pick the one for
           where you're paying from; it opens in a new tab.
@@ -74,57 +74,37 @@ const { class: className = "", note = false } = Astro.props;
 </div>
 
 <style>
-  /* Region hierarchy — PAINT ONLY (no layout shift, no reorder, both buttons stay
-     clickable and in stable DOM/focus order). Buttons render as `ghost`
+  /* Region hierarchy — PAINT ONLY, keyed on html[data-region-guess] which
+     BaseLayout sets SYNCHRONOUSLY before first paint (no flash, no layout shift,
+     no reorder → stable DOM/focus order, WCAG-safe). Buttons render as `ghost`
      (purple-outline secondary); the LIKELY region — the timezone guess, India by
-     default when there's no guess/no JS (India-majority audience; the page leads
-     with the India price) — is promoted to the solid-yellow PRIMARY CTA. The
-     guess is timezone-based, never IP (golden rule 6); the headline shows both
-     prices regardless, so this is emphasis, never a price swap.
-     NB: mirrors Button.astro's `primary` variant via the same tokens
-     (--color-cta / --color-ink / --color-cta-deep) — keep in sync if that
-     variant changes structurally. :global because .region-btn is the child <a>.
-     Deliberately NO CSS `order`: reordering focusable buttons would break
-     keyboard/SR focus order (WCAG 2.4.3) — the yellow fill carries the emphasis. */
-  :global(
-      .enroll-group:not([data-region-guess="world"])
-        .region-btn[data-region-btn="india"]
-    ),
-  :global(
-      .enroll-group[data-region-guess="world"]
-        .region-btn[data-region-btn="world"]
-    ) {
+     default when the attr is unset (India-majority; page leads with ₹) — is
+     promoted to the solid-yellow PRIMARY CTA. Timezone, never IP (golden rule 6);
+     both buttons stay visible + clickable, so this is emphasis, never a swap.
+     Mirrors Button.astro's `primary` via the same tokens (--color-cta/-ink/-deep).
+     :global because .region-btn is the child <a> and <html> is outside this
+     component's scope. */
+  :global(html:not([data-region-guess="world"]) .region-btn[data-region-btn="india"]),
+  :global(html[data-region-guess="world"] .region-btn[data-region-btn="world"]) {
     background-color: var(--color-cta);
     color: var(--color-ink);
     border-color: transparent;
   }
-  :global(
-      .enroll-group:not([data-region-guess="world"])
-        .region-btn[data-region-btn="india"]:hover
-    ),
-  :global(
-      .enroll-group[data-region-guess="world"]
-        .region-btn[data-region-btn="world"]:hover
-    ) {
+  :global(html:not([data-region-guess="world"]) .region-btn[data-region-btn="india"]:hover),
+  :global(html[data-region-guess="world"] .region-btn[data-region-btn="world"]:hover) {
     background-color: var(--color-cta-deep);
   }
-  /* Match the primary CTA's focus ring (yellow), not the ghost's purple, so the
-     promoted button's focus affordance matches its look. */
-  :global(
-      .enroll-group:not([data-region-guess="world"])
-        .region-btn[data-region-btn="india"]:focus-visible
-    ),
-  :global(
-      .enroll-group[data-region-guess="world"]
-        .region-btn[data-region-btn="world"]:focus-visible
-    ) {
+  /* Match the primary CTA's focus ring (yellow), not the ghost's purple. */
+  :global(html:not([data-region-guess="world"]) .region-btn[data-region-btn="india"]:focus-visible),
+  :global(html[data-region-guess="world"] .region-btn[data-region-btn="world"]:focus-visible) {
     outline-color: var(--color-cta);
   }
 
   /* Welcoming geo note. All three variants are stacked in ONE grid cell so the
-     box always sizes to the tallest variant — swapping which one is visible can
-     never change the height (zero CLS, even at 380px where they differ in line
-     count). We toggle `visibility`, not `display`, to keep them all in layout. */
+     box always sizes to the tallest variant — swapping which is visible can never
+     change the height (zero CLS). We toggle `visibility`, not `display`, to keep
+     them all in layout. Keyed on html[data-region-guess]; base shows when the
+     region is unknown (no JS). */
   .geo-note {
     margin-top: 0.85rem;
     display: grid;
@@ -136,19 +116,18 @@ const { class: className = "", note = false } = Astro.props;
   .geo-note > span {
     grid-area: 1 / 1; /* overlap in the same cell */
   }
-  /* Default (no JS / unknown region): base visible, others hidden-but-present. */
   .geo-india,
   .geo-world {
     visibility: hidden;
   }
-  .enroll-group[data-region-guess="india"] .geo-base,
-  .enroll-group[data-region-guess="world"] .geo-base {
+  :global(html[data-region-guess="india"]) .geo-base,
+  :global(html[data-region-guess="world"]) .geo-base {
     visibility: hidden;
   }
-  .enroll-group[data-region-guess="india"] .geo-india {
+  :global(html[data-region-guess="india"]) .geo-india {
     visibility: visible;
   }
-  .enroll-group[data-region-guess="world"] .geo-world {
+  :global(html[data-region-guess="world"]) .geo-world {
     visibility: visible;
   }
 </style>

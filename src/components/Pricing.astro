@@ -41,22 +41,18 @@ const fullPriceSr = `Full price ${site.price.india.regular} for India, ${site.pr
       >
         ❯ early-bird price
       </p>
-      <!-- Both currencies shown at EQUAL weight (neither dominates) so a
-           rest-of-world learner isn't led by a big ₹ that isn't theirs; the yellow
-           pay button + note steer the region. Both visible — no region-driven
-           swap (golden rule 6). -->
+      <!-- Region-priced: the visitor's likely currency (browser timezone, never
+           IP — flag set pre-paint on <html>) is the big anchor; the other stays
+           visible but smaller. Both always shown — emphasis, never a hide/swap
+           (golden rule 6). India is the default anchor when region is unknown. -->
       <div aria-hidden="true">
         <div
           class="mt-3 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1"
         >
           <span class="text-lg text-muted">from</span>
-          <span class="font-display text-3xl font-bold text-text sm:text-4xl"
-            >{site.price.india.early}</span
-          >
-          <span class="font-display text-2xl font-light text-muted">·</span>
-          <span class="font-display text-3xl font-bold text-text sm:text-4xl"
-            >{site.price.world.early}</span
-          >
+          <span class="price-amt amt-india">{site.price.india.early}</span>
+          <span class="price-sep">·</span>
+          <span class="price-amt amt-world">{site.price.world.early}</span>
         </div>
         <p class="mt-2 text-sm text-muted">
           regularly <s>{site.price.india.regular}</s> /
@@ -80,13 +76,9 @@ const fullPriceSr = `Full price ${site.price.india.regular} for India, ${site.pr
       </p>
       <div class="mt-4" aria-hidden="true">
         <div class="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1">
-          <span class="font-display text-3xl font-bold text-text sm:text-4xl"
-            >{site.price.india.regular}</span
-          >
-          <span class="font-display text-2xl font-light text-muted">·</span>
-          <span class="font-display text-3xl font-bold text-text sm:text-4xl"
-            >{site.price.world.regular}</span
-          >
+          <span class="price-amt amt-india">{site.price.india.regular}</span>
+          <span class="price-sep">·</span>
+          <span class="price-amt amt-world">{site.price.world.regular}</span>
         </div>
         <p class="mt-3 text-sm text-muted">The early-bird window has closed.</p>
       </div>
@@ -137,6 +129,39 @@ const fullPriceSr = `Full price ${site.price.india.regular} for India, ${site.pr
 </Section>
 
 <style>
+  /* Region-priced headline: the detected region's amount (html[data-region-guess],
+     set pre-paint in BaseLayout — timezone, never IP) is the big anchor; the other
+     stays visible but smaller. Emphasis only — both always shown (golden rule 6).
+     India is the default anchor when the region is unknown (attr unset). Because
+     the flag is set before first paint, there's no ₹→$ flip/flash on load. */
+  .price-amt {
+    font-family: var(--font-display);
+    line-height: 1.1;
+  }
+  /* ANCHOR (big) — the visitor's OWN currency: India by default, the world price
+     when the region flag flips. Defined once, applied to whichever span is the
+     anchor. (The html[...] selector outspecifies the base, so on a world visitor
+     .amt-world wins the anchor and .amt-india falls to ALT below.) */
+  .amt-india,
+  :global(html[data-region-guess="world"]) .amt-world {
+    font-size: clamp(2rem, 9vw, 2.5rem);
+    font-weight: 700;
+    color: var(--color-text);
+  }
+  /* ALT (small) — the other currency, kept fully visible but secondary. */
+  .amt-world,
+  :global(html[data-region-guess="world"]) .amt-india {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+  .price-sep {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--color-muted);
+  }
+
   .price-full {
     display: none;
   }
