@@ -14,7 +14,7 @@ export const site = {
   classTime: "8–10 PM IST",
 
   // --- scarcity ---
-  earlyBirdEndsISO: "2026-07-03T23:59:00+05:30", // real macro deadline (countdown target)
+  earlyBirdEndsISO: "2026-07-05T23:59:00+05:30", // real macro deadline (countdown target)
 
   // --- daily bonus (honest "evergreen") ---
   // A REAL, repeatable bonus: enroll on any given day (before midnight IST) and

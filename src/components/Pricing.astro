@@ -41,27 +41,27 @@ const fullPriceSr = `Full price ${site.price.india.regular} for India, ${site.pr
       >
         ❯ early-bird price
       </p>
-      <!-- Both currencies shown up front (₹ is the anchor, $ smaller beside it)
-           so rest-of-world learners see their real price here, not first at
-           checkout. Both stay visible — no region-driven swap (golden rule 6). -->
+      <!-- Both currencies shown at EQUAL weight (neither dominates) so a
+           rest-of-world learner isn't led by a big ₹ that isn't theirs; the yellow
+           pay button + note steer the region. Both visible — no region-driven
+           swap (golden rule 6). -->
       <div aria-hidden="true">
         <div
-          class="mt-3 flex flex-wrap items-end justify-center gap-x-2 gap-y-1"
+          class="mt-3 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1"
         >
-          <span class="pb-1 text-lg text-muted">from</span>
-          <span class="font-display text-5xl font-bold text-text"
+          <span class="text-lg text-muted">from</span>
+          <span class="font-display text-3xl font-bold text-text sm:text-4xl"
             >{site.price.india.early}</span
           >
-          <span class="pb-1.5 font-display text-2xl font-semibold text-muted"
-            >/ {site.price.world.early}</span
-          >
-          <span class="pb-1.5 text-sm text-muted"
-            >· regularly <s>{site.price.india.regular}</s> /
-            <s>{site.price.world.regular}</s></span
+          <span class="font-display text-2xl font-light text-muted">·</span>
+          <span class="font-display text-3xl font-bold text-text sm:text-4xl"
+            >{site.price.world.early}</span
           >
         </div>
         <p class="mt-2 text-sm text-muted">
-          Price rises when the early-bird window closes.
+          regularly <s>{site.price.india.regular}</s> /
+          <s>{site.price.world.regular}</s> · price rises when the early-bird
+          window closes.
         </p>
       </div>
       <p class="sr-only">{earlyBirdSr}</p>
@@ -79,12 +79,15 @@ const fullPriceSr = `Full price ${site.price.india.regular} for India, ${site.pr
         ❯ full price
       </p>
       <div class="mt-4" aria-hidden="true">
-        <span class="font-display text-5xl font-bold text-text"
-          >{site.price.india.regular}</span
-        >
-        <span class="font-display text-2xl font-semibold text-muted"
-          >/ {site.price.world.regular}</span
-        >
+        <div class="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1">
+          <span class="font-display text-3xl font-bold text-text sm:text-4xl"
+            >{site.price.india.regular}</span
+          >
+          <span class="font-display text-2xl font-light text-muted">·</span>
+          <span class="font-display text-3xl font-bold text-text sm:text-4xl"
+            >{site.price.world.regular}</span
+          >
+        </div>
         <p class="mt-3 text-sm text-muted">The early-bird window has closed.</p>
       </div>
       <p class="sr-only">{fullPriceSr}</p>
