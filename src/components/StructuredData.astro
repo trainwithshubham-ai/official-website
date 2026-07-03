@@ -28,7 +28,23 @@ const priceValidUntil = earlyBirdOver
   ? undefined
   : site.earlyBirdEndsISO.slice(0, 10);
 
-const orgId = `${site.domain}#org`;
+// Canonical home URL WITH trailing slash, to match BaseLayout's <link canonical>.
+const home = `${site.domain}/`;
+const orgId = `${home}#org`;
+
+// Same token substitution FAQ.astro applies, so schema answers don't ship literal
+// {classDays}/{classTime}/{batchStart} placeholders. Values stay single-sourced.
+const batchStart = new Date(site.batchStartISO).toLocaleDateString("en-IN", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+const fill = (s: string) =>
+  s
+    .replaceAll("{classDays}", site.classDays)
+    .replaceAll("{classTime}", site.classTime)
+    .replaceAll("{batchStart}", batchStart);
+
 const offer = (priceCurrency: string, price: number) => ({
   "@type": "Offer",
   category: "Paid",
@@ -36,7 +52,7 @@ const offer = (priceCurrency: string, price: number) => ({
   price,
   ...(priceValidUntil ? { priceValidUntil } : {}),
   availability: "https://schema.org/InStock",
-  url: `${site.domain}#pricing`,
+  url: `${home}#pricing`,
 });
 
 const jsonLd = {
@@ -46,7 +62,7 @@ const jsonLd = {
       "@type": "Organization",
       "@id": orgId,
       name: site.brand,
-      url: site.domain,
+      url: home,
       logo: `${site.domain}/logo.png`,
       sameAs: [
         site.social.youtube.url,
@@ -55,18 +71,21 @@ const jsonLd = {
         site.englishSocial.youtube,
         site.englishSocial.instagram,
       ],
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: site.googleRating,
-        reviewCount: site.googleReviewCount,
-      },
     },
     {
       "@type": "Course",
       name: site.product,
       description,
-      url: site.domain,
+      url: home,
       provider: { "@id": orgId },
+      // Real learner rating (4.9 / 232). Attached to the Course (the reviewed
+      // product) rather than the Organization so it's rich-result eligible and
+      // not treated as a self-serving org rating.
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: site.googleRating,
+        reviewCount: site.googleReviewCount,
+      },
       hasCourseInstance: {
         "@type": "CourseInstance",
         courseMode: "online",
@@ -84,7 +103,7 @@ const jsonLd = {
       mainEntity: faq.map((f) => ({
         "@type": "Question",
         name: f.q,
-        acceptedAnswer: { "@type": "Answer", text: f.a },
+        acceptedAnswer: { "@type": "Answer", text: fill(f.a) },
       })),
     },
   ],
