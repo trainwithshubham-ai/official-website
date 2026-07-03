@@ -1,0 +1,98 @@
+---
+// StructuredData — JSON-LD for the search-first audience. One @graph with:
+//   • Organization (+ the REAL Google aggregateRating 4.9 / 232)
+//   • Course (+ region Offers priced to MATCH the rendered early-bird/full price)
+//   • FAQPage (from faq.json)
+// Every value is real, pulled from site.ts / content data — nothing fabricated
+// (golden rule 4). JSON-LD is inert: no runtime JS, no perf/a11y cost.
+import { site } from "../config/site";
+import { faq } from "../content/data";
+
+interface Props {
+  /** Same description string BaseLayout renders in <meta name="description">. */
+  description: string;
+}
+const { description } = Astro.props;
+
+// Mirror Pricing.astro's build-time gate so the schema price always equals the
+// price actually shown on the page (early-bird → full price after the deadline).
+const earlyBirdOver = Date.now() > new Date(site.earlyBirdEndsISO).getTime();
+const toNum = (s: string) => Number(String(s).replace(/[^0-9.]/g, ""));
+const inrPrice = toNum(
+  earlyBirdOver ? site.price.india.regular : site.price.india.early,
+);
+const usdPrice = toNum(
+  earlyBirdOver ? site.price.world.regular : site.price.world.early,
+);
+const priceValidUntil = earlyBirdOver
+  ? undefined
+  : site.earlyBirdEndsISO.slice(0, 10);
+
+const orgId = `${site.domain}#org`;
+const offer = (priceCurrency: string, price: number) => ({
+  "@type": "Offer",
+  category: "Paid",
+  priceCurrency,
+  price,
+  ...(priceValidUntil ? { priceValidUntil } : {}),
+  availability: "https://schema.org/InStock",
+  url: `${site.domain}#pricing`,
+});
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": orgId,
+      name: site.brand,
+      url: site.domain,
+      logo: `${site.domain}/logo.png`,
+      sameAs: [
+        site.social.youtube.url,
+        site.social.linkedin.url,
+        site.social.instagram.url,
+        site.englishSocial.youtube,
+        site.englishSocial.instagram,
+      ],
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: site.googleRating,
+        reviewCount: site.googleReviewCount,
+      },
+    },
+    {
+      "@type": "Course",
+      name: site.product,
+      description,
+      url: site.domain,
+      provider: { "@id": orgId },
+      hasCourseInstance: {
+        "@type": "CourseInstance",
+        courseMode: "online",
+        startDate: site.batchStartISO,
+        instructor: {
+          "@type": "Person",
+          name: "Shubham Londhe",
+          url: site.social.linkedin.url,
+        },
+      },
+      offers: [offer("INR", inrPrice), offer("USD", usdPrice)],
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: faq.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+};
+
+// Escape "<" so a stray "</script>" or "<" inside any FAQ answer can't break out
+// of the inline script; < is valid JSON and parses back identically.
+const json = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
+---
+
+<script type="application/ld+json" is:inline set:html={json} />

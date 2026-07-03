@@ -24,7 +24,6 @@ export const site = {
   bonus: {
     enabled: true,
     name: "#90DaysOfDevOps ebook",
-    blurb: "Enroll today and get the #90DaysOfDevOps ebook — free.",
     // TODO: confirm delivery (Learnyst auto-grant on enrollment / emailed link).
   },
 

@@ -2,6 +2,7 @@
 // BaseLayout — <head>, meta/OG, self-hosted fonts, analytics slots, UTM capture.
 // Carries NO section markup; pages compose sections inside the <slot/>.
 import { site } from "../config/site";
+import StructuredData from "../components/StructuredData.astro";
 import "../styles/tokens.css";
 
 // Self-hosted fonts (BRAND.md §4) — only the weights AND subsets we use.
@@ -45,6 +46,7 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content="index,follow" />
     <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#0A0E12" />
 
@@ -60,15 +62,21 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${site.brand} — ${site.product}`} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={`${site.brand} — ${site.product}`} />
+
+    <!-- SEO: Course / Organization / FAQ structured data (JSON-LD) -->
+    <StructuredData description={description} />
 
     <!--
       Attribution without a backend (ARCHITECTURE.md §6):
@@ -220,6 +228,14 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
     }
   </head>
   <body>
+    <!-- Skip link: first focusable element; hidden until focused, then jumps
+         keyboard/SR users past the sticky nav to <main> (a11y). -->
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:border focus:border-primary focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-text focus:outline-none"
+    >
+      Skip to content
+    </a>
     <!-- page grain (BRAND.md §3): behind content, can't affect contrast -->
     <div class="grain" aria-hidden="true"></div>
     <slot />
