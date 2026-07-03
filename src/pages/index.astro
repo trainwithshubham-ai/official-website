@@ -8,7 +8,6 @@ import TrustBar from "../components/TrustBar.astro";
 import Reviews from "../components/Reviews.astro";
 import LogoMarquee from "../components/LogoMarquee.astro";
 import Audience from "../components/Audience.astro";
-import EnrollNudge from "../components/EnrollNudge.astro";
 // Outcomes intentionally dropped from the page (overlapped Curriculum/Projects,
 // reduced text density). Component + outcomes.json kept dormant for easy re-add.
 import Curriculum from "../components/Curriculum.astro";
@@ -20,30 +19,28 @@ import Community from "../components/Community.astro";
 import ProofStrip from "../components/ProofStrip.astro";
 import Pricing from "../components/Pricing.astro";
 import FAQ from "../components/FAQ.astro";
-import FinalCTA from "../components/FinalCTA.astro";
 import Footer from "../components/Footer.astro";
 ---
 
 <BaseLayout>
   <Nav />
   <main>
-    {/* Conversion order: proof up top (stats → logos → testimonials), price late. */}
+    {/* Order: proof up top → curriculum → price (moved up, right after the
+        roadmap) → depth (projects/tools/credential/community) → audience → FAQ. */}
     <Hero />
     <TrustBar />
     <LogoMarquee />
     <Reviews />
     <Instructor />
     <Curriculum />
-    <EnrollNudge />
+    <Pricing />
     <Projects />
     <ToolWall />
     <Credential />
     <Community />
     <Audience />
     <ProofStrip />
-    <Pricing />
     <FAQ />
-    <FinalCTA />
   </main>
   <Footer />
 </BaseLayout>
