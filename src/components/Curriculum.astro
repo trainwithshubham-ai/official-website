@@ -6,13 +6,30 @@
 import Section from "./primitives/Section.astro";
 import ToolIcon from "./primitives/ToolIcon.astro";
 import { curriculum } from "../content/data";
+import { site } from "../config/site";
+
+// Subtle live-format cues, authored from the class schedule (golden rule 8 — the
+// ops sheet is a reference, never embedded). Keeps the curriculum honest about
+// what the batch actually is: live, weekend-friendly, ~3 months, 150+ hours.
+const liveMeta = [
+  `${site.classDays} · ${site.classTime}`,
+  `${site.programLength} program`,
+  `${site.liveHours} hours of live class`,
+];
 ---
 
 <Section id="curriculum" eyebrow="curriculum" title="From code to production">
-  <p class="mb-10 max-w-2xl text-pretty text-muted">
+  <p class="mb-5 max-w-2xl text-pretty text-muted">
     Every module is a stage in the pipeline — from your first line of code to
     shipping in production. Expand any stage to see what you'll build.
   </p>
+
+  <ul class="live-meta" role="list" aria-label="Live class format">
+    <li class="live-badge">
+      <span class="text-primary" aria-hidden="true">❯</span> live cohort
+    </li>
+    {liveMeta.map((m) => <li>{m}</li>)}
+  </ul>
 
   <ol class="rail-list" role="list">
     {
@@ -66,6 +83,30 @@ import { curriculum } from "../content/data";
 </Section>
 
 <style>
+  /* Subtle live-format cues (mono pills) under the intro — states the batch is
+     live, weekend-friendly, ~3 months, 150+ hours, without a heavy schedule table. */
+  .live-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 2.5rem;
+    padding: 0;
+    list-style: none;
+  }
+  .live-meta li {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+    padding: 0.25rem 0.7rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-pill);
+  }
+  .live-meta .live-badge {
+    color: var(--color-text);
+    border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-line));
+  }
+
   .rail-list {
     margin: 0;
     padding: 0;

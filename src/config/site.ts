@@ -12,9 +12,13 @@ export const site = {
   batchStartISO: "2026-07-26T20:00:00+05:30",
   classDays: "Sat & Sun",
   classTime: "8–10 PM IST",
+  // Live-schedule facts authored from the ops sheet (references only — the sheet
+  // is NEVER embedded/fetched; golden rule 8). Update here if the batch changes.
+  programLength: "3-month", // 26 Jul → late Oct 2026
+  liveHours: "150+", // hours of live instruction across the batch (sheet total: 151)
 
   // --- scarcity ---
-  earlyBirdEndsISO: "2026-07-05T23:59:00+05:30", // real macro deadline (countdown target)
+  earlyBirdEndsISO: "2026-07-08T23:59:00+05:30", // real macro deadline (countdown target)
 
   // --- daily bonus (honest "evergreen") ---
   // A REAL, repeatable bonus: enroll on any given day (before midnight IST) and
@@ -98,9 +102,9 @@ export const site = {
   // public verification page for the DevOps Engineer (Associate) credential
   credentialUrl: "https://credentials.certdirectory.io/o/trainwithshubham",
   social: {
-    youtube: { url: "https://www.youtube.com/@TrainWithShubham", label: "1.5 Lakh+" },
-    linkedin: { url: "https://www.linkedin.com/in/shubhamlondhe1996", label: "1 Lakh+" },
-    instagram: { url: "https://www.instagram.com/trainwithshubham__", label: "10,000+" },
+    youtube: { url: "https://www.youtube.com/@TrainWithShubham", label: "1.85 Lakh+" },
+    linkedin: { url: "https://www.linkedin.com/in/shubhamlondhe1996", label: "1.15 Lakh+" },
+    instagram: { url: "https://www.instagram.com/trainwithshubham__", label: "40,000+" },
   },
   // English-venture handles for "follow our English content" CTAs
   englishSocial: {
