@@ -10,6 +10,7 @@
 // recoverable. Both buttons are `data-enroll`: BaseLayout forwards UTM (+ src),
 // preserves ?priceId, and fires enroll_click with the data-region.
 import { site } from "../config/site";
+import type { CoursePrice, CourseCheckout } from "../config/courses";
 import Button from "./primitives/Button.astro";
 import FlagIndia from "./primitives/FlagIndia.astro";
 import Globe from "./primitives/Globe.astro";
@@ -18,19 +19,37 @@ interface Props {
   class?: string;
   /** Show the welcoming geo-pricing note under the buttons (Pricing box only). */
   note?: boolean;
+  /** Per-course checkout URLs; defaults to the main DevOps course (site.checkout). */
+  checkout?: CourseCheckout;
+  /** Per-course prices (for the aria-labels); defaults to site.price. */
+  price?: CoursePrice;
+  /** SR-label price qualifier. Defaults to "early bird" (the live DevOps page's
+   *  early-bird pricing); pass "" for courses with no early-bird window (/python). */
+  priceQualifier?: string;
+  /** Course slug forwarded to the enroll_click analytics event (per-course funnel). */
+  courseSlug?: string;
 }
-const { class: className = "", note = false } = Astro.props;
+const {
+  class: className = "",
+  note = false,
+  checkout = site.checkout,
+  price = site.price,
+  priceQualifier = "early bird",
+  courseSlug,
+} = Astro.props;
+const q = priceQualifier ? ` ${priceQualifier}` : "";
 ---
 
 <div class:list={["enroll-group", className]} data-enroll-group>
   <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
     <Button
-      href={site.checkout.india}
+      href={checkout.india}
       enroll
       variant="ghost"
       data-region="india"
       data-region-btn="india"
-      aria-label={`Pay — India pricing, ${site.price.india.early} early bird (opens in a new tab)`}
+      data-course={courseSlug}
+      aria-label={`Pay — India pricing, ${price.india.early}${q} (opens in a new tab)`}
       class="region-btn w-full sm:w-auto sm:min-w-[13rem]"
     >
       <FlagIndia width={18} height={12} />
@@ -38,12 +57,13 @@ const { class: className = "", note = false } = Astro.props;
     </Button>
 
     <Button
-      href={site.checkout.world}
+      href={checkout.world}
       enroll
       variant="ghost"
       data-region="world"
       data-region-btn="world"
-      aria-label={`Pay — rest-of-world pricing, ${site.price.world.early} early bird (opens in a new tab)`}
+      data-course={courseSlug}
+      aria-label={`Pay — rest-of-world pricing, ${price.world.early}${q} (opens in a new tab)`}
       class="region-btn w-full sm:w-auto sm:min-w-[13rem]"
     >
       <Globe size={18} />

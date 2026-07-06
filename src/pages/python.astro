@@ -1,0 +1,9 @@
+---
+// /python — Python for DevOps course landing page. Thin: all layout/design lives in
+// the shared CourseLanding template; content lives in courses.ts. Add a course =
+// copy these 3 lines with a new slug.
+import CourseLanding from "../components/CourseLanding.astro";
+import { courses } from "../config/courses";
+---
+
+<CourseLanding course={courses.python} />

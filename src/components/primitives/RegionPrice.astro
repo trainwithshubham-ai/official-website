@@ -1,0 +1,67 @@
+---
+// RegionPrice — the region-adaptive dual-currency price. The visitor's likely currency
+// (html[data-region-guess], set pre-paint in BaseLayout — timezone, never IP) is the big
+// anchor; the other stays visible but smaller. BOTH always shown — emphasis, never a
+// hide/swap (golden rule 6). India is the default anchor. Shared so course pages read
+// identically to the main site.
+import type { CoursePrice } from "../../config/courses";
+
+interface Props {
+  price: CoursePrice;
+  class?: string;
+}
+const { price, class: className = "" } = Astro.props;
+const sr = `Price: ${price.india.early} for India (regularly ${price.india.regular}), ${price.world.early} for the rest of the world (regularly ${price.world.regular}). Choose your region to pay.`;
+---
+
+<div class:list={["price", className]} aria-hidden="true">
+  <span class="price-from">from</span>
+  <span class="price-amt amt-india">{price.india.early}</span>
+  <span class="price-sep">·</span>
+  <span class="price-amt amt-world">{price.world.early}</span>
+  <span class="price-reg">
+    regularly <s>{price.india.regular}</s> / <s>{price.world.regular}</s>
+  </span>
+</div>
+<p class="sr-only">{sr}</p>
+
+<style>
+  .price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.25rem 0.6rem;
+  }
+  .price-from {
+    color: var(--color-muted);
+  }
+  .price-amt {
+    font-family: var(--font-display);
+    line-height: 1.1;
+  }
+  /* ANCHOR (big) = detected region; ALT (small) = the other. India default. */
+  .amt-india,
+  :global(html[data-region-guess="world"]) .amt-world {
+    font-size: clamp(2rem, 8vw, 2.5rem);
+    font-weight: 700;
+    color: var(--color-text);
+  }
+  .amt-world,
+  :global(html[data-region-guess="world"]) .amt-india {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+  .price-sep {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 300;
+    color: var(--color-muted);
+  }
+  .price-reg {
+    width: 100%;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+  }
+</style>

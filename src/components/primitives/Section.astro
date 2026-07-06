@@ -8,8 +8,9 @@ interface Props {
   id?: string;
   eyebrow?: string;
   title?: string;
-  /** Heading level for the title — keep the document outline correct. */
-  as?: "h2" | "h3";
+  /** Heading level for the title — keep the document outline correct. Use "h1"
+   *  only when this is the page's primary heading (e.g. a header-less index page). */
+  as?: "h1" | "h2" | "h3";
   class?: string;
   /** Set false to let the section manage its own width (full-bleed visuals). */
   contained?: boolean;

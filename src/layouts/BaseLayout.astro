@@ -3,6 +3,7 @@
 // Carries NO section markup; pages compose sections inside the <slot/>.
 import { site } from "../config/site";
 import StructuredData from "../components/StructuredData.astro";
+import type { Course } from "../config/courses";
 import "../styles/tokens.css";
 
 // Self-hosted fonts (BRAND.md §4) — only the weights AND subsets we use.
@@ -23,12 +24,28 @@ interface Props {
   description?: string;
   /** OG/Twitter image, relative to site root. */
   image?: string;
+  /** Actual pixel dims of `image` (declared to social platforms). Default = the
+   *  1200×630 og-image.png; course posters carry their own dims (courses.ts). */
+  imageWidth?: number;
+  imageHeight?: number;
+  /** Alt text for the OG/Twitter image. Defaults to the DevOps product; course
+   *  pages pass the course-specific alt so the shared image matches its label. */
+  imageAlt?: string;
+  /** When set, emit this course's JSON-LD instead of the main DevOps graph. */
+  course?: Course;
+  /** Catalog/index pages (e.g. /courses): emit Organization-only JSON-LD. */
+  collection?: boolean;
 }
 
 const {
   title = `${site.product} — ${site.brand}`,
   description = "DevOps: Zero to Hero — AI-powered live classes. From fundamentals to production: Docker, Kubernetes, Terraform, AWS, CI/CD, observability and Agentic AI.",
   image = "/og-image.png",
+  imageWidth = 1200,
+  imageHeight = 630,
+  imageAlt = `${site.brand} — ${site.product}`,
+  course,
+  collection,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, site.domain).href;
@@ -64,19 +81,19 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content="en_US" />
     <meta property="og:image" content={ogImage} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content={`${site.brand} — ${site.product}`} />
+    <meta property="og:image:width" content={String(imageWidth)} />
+    <meta property="og:image:height" content={String(imageHeight)} />
+    <meta property="og:image:alt" content={imageAlt} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
-    <meta name="twitter:image:alt" content={`${site.brand} — ${site.product}`} />
+    <meta name="twitter:image:alt" content={imageAlt} />
 
     <!-- SEO: Course / Organization / FAQ structured data (JSON-LD) -->
-    <StructuredData description={description} />
+    <StructuredData description={description} course={course} collection={collection} />
 
     <!--
       Attribution without a backend (ARCHITECTURE.md §6):
@@ -124,10 +141,12 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
           /* malformed/placeholder checkout URL — let the click proceed as-is */
         }
         var region = a.getAttribute("data-region") || undefined;
+        /* course slug (multi-course funnel attribution); undefined on the DevOps page */
+        var course = a.getAttribute("data-course") || undefined;
         if (typeof window.gtag === "function")
-          window.gtag("event", "enroll_click", { region: region });
+          window.gtag("event", "enroll_click", { region: region, course: course });
         if (typeof window.fbq === "function")
-          window.fbq("track", "InitiateCheckout", { region: region });
+          window.fbq("track", "InitiateCheckout", { region: region, course: course });
       });
     </script>
 

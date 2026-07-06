@@ -1,86 +1,161 @@
 ---
-// StructuredData — JSON-LD for the search-first audience. One @graph with:
-//   • Organization (+ the REAL Google aggregateRating 4.9 / 232)
-//   • Course (+ region Offers priced to MATCH the rendered early-bird/full price)
-//   • FAQPage (from faq.json)
-// Every value is real, pulled from site.ts / content data — nothing fabricated
-// (golden rule 4). JSON-LD is inert: no runtime JS, no perf/a11y cost.
+// StructuredData — JSON-LD for the search-first audience. Emits one @graph:
+//   • Organization (real Google aggregateRating lives on the DevOps Course only)
+//   • Course (+ region Offers priced to match the rendered price)
+//   • FAQPage
+// Default = the main DevOps course (from site.ts + faq.json). Pass `course` to emit a
+// standalone course page's graph instead (name/price/faq from courses.ts). Nothing is
+// fabricated (golden rule 4): a course page carries NO aggregateRating, because the
+// 4.9/232 Google reviews are the DevOps business rating, not that course's.
 import { site } from "../config/site";
 import { faq } from "../content/data";
+import type { Course } from "../config/courses";
 
 interface Props {
   /** Same description string BaseLayout renders in <meta name="description">. */
   description: string;
+  /** When set, emit this course's graph instead of the main DevOps graph. */
+  course?: Course;
+  /** Catalog/index pages (e.g. /courses): emit ONLY Organization — not the DevOps
+   *  Course/Offer/aggregateRating/FAQ graph, which doesn't belong on a catalog URL. */
+  collection?: boolean;
 }
-const { description } = Astro.props;
+const { description, course, collection } = Astro.props;
 
-// Mirror Pricing.astro's build-time gate so the schema price always equals the
-// price actually shown on the page (early-bird → full price after the deadline).
-const earlyBirdOver = Date.now() > new Date(site.earlyBirdEndsISO).getTime();
-const toNum = (s: string) => Number(String(s).replace(/[^0-9.]/g, ""));
-const inrPrice = toNum(
-  earlyBirdOver ? site.price.india.regular : site.price.india.early,
-);
-const usdPrice = toNum(
-  earlyBirdOver ? site.price.world.regular : site.price.world.early,
-);
-const priceValidUntil = earlyBirdOver
-  ? undefined
-  : site.earlyBirdEndsISO.slice(0, 10);
-
-// Canonical home URL WITH trailing slash, to match BaseLayout's <link canonical>.
 const home = `${site.domain}/`;
 const orgId = `${home}#org`;
+const toNum = (s: string) => Number(String(s).replace(/[^0-9.]/g, ""));
 
-// Same token substitution FAQ.astro applies, so schema answers don't ship literal
-// {classDays}/{classTime}/{batchStart} placeholders. Values stay single-sourced.
-const batchStart = new Date(site.batchStartISO).toLocaleDateString("en-IN", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-const fill = (s: string) =>
-  s
-    .replaceAll("{classDays}", site.classDays)
-    .replaceAll("{classTime}", site.classTime)
-    .replaceAll("{batchStart}", batchStart);
-
-const offer = (priceCurrency: string, price: number) => ({
+// One Offer builder for both branches (course page + main DevOps).
+const makeOffer = (
+  priceCurrency: string,
+  price: number,
+  url: string,
+  validUntil?: string,
+) => ({
   "@type": "Offer",
   category: "Paid",
   priceCurrency,
   price,
-  ...(priceValidUntil ? { priceValidUntil } : {}),
+  ...(validUntil ? { priceValidUntil: validUntil } : {}),
   availability: "https://schema.org/InStock",
-  url: `${home}#pricing`,
+  url,
 });
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
+const organization = {
+  "@type": "Organization",
+  "@id": orgId,
+  name: site.brand,
+  url: home,
+  logo: `${site.domain}/logo.png`,
+  sameAs: [
+    site.social.youtube.url,
+    site.social.linkedin.url,
+    site.social.instagram.url,
+    site.englishSocial.youtube,
+    site.englishSocial.instagram,
+  ],
+};
+
+let graph;
+
+if (collection) {
+  // Catalog page — brand identity only; no Course/Offer/rating/FAQ (none of it is
+  // shown here, and it would duplicate/misattribute the homepage's Course graph).
+  graph = [organization];
+} else if (course) {
+  // --- Standalone course page ---
+  // Mirror Pricing's build-time gate: once the early-bird window has passed, advertise
+  // the REGULAR price and drop priceValidUntil (a past validUntil marks the offer expired).
+  const courseEarlyBirdOver =
+    !!course.earlyBirdEndsISO &&
+    Date.now() > new Date(course.earlyBirdEndsISO).getTime();
+  const validUntil = courseEarlyBirdOver
+    ? undefined
+    : course.earlyBirdEndsISO?.slice(0, 10);
+  const pick = (p: { early: string; regular: string }) =>
+    toNum(courseEarlyBirdOver ? p.regular : p.early);
+  // Trailing slash to match BaseLayout's canonical (new URL(pathname) → "/python/").
+  const url = `${site.domain}/${course.slug}/`;
+  graph = [
+    organization,
     {
-      "@type": "Organization",
-      "@id": orgId,
-      name: site.brand,
-      url: home,
-      logo: `${site.domain}/logo.png`,
-      sameAs: [
-        site.social.youtube.url,
-        site.social.linkedin.url,
-        site.social.instagram.url,
-        site.englishSocial.youtube,
-        site.englishSocial.instagram,
-      ],
+      "@type": "Course",
+      name: course.title,
+      description,
+      url,
+      provider: { "@id": orgId },
+      hasCourseInstance: {
+        "@type": "CourseInstance",
+        courseMode: "online",
+        ...(course.batchStartISO ? { startDate: course.batchStartISO } : {}),
+        instructor: {
+          "@type": "Person",
+          name: "Shubham Londhe",
+          url: site.social.linkedin.url,
+        },
+      },
+      // Offers only when the course is actually for sale (a coming-soon course has no
+      // price yet — emitting a price-less Offer would be invalid / dishonest).
+      ...(course.price
+        ? {
+            offers: [
+              makeOffer("INR", pick(course.price.india), `${url}#enroll`, validUntil),
+              makeOffer("USD", pick(course.price.world), `${url}#enroll`, validUntil),
+            ],
+          }
+        : {}),
     },
+    ...(course.faq?.length
+      ? [
+          {
+            "@type": "FAQPage",
+            mainEntity: course.faq.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+          },
+        ]
+      : []),
+  ];
+} else {
+  // --- Main DevOps course (default) ---
+  // Mirror Pricing.astro's build-time gate so the schema price equals the rendered price.
+  const earlyBirdOver = Date.now() > new Date(site.earlyBirdEndsISO).getTime();
+  const inrPrice = toNum(
+    earlyBirdOver ? site.price.india.regular : site.price.india.early,
+  );
+  const usdPrice = toNum(
+    earlyBirdOver ? site.price.world.regular : site.price.world.early,
+  );
+  const priceValidUntil = earlyBirdOver
+    ? undefined
+    : site.earlyBirdEndsISO.slice(0, 10);
+
+  // Same token substitution FAQ.astro applies (no literal {classDays}… placeholders).
+  const batchStart = new Date(site.batchStartISO).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  const fill = (s: string) =>
+    s
+      .replaceAll("{classDays}", site.classDays)
+      .replaceAll("{classTime}", site.classTime)
+      .replaceAll("{batchStart}", batchStart);
+
+  const pricingUrl = `${home}#pricing`;
+  graph = [
+    organization,
     {
       "@type": "Course",
       name: site.product,
       description,
       url: home,
       provider: { "@id": orgId },
-      // Real learner rating (4.9 / 232). Attached to the Course (the reviewed
-      // product) rather than the Organization so it's rich-result eligible and
-      // not treated as a self-serving org rating.
+      // Real learner rating (4.9 / 232) — on the Course (the reviewed product), not the
+      // Organization, so it's rich-result eligible and not a self-serving org rating.
       aggregateRating: {
         "@type": "AggregateRating",
         ratingValue: site.googleRating,
@@ -96,7 +171,10 @@ const jsonLd = {
           url: site.social.linkedin.url,
         },
       },
-      offers: [offer("INR", inrPrice), offer("USD", usdPrice)],
+      offers: [
+        makeOffer("INR", inrPrice, pricingUrl, priceValidUntil),
+        makeOffer("USD", usdPrice, pricingUrl, priceValidUntil),
+      ],
     },
     {
       "@type": "FAQPage",
@@ -106,11 +184,12 @@ const jsonLd = {
         acceptedAnswer: { "@type": "Answer", text: fill(f.a) },
       })),
     },
-  ],
-};
+  ];
+}
 
-// Escape "<" so a stray "</script>" or "<" inside any FAQ answer can't break out
-// of the inline script; < is valid JSON and parses back identically.
+const jsonLd = { "@context": "https://schema.org", "@graph": graph };
+// Escape "<" so a stray "</script>" or "<" in any answer can't break out of the inline
+// script; < is valid JSON and parses back identically.
 const json = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
 ---
 

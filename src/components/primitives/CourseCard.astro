@@ -1,0 +1,65 @@
+---
+// CourseCard — the shared course/bonus card: accent-striped link, optional 16:9
+// poster, a tag row (named slot "tags"), a title (level via `as`), a body line
+// (default slot), and a "→" CTA. Used by CoursesIndex (as="h2") and BonusCourses
+// (as="h3") so the two card treatments can't drift. Accent via themeVars (single
+// source). CTA/tag text is accent-coloured — never --cta yellow (Enroll/Pay only).
+import { themeVars, type CourseTheme } from "../../config/courses";
+
+interface Props {
+  href: string;
+  poster?: string;
+  title: string;
+  /** Heading level — keep the page outline correct (h2 under an h1, h3 under an h2). */
+  as?: "h2" | "h3";
+  ctaLabel: string;
+  theme?: CourseTheme;
+}
+const { href, poster, title, as: Heading = "h2", ctaLabel, theme } = Astro.props;
+---
+
+<a
+  href={href}
+  style={themeVars(theme)}
+  class="course-card lift group flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-line border-l-2 border-l-primary bg-surface shadow-[var(--sheen),var(--shadow-card)]"
+>
+  {
+    poster && (
+      <div class="aspect-[16/9] overflow-hidden border-b border-line bg-surface-2">
+        <img
+          src={poster}
+          alt={`${title} — course poster`}
+          width="1280"
+          height="720"
+          loading="lazy"
+          decoding="async"
+          class="size-full object-cover transition-transform duration-300 motion-safe:group-hover:scale-[1.03]"
+        />
+      </div>
+    )
+  }
+  <div class="flex h-full flex-col gap-3 p-6 sm:p-8">
+    <div class="flex flex-wrap items-center gap-2.5">
+      <slot name="tags" />
+    </div>
+    <Heading class="font-display text-xl font-medium text-text">{title}</Heading>
+    <slot />
+    <span class="mt-auto inline-flex items-center gap-1.5 pt-1 text-sm font-medium text-primary">
+      {ctaLabel}
+      <svg
+        class="size-4 transition-transform duration-150 motion-safe:group-hover:translate-x-0.5"
+        viewBox="0 0 20 20"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M4 10h11M11 6l4 4-4 4"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </span>
+  </div>
+</a>

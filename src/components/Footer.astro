@@ -7,14 +7,21 @@ import Globe from "./primitives/Globe.astro";
 
 const year = new Date().getFullYear();
 
-const jumpLinks = [
-  { href: "#curriculum", label: "Curriculum" },
-  { href: "#projects", label: "Projects" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "#community", label: "Community" },
-  { href: "#reviews", label: "Reviews" },
-  { href: "#faq", label: "FAQ" },
-];
+interface Props {
+  /** "Explore" column links. Defaults to the main (index) on-page anchors; course
+   *  pages pass their own so the footer never points at anchors that don't exist. */
+  jumpLinks?: { href: string; label: string }[];
+}
+const {
+  jumpLinks = [
+    { href: "#curriculum", label: "Curriculum" },
+    { href: "#projects", label: "Projects" },
+    { href: "#pricing", label: "Pricing" },
+    { href: "#community", label: "Community" },
+    { href: "#reviews", label: "Reviews" },
+    { href: "#faq", label: "FAQ" },
+  ],
+} = Astro.props;
 
 const socials = [
   { ...site.social.youtube, name: "YouTube" },
@@ -84,6 +91,15 @@ const lmsLinks = [
         Learn
       </p>
       <ul class="flex flex-col gap-2" role="list">
+        {/* internal course index (same-tab route); Learnyst catalog links follow */}
+        <li>
+          <a
+            href="/courses"
+            class="text-sm text-muted transition-colors hover:text-text"
+          >
+            Courses
+          </a>
+        </li>
         {
           lmsLinks.map((l) => (
             <li>

@@ -1,29 +1,30 @@
 ---
-// BonusBar — a slim, honest "enroll today" bonus callout for the Pricing box.
-// The bonus is REAL and repeatable (enroll before tonight's midnight IST and get
-// the ebook — golden rule 6). It is deliberately NOT a ticking clock: the Pricing
-// card already carries the early-bird Countdown, so a second timer here would be
-// two competing clocks in one decision zone. This stays a calm gift callout; the
-// "today" framing keeps the honest end-of-day deadline without the visual race.
-// Renders only when site.bonus.enabled.
-import { site } from "../config/site";
+// BonusBar — a slim "your enrolment includes free courses" callout for the Pricing
+// box. Driven by flagshipBonuses (courses.ts, single source), so it names the real
+// bundled courses and stays in sync as bonuses are added. Deliberately NOT a timer —
+// the Pricing card already carries the early-bird Countdown. Renders only when there
+// is at least one bonus course.
+import { flagshipBonuses } from "../config/courses";
 
 interface Props {
   class?: string;
 }
 const { class: className = "" } = Astro.props;
+
+const names = flagshipBonuses.map((b) => b.title).join(" + ");
+const n = flagshipBonuses.length;
 ---
 
 {
-  site.bonus.enabled && (
+  n > 0 && (
     <div class:list={["bonus-bar grad-border", className]} role="note">
       <p class="bonus-copy">
         <span class="bonus-ic" aria-hidden="true">
           🎁
         </span>
         <span>
-          Enroll <strong>today</strong> and get the{" "}
-          <strong class="bonus-name">{site.bonus.name}</strong> — free.
+          Your enrolment includes <strong>{n} courses free</strong> —{" "}
+          <strong class="bonus-name">{names}</strong>.
         </span>
       </p>
     </div>

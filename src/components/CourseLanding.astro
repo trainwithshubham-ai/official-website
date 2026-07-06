@@ -1,0 +1,988 @@
+---
+// CourseLanding — the shared, crisp template for standalone course pages
+// (/python, future /aws…). Driven entirely by a `course` data entry (courses.ts).
+// Look & feel comes from tokens.css + shared primitives, so every course page matches
+// the rest of the site; `course.theme` (optional) re-tints ONLY the accent via scoped
+// --color-* overrides on the root — the CTA yellow + dark base stay invariant.
+// Reuses the region-adaptive price + EnrollButtons + the global region-guess/enroll
+// scripts (in BaseLayout) that run on every page.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Section from "./primitives/Section.astro";
+import Button from "./primitives/Button.astro";
+import RegionPrice from "./primitives/RegionPrice.astro";
+import ToolIcon from "./primitives/ToolIcon.astro";
+import EnrollButtons from "./EnrollButtons.astro";
+import StatusDot from "./primitives/StatusDot.astro";
+import Instructor from "./Instructor.astro";
+import Footer from "./Footer.astro";
+import { site } from "../config/site";
+import { themeVars, type Course } from "../config/courses";
+
+interface Props {
+  course: Course;
+}
+const { course } = Astro.props;
+
+const themeStyle = themeVars(course.theme);
+
+// Split the topic syllabus into the two groups (stable order preserved).
+const liveModules = course.curriculum?.filter((m) => m.mode === "live") ?? [];
+const recordedModules =
+  course.curriculum?.filter((m) => m.mode === "recorded") ?? [];
+
+// Hero eyebrow/pill label — "Coming soon" for a teaser course, else "live N-day cohort".
+const heroBadge = course.comingSoon
+  ? "Coming soon"
+  : course.format
+    ? `live ${course.format.days}-day cohort`
+    : "Live cohort";
+
+// Only link sections that actually render on this course (a coming-soon course has no
+// curriculum/faq → no dead footer anchors). #enroll exists in both live + coming-soon.
+const footerLinks = [
+  ...(course.curriculum ? [{ href: "#curriculum", label: "Curriculum" }] : []),
+  { href: "#enroll", label: course.comingSoon ? "Coming soon" : "Enroll" },
+  ...(course.faq ? [{ href: "#faq", label: "FAQ" }] : []),
+  { href: "/courses", label: "All courses" },
+  { href: "/", label: "DevOps: Zero to Hero" },
+];
+---
+
+<BaseLayout
+  title={`${course.title} — ${site.brand}`}
+  description={course.description}
+  image={course.ogImage ?? "/og-image.png"}
+  imageWidth={course.ogImage ? (course.ogImageWidth ?? 1200) : 1200}
+  imageHeight={course.ogImage ? (course.ogImageHeight ?? 630) : 630}
+  imageAlt={`${course.title} — ${site.brand}`}
+  course={course}
+>
+  <div
+    class:list={["course", course.price && course.checkout && "has-sticky"]}
+    style={themeStyle}
+  >
+    <!-- slim sticky header (logo → home + one Enroll CTA; no jump-links) -->
+    <header class="ch-header">
+      <a href="/" class="ch-brand" aria-label={`${site.brand} — home`}>
+        <img
+          src="/logo.png"
+          alt={site.brand}
+          width="40"
+          height="40"
+          class="size-9 rounded-md"
+          loading="eager"
+          decoding="async"
+        />
+        <span class="hidden font-display font-medium sm:inline">{site.brand}</span>
+      </a>
+      <div class="ch-actions">
+        <a href="/courses" class="ch-link">Courses</a>
+        {
+          course.comingSoon ? (
+            course.repo && (
+              <Button
+                href={course.repo}
+                variant="ghost"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-track={`${course.slug}-repo`}
+                class="px-4 py-2 text-sm"
+              >
+                Star the repo →
+              </Button>
+            )
+          ) : (
+            <Button href="#enroll" class="px-4 py-2 text-sm">
+              Enroll now
+            </Button>
+          )
+        }
+      </div>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <!-- HERO — layered like the main page: ambient glow + faint infra grid behind a
+           clean, centered column. The real region Pay buttons live only in the enroll
+           card below; the hero's "Enroll now" is a scroll CTA (no duplication). -->
+      <section class="reveal hero relative overflow-hidden">
+        <!-- depth: dual ambient glow over a faint pipeline grid (BRAND.md §5); both
+             glows pick up the course accent via --color-primary/-accent -->
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+        >
+          <div
+            class="absolute -top-40 left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]"
+          >
+          </div>
+          <div
+            class="absolute -top-10 right-[-12rem] h-[26rem] w-[26rem] rounded-full bg-accent/[0.06] blur-[120px]"
+          >
+          </div>
+          <div class="hero-grid absolute inset-0"></div>
+        </div>
+
+        <div class="hero-inner">
+          <span
+            class="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-line bg-surface/70 px-3.5 py-1.5 font-mono text-xs text-muted"
+          >
+            <StatusDot tone="primary" />
+            {heroBadge}
+          </span>
+
+          <h1 class="mt-4 text-balance">{course.title}</h1>
+
+          <p class="mx-auto mt-4 max-w-xl text-pretty text-lg text-muted">
+            {course.tagline}
+          </p>
+
+          <!-- Course poster — the hero visual, right below the title. Swap in real art
+               via course.poster; otherwise a branded 16:9 placeholder frame renders
+               (picks up the course accent). -->
+          <figure class="poster grad-border">
+            {
+              course.poster ? (
+                <img
+                  src={course.poster}
+                  alt={`${course.title} — course poster`}
+                  width="1280"
+                  height="720"
+                  loading="eager"
+                  fetchpriority="high"
+                  decoding="async"
+                />
+              ) : (
+                <div class="poster-ph">
+                  <span class="poster-ph-eyebrow font-mono">live cohort</span>
+                  <span class="poster-ph-title font-display">{course.title}</span>
+                  <span class="poster-ph-note font-mono">poster coming soon</span>
+                </div>
+              )
+            }
+          </figure>
+
+          <!-- one clean above-the-fold action. Live course → yellow Enroll (scrolls to
+               the priced card below). Coming-soon → ghost repo CTA (nothing to enrol in
+               yet, so never yellow) + a secondary link to the other courses. -->
+          <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            {
+              course.comingSoon ? (
+                <>
+                  {course.repo && (
+                    <Button
+                      href={course.repo}
+                      variant="ghost"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-track={`${course.slug}-repo`}
+                    >
+                      Star the repo →
+                    </Button>
+                  )}
+                  <a href="/courses" class="text-sm font-medium text-primary hover:underline">
+                    See other courses
+                  </a>
+                </>
+              ) : (
+                <Button href="#enroll" variant="primary" class="pulse-cta">
+                  Enroll now
+                </Button>
+              )
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- FREE-WITH-FLAGSHIP cross-link (bonus courses only) -->
+      {
+        course.bonus && (
+          <a href="/" class="bonus-note">
+            <StatusDot tone="primary" />
+            <span>
+              {course.comingSoon ? "Coming soon — and " : "Also "}included{" "}
+              <strong>free</strong> when you enrol in DevOps: Zero to Hero
+            </span>
+            <span class="bonus-note-arrow" aria-hidden="true">→</span>
+          </a>
+        )
+      }
+
+      <!-- AT A GLANCE — scannable facts strip -->
+      {
+        course.atAGlance && (
+          <section class="reveal glance" aria-label="Course at a glance">
+            <dl class="glance-grid">
+              {course.atAGlance.map((f) => (
+                <div class="glance-cell surface-card">
+                  <dt class="glance-label font-mono">{f.label}</dt>
+                  <dd class="glance-value">{f.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )
+      }
+
+      <!-- TECH STRIP -->
+      {
+        course.techStack && (
+          <section class="reveal tech-strip" aria-label="What you'll use">
+            <span class="tech-label font-mono">you'll use</span>
+            <ul role="list">
+              {course.techStack.map((t) => (
+                <li>
+                  <ToolIcon name={t} class="text-[0.95rem] text-primary" />
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      <!-- CURRICULUM (topics, split live vs recorded) — right below "you'll use" -->
+      {
+        course.curriculum && (
+          <Section id="curriculum" eyebrow="curriculum" title="Topics we cover">
+            <p class="mb-9 max-w-2xl text-pretty text-muted">
+              The live weekend covers the flagship, hands-on topics. Everything else is
+              recorded for self-study — yours for 4 years, including future updates.
+            </p>
+            <div class="cur-groups">
+              <div class="cur-group">
+                <p class="cur-group-h">
+                  <span class="cur-badge cur-badge--live">Live</span> weekend sessions
+                </p>
+                <ol class="rail" role="list">
+                  {liveModules.map((m, i) => (
+                    <li class="stage">
+                      <span
+                        class:list={["dot", i === liveModules.length - 1 && "pulse-dot"]}
+                        aria-hidden="true"
+                      />
+                      <div class="surface-card lift cur-card">
+                        <h3>{m.module}</h3>
+                        {m.desc && (
+                          <p class="mt-1 text-pretty text-sm text-muted">{m.desc}</p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div class="cur-group">
+                <p class="cur-group-h">
+                  <span class="cur-badge">Recorded</span> self-study · 4 years access
+                </p>
+                <ol class="rail" role="list">
+                  {recordedModules.map((m) => (
+                    <li class="stage">
+                      <span class="dot dot--muted" aria-hidden="true" />
+                      <div class="surface-card lift cur-card">
+                        <h3>{m.module}</h3>
+                        {m.desc && (
+                          <p class="mt-1 text-pretty text-sm text-muted">{m.desc}</p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </Section>
+        )
+      }
+
+      <!-- INSTRUCTOR — shared component (universal across all pages, reads site.ts) -->
+      <Instructor />
+
+      <!-- ENROLL (live course) — or COMING SOON (teaser) -->
+      {
+        course.comingSoon ? (
+          <Section id="enroll" eyebrow="coming soon" title="Enrolment opens soon">
+            <div class="enroll-card surface-card grad-border">
+              <p class="text-pretty text-muted">
+                {course.repo
+                  ? "This cohort is being built in the open. Star the repo to follow along and be first to know the moment enrolment opens."
+                  : "Enrolment opens soon. Explore the other courses meanwhile, or check back here."}
+              </p>
+              <div class="mt-7 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                {course.repo && (
+                  <Button
+                    href={course.repo}
+                    variant="ghost"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-track={`${course.slug}-repo`}
+                  >
+                    Star the repo →
+                  </Button>
+                )}
+                <a href="/courses" class="text-sm font-medium text-primary hover:underline">
+                  See other courses
+                </a>
+              </div>
+            </div>
+          </Section>
+        ) : (
+          <Section id="enroll" eyebrow="enroll" title="Grab your seat">
+            <div class="enroll-card surface-card grad-border">
+              {course.schedule && (
+                <p class="cohort-line">
+                  <svg
+                    class="cohort-icon"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <rect
+                      x="3"
+                      y="4.5"
+                      width="14"
+                      height="12"
+                      rx="2"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                    />
+                    <path
+                      d="M3 8h14M7 3v3M13 3v3"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  <span>
+                    <span class="cohort-label">Live cohort</span>
+                    {course.schedule.dates} · {course.schedule.time}
+                  </span>
+                </p>
+              )}
+              {course.price && <RegionPrice price={course.price} />}
+              {course.includes && (
+                <ul class="mx-auto mt-7 flex w-fit flex-col gap-3 text-left" role="list">
+                  {course.includes.map((item) => (
+                    <li class="flex items-start gap-3">
+                      <svg
+                        class="mt-0.5 size-5 shrink-0 text-primary"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M4 10.5l3.5 3.5L16 6"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                      <span class="text-text">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {course.price && course.checkout && (
+                <EnrollButtons
+                  class="mt-7"
+                  checkout={course.checkout}
+                  price={course.price}
+                  priceQualifier=""
+                  courseSlug={course.slug}
+                  note
+                />
+              )}
+              {course.price && course.checkout && (
+                <p class="trust-row font-mono">
+                  <span><StatusDot tone="primary" /> Secure checkout</span>
+                  <span><StatusDot tone="primary" /> Instant access</span>
+                  <span><StatusDot tone="primary" /> 4 years + updates</span>
+                </p>
+              )}
+            </div>
+          </Section>
+        )
+      }
+
+      <!-- FAQ — its own section with a header (systematic, like every other section) -->
+      {
+        course.faq && (
+          <Section id="faq" eyebrow="faq" title="Frequently asked questions">
+            <ul class="faq" role="list">
+              {course.faq.map((f) => (
+                <li>
+                  <details class="surface-card">
+                    <summary>
+                      <span class="grow text-text">{f.q}</span>
+                      <svg class="chev" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path
+                          d="M5 7.5L10 12.5L15 7.5"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </summary>
+                    <p class="text-pretty text-muted">{f.a}</p>
+                  </details>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )
+      }
+
+      <!-- OPEN-SOURCE REPO CALLOUT — after pricing (a closing reassurance beat) -->
+      {
+        course.repo && (
+          <Section eyebrow="open source" title="The code is yours to keep">
+            <div class="repo-callout surface-card grad-border">
+              <div class="repo-copy">
+                <p class="text-pretty text-muted">
+                  Every script and project we build is open-source. Fork the repo,
+                  follow along live, and keep building long after the cohort ends.
+                </p>
+                {course.repoForks && (
+                  <p class="repo-forks font-mono">
+                    {course.repoForks} forks on GitHub
+                  </p>
+                )}
+              </div>
+              <Button
+                href={course.repo}
+                variant="ghost"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-track={`${course.slug}-repo`}
+                class="shrink-0"
+              >
+                View the repo →
+              </Button>
+            </div>
+          </Section>
+        )
+      }
+    </main>
+
+    <Footer jumpLinks={footerLinks} />
+
+    <!-- mobile sticky enroll bar (codehelp pattern) — live courses only (needs price) -->
+    {
+      course.price && course.checkout && (
+        <div class="sticky-enroll">
+          <span class="se-price">
+            <span class="se-amt se-india">{course.price.india.early}</span>
+            <span class="se-dot" aria-hidden="true">·</span>
+            <span class="se-amt se-world">{course.price.world.early}</span>
+          </span>
+          <Button href="#enroll" class="px-4 py-2 text-sm">Enroll now</Button>
+        </div>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  /* --- slim header --- */
+  .ch-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-line) 70%, transparent);
+    background: color-mix(in srgb, var(--color-ink) 80%, transparent);
+    backdrop-filter: blur(12px);
+  }
+  .ch-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--color-text);
+  }
+  .ch-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .ch-link {
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    transition: color 0.15s;
+  }
+  .ch-link:hover {
+    color: var(--color-text);
+  }
+
+  /* --- hero (layered: full-bleed backdrop + centered inner column) --- */
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: var(--container-content);
+    margin: 0 auto;
+    padding: clamp(2.5rem, 7vw, 4.5rem) 1.5rem clamp(1.5rem, 4vw, 2.5rem);
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: clamp(2.25rem, 6vw, 3.5rem);
+  }
+  /* faint infra grid behind the hero, faded with a radial mask (BRAND.md §5) */
+  .hero-grid {
+    background-image:
+      linear-gradient(
+        to right,
+        color-mix(in srgb, var(--color-line) 55%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--color-line) 55%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(
+      ellipse 70% 60% at 50% 0%,
+      black,
+      transparent 75%
+    );
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black, transparent 75%);
+  }
+
+  /* --- course poster (hero visual, right below the title) --- */
+  .poster {
+    max-width: 44rem;
+    margin: 2rem auto 0;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+  }
+  .poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* branded placeholder until real art is set (picks up the course accent) */
+  .poster-ph {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-align: center;
+    background:
+      radial-gradient(
+        120% 120% at 50% 0%,
+        color-mix(in srgb, var(--color-primary) 20%, transparent),
+        transparent 60%
+      ),
+      var(--color-surface);
+  }
+  .poster-ph-eyebrow,
+  .poster-ph-note {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .poster-ph-title {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    font-weight: 700;
+    color: var(--color-text);
+    padding: 0 1rem;
+    line-height: 1.1;
+  }
+  /* subtle poster hover (motion-safe; disabled under reduced-motion globally) */
+  @media (prefers-reduced-motion: no-preference) {
+    .poster img {
+      transition: transform 0.4s ease;
+    }
+    .poster:hover img {
+      transform: scale(1.03);
+    }
+  }
+
+  /* --- tech strip --- */
+  .tech-strip {
+    max-width: var(--container-content);
+    margin: 0 auto;
+    padding: 0 1.5rem 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .tech-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .tech-strip ul {
+    display: contents;
+  }
+  .tech-strip li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-muted);
+    padding: 0.25rem 0.65rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-pill);
+  }
+
+  /* --- free-with-flagship cross-link --- */
+  .bonus-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    max-width: var(--container-content);
+    margin: 0 auto;
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    transition: color 0.15s;
+  }
+  .bonus-note strong {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+  .bonus-note-arrow {
+    color: var(--color-primary);
+    transition: transform 0.15s;
+  }
+  .bonus-note:hover {
+    color: var(--color-text);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .bonus-note:hover .bonus-note-arrow {
+      transform: translateX(3px);
+    }
+  }
+
+  /* --- at a glance (facts strip under the hero) --- */
+  .glance {
+    max-width: var(--container-content);
+    margin: 0 auto;
+    padding: clamp(0.5rem, 2vw, 1rem) 1.5rem;
+  }
+  .glance-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin: 0;
+  }
+  @media (min-width: 560px) {
+    .glance-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (min-width: 900px) {
+    .glance-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+  .glance-cell {
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    text-align: center;
+  }
+  .glance-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .glance-value {
+    margin: 0.3rem 0 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    line-height: 1.2;
+  }
+
+
+  /* --- payment trust row (under the pay buttons) --- */
+  .trust-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.1rem;
+    margin: 1.1rem 0 0;
+    font-size: 0.72rem;
+    color: var(--color-muted);
+  }
+  .trust-row span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  /* --- curriculum: two grouped pipeline rails (live vs recorded) --- */
+  .cur-groups {
+    display: grid;
+    gap: 2.25rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 820px) {
+    .cur-groups {
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+  }
+  .cur-group-h {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 0 1.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-text);
+  }
+  .cur-badge {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+  }
+  .cur-badge--live {
+    background: var(--color-primary);
+    color: var(--color-ink);
+    border-color: transparent;
+  }
+  .rail {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .rail .stage {
+    position: relative;
+    padding-left: 1.9rem;
+    padding-bottom: 0.85rem;
+  }
+  .rail .stage:last-child {
+    padding-bottom: 0;
+  }
+  .rail .stage::before {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-line);
+  }
+  .rail .stage:first-child::before {
+    top: 0.55rem;
+  }
+  .rail .stage:last-child::before {
+    bottom: auto;
+    height: 0.55rem;
+  }
+  .rail .dot {
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 9999px;
+    background: var(--color-primary);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
+  }
+  .rail .dot--muted {
+    background: var(--color-muted);
+    box-shadow: none;
+  }
+  .cur-card {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    padding: 0.9rem 1.1rem;
+  }
+  .cur-card h3 {
+    font-size: 1rem;
+  }
+
+  /* --- open-source repo callout --- */
+  .repo-callout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    align-items: flex-start;
+    padding: 1.75rem;
+    border-radius: var(--radius-card);
+  }
+  @media (min-width: 640px) {
+    .repo-callout {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+  .repo-forks {
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: var(--color-primary);
+  }
+
+  /* --- enroll card + faq --- */
+  .enroll-card {
+    max-width: 34rem;
+    margin: 0 auto;
+    padding: 2rem;
+    border-radius: var(--radius-card);
+    text-align: center;
+  }
+  /* cohort schedule line at the top of the enroll card (when it runs) */
+  .cohort-line {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto 1.4rem;
+    padding: 0.45rem 0.95rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    font-size: 0.85rem;
+    color: var(--color-text);
+  }
+  .cohort-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex-shrink: 0;
+    color: var(--color-primary);
+  }
+  .cohort-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-primary);
+    margin-right: 0.4rem;
+  }
+  .faq {
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .faq details {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+  }
+  .faq summary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    cursor: pointer;
+    list-style: none;
+    font-weight: 500;
+  }
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq summary:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+    border-radius: var(--radius-card);
+  }
+  .faq .grow {
+    flex: 1;
+  }
+  .faq .chev {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--color-muted);
+    transition: transform 0.2s ease;
+  }
+  .faq details[open] .chev {
+    transform: rotate(180deg);
+  }
+  .faq p {
+    margin: 0;
+    padding: 0 1.25rem 1.2rem;
+  }
+
+  /* --- mobile sticky enroll bar --- */
+  .sticky-enroll {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 1rem;
+    border-top: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-ink) 92%, transparent);
+    backdrop-filter: blur(12px);
+  }
+  .se-price {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    font-family: var(--font-display);
+  }
+  /* BOTH currencies stay visible (golden rule 6) — region emphasis, never a hide/swap:
+     the detected region's figure is the bold anchor, the other stays smaller/muted.
+     Mirrors RegionPrice's emphasis pattern; India is the default anchor when unset. */
+  .se-amt {
+    font-weight: 700;
+  }
+  .se-india,
+  :global(html[data-region-guess="world"]) .se-world {
+    font-size: 1.05rem;
+    color: var(--color-text);
+  }
+  .se-world,
+  :global(html[data-region-guess="world"]) .se-india {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+  .se-dot {
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+  /* Desktop has the hero + enroll CTAs in view; the sticky bar is a mobile aid only. */
+  @media (min-width: 720px) {
+    .sticky-enroll {
+      display: none;
+    }
+  }
+  /* keep content clear of the fixed bar on mobile — only when the sticky bar renders
+     (a coming-soon course has no bar, so no reserved gap). */
+  @media (max-width: 719px) {
+    .course.has-sticky :global(footer) {
+      margin-bottom: 4.5rem;
+    }
+  }
+</style>

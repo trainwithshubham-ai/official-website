@@ -1,0 +1,73 @@
+---
+// /courses — internal catalog of our landing pages (DevOps flagship + Python + future).
+// Thin: slim header + <CoursesIndex /> + Footer. Data-driven from `catalog` (courses.ts).
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Button from "../components/primitives/Button.astro";
+import CoursesIndex from "../components/CoursesIndex.astro";
+import Footer from "../components/Footer.astro";
+import { site } from "../config/site";
+import { catalog } from "../config/courses";
+
+// Footer "Explore" column → the course landing pages (data-driven; future courses appear).
+const footerLinks = catalog.map((c) => ({
+  href: c.href,
+  label: c.flagship ? "DevOps: Zero to Hero" : c.title,
+}));
+---
+
+<BaseLayout
+  title={`Courses — ${site.brand}`}
+  description="Live, hands-on DevOps, Cloud, Python and AI courses from TrainWithShubham. Pick a cohort and start building — taught the way it's done in production."
+  collection
+>
+  <!-- slim sticky header (logo → home + Log in) — mirrors the course-page header -->
+  <header class="ci-header">
+    <a href="/" class="ci-brand" aria-label={`${site.brand} — home`}>
+      <img
+        src="/logo.png"
+        alt={site.brand}
+        width="40"
+        height="40"
+        class="size-9 rounded-md"
+        loading="eager"
+        decoding="async"
+      />
+      <span class="hidden font-display font-medium sm:inline">{site.brand}</span>
+    </a>
+    <Button
+      href={site.lms.signIn}
+      variant="ghost"
+      target="_blank"
+      rel="noopener noreferrer"
+      data-track="login"
+      class="px-4 py-2 text-sm">Log in</Button
+    >
+  </header>
+
+  <main id="main" tabindex="-1">
+    <CoursesIndex />
+  </main>
+
+  <Footer jumpLinks={footerLinks} />
+</BaseLayout>
+
+<style>
+  .ci-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-line) 70%, transparent);
+    background: color-mix(in srgb, var(--color-ink) 80%, transparent);
+    backdrop-filter: blur(12px);
+  }
+  .ci-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+</style>

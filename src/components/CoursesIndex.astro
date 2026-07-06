@@ -1,0 +1,73 @@
+---
+// CoursesIndex — the internal course catalog (/courses). A card per landing page
+// from `catalog` (courses.ts): the DevOps flagship + every standalone course page,
+// so future courses appear automatically. Price-light — price lives on each landing
+// page; real enrolment catalog stays on Learnyst (linked below the grid).
+// Reads only shared data; near-zero JS (CSS-only hover). --cta yellow stays reserved
+// for Enroll/Pay, so "View course" links use the (per-card) accent, not yellow.
+import Section from "./primitives/Section.astro";
+import CourseCard from "./primitives/CourseCard.astro";
+import { catalog } from "../config/courses";
+import { site } from "../config/site";
+---
+
+<Section eyebrow="courses" title="Learn by building" as="h1">
+  <p class="mb-10 max-w-2xl text-pretty text-muted">
+    Live, hands-on cohorts and courses — pick the one for where you are, and start
+    building. Every one is taught the way it's done in production.
+  </p>
+
+  <ul class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list">
+    {
+      catalog.map((c) => (
+        <li>
+          <CourseCard
+            href={c.href}
+            poster={c.poster}
+            title={c.title}
+            as="h2"
+            theme={c.theme}
+            ctaLabel={c.comingSoon ? "Preview" : "View course"}
+          >
+            <span
+              slot="tags"
+              class="font-mono text-xs uppercase tracking-[0.08em] text-muted"
+            >
+              {c.meta}
+            </span>
+            {c.flagship && (
+              <span
+                slot="tags"
+                class="rounded-[var(--radius-pill)] border border-line px-2 py-0.5 font-mono text-[0.62rem] uppercase tracking-[0.08em] text-primary"
+              >
+                Flagship
+              </span>
+            )}
+            {c.comingSoon && (
+              <span
+                slot="tags"
+                class="rounded-[var(--radius-pill)] border border-line px-2 py-0.5 font-mono text-[0.62rem] uppercase tracking-[0.08em] text-primary"
+              >
+                Coming soon
+              </span>
+            )}
+            <p class="text-pretty text-sm text-muted">{c.blurb}</p>
+          </CourseCard>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="mt-8 text-sm text-muted">
+    Looking for the full catalog?{" "}
+    <a
+      href={site.lms.explore}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-track="all-courses"
+      class="text-primary transition-colors hover:underline"
+    >
+      Browse the store →
+    </a>
+  </p>
+</Section>

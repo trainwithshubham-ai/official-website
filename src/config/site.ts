@@ -18,7 +18,7 @@ export const site = {
   liveHours: "150+", // hours of live instruction across the batch (sheet total: 151)
 
   // --- scarcity ---
-  earlyBirdEndsISO: "2026-07-08T23:59:00+05:30", // real macro deadline (countdown target)
+  earlyBirdEndsISO: "2026-07-10T23:59:00+05:30", // real macro deadline (countdown target)
 
   // --- daily bonus (honest "evergreen") ---
   // A REAL, repeatable bonus: enroll on any given day (before midnight IST) and
@@ -26,9 +26,11 @@ export const site = {
   // rolls each day — a real end-of-day deadline, NOT a fake per-visit 24h reset
   // (golden rule 6). Set enabled:false to remove it instantly.
   bonus: {
-    enabled: true,
+    // Retired: the free bonus is now the two bundled courses (Python for DevOps +
+    // Agentic AI for DevOps), promoted via BonusBar + the homepage BonusCourses strip.
+    // Set enabled:true to bring the ebook back as an additional community perk.
+    enabled: false,
     name: "#90DaysOfDevOps ebook",
-    // TODO: confirm delivery (Learnyst auto-grant on enrollment / emailed link).
   },
 
   // --- pricing ---
