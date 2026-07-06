@@ -40,9 +40,12 @@ interface Props {
 const {
   title = `${site.product} — ${site.brand}`,
   description = "DevOps: Zero to Hero — AI-powered live classes. From fundamentals to production: Docker, Kubernetes, Terraform, AWS, CI/CD, observability and Agentic AI.",
-  image = "/og-image.png",
-  imageWidth = 1200,
-  imageHeight = 630,
+  // Default social card = the real, on-brand DevOps course poster (1280×720),
+  // consistent with how course pages use their posters. (The old /og-image.png was a
+  // stale teal-palette card with a wrong price/date.)
+  image = "/posters/devops.jpg",
+  imageWidth = 1280,
+  imageHeight = 720,
   imageAlt = `${site.brand} — ${site.product}`,
   course,
   collection,
