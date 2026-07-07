@@ -107,7 +107,8 @@ export const courses = {
       "AWS CDK",
       "FastAPI",
       "argparse",
-      "Strands AI",
+      "LangChain",
+      "Ollama",
       "GitHub",
     ],
     // What's included — all real (live weekend + recorded self-study + open-source repo).
@@ -145,7 +146,7 @@ export const courses = {
       {
         module: "Automating system tasks with Python",
         mode: "live",
-        desc: "Script real system and ops tasks the way DevOps engineers do.",
+        desc: "Script real system and ops tasks — system health with psutil, the way DevOps engineers do.",
       },
       {
         module: "AWS automation with Python (boto3 + CDK)",
@@ -158,14 +159,19 @@ export const courses = {
         desc: "Build and serve an internal DevOps utilities API end to end.",
       },
       {
-        module: "AI logs agent with Strands — live demo",
+        module: "AI log-analysis agent — live demo",
         mode: "live",
-        desc: "Watch an AI agent read logs and suggest fixes (full build is recorded).",
+        desc: "Watch a local AI agent (LangGraph + Ollama) read logs and suggest fixes — no API keys (full build is recorded).",
       },
       {
         module: "Python fundamentals deep-dive",
         mode: "recorded",
         desc: "Strengthen the core at your own pace.",
+      },
+      {
+        module: "Working with APIs & JSON (requests)",
+        mode: "recorded",
+        desc: "Call real APIs, parse JSON, and keep secrets in env vars.",
       },
       {
         module: "File handling & log analysis",
@@ -180,9 +186,9 @@ export const courses = {
       },
       { module: "DevOps thinking & problem-solving", mode: "recorded" },
       {
-        module: "AI logs agent — full recorded build",
+        module: "Local log-analysis agent — full build",
         mode: "recorded",
-        desc: "Build the Strands agent end to end, step by step.",
+        desc: "Build the agent end to end with LangGraph, LangChain and Ollama — runs locally, step by step.",
       },
       {
         module: "Capstone completion + interview prep (STAR)",
