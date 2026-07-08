@@ -5,6 +5,7 @@
 // Data mirrors curriculumSchema in content.config.ts.
 import Section from "./primitives/Section.astro";
 import ToolIcon from "./primitives/ToolIcon.astro";
+import Button from "./primitives/Button.astro";
 import { curriculum } from "../content/data";
 import { site } from "../config/site";
 
@@ -80,6 +81,31 @@ const liveMeta = [
       ))
     }
   </ol>
+
+  {/* Wayfinding to the exhaustive syllabus on the LMS. Ghost (not the yellow
+      Enroll CTA — golden rule 5); data-track fires outbound_click, not a
+      checkout event; opens on the LMS host in a new tab so the sales page
+      stays alive (golden rule 8 — link out, never embed). */}
+  <div class="full-syllabus">
+    <Button
+      variant="ghost"
+      href={site.lms.devopsCurriculum}
+      data-track="devops-full-curriculum"
+      target="_blank"
+    >
+      See the full syllabus
+      <svg class="ext" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <path
+          d="M7.5 4.5h8v8M15.5 4.5l-10 10"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <span class="sr-only">(opens on the LMS in a new tab)</span>
+    </Button>
+  </div>
 </Section>
 
 <style>
@@ -273,5 +299,17 @@ const liveMeta = [
     width: 8px;
     height: 2px;
     background: var(--color-primary);
+  }
+
+  /* Full-syllabus wayfinding — sits after the rail, aligned with the stage
+     cards (past the 2.5rem rail gutter) so it reads as the roadmap's next step. */
+  .full-syllabus {
+    margin-top: 2rem;
+    padding-left: 2.5rem;
+  }
+  .ext {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
   }
 </style>

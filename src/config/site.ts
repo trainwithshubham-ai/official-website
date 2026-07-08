@@ -64,6 +64,10 @@ export const site = {
     base: "https://courses.trainwithshubham.ai",
     signIn: "https://courses.trainwithshubham.ai/learn/account/signin",
     explore: "https://courses.trainwithshubham.ai/learn", // catalog / "All courses"
+    // Full DevOps syllabus on the LMS — the complete, module-by-module curriculum
+    // (the on-page rail is a curated marketing view; this is the exhaustive list).
+    devopsCurriculum:
+      "https://courses.trainwithshubham.ai/learn/DevOps-Zero-To-Hero-AI-Powered-Curriculum",
     // TODO: add when live —
     // masterclasses: "https://courses.trainwithshubham.ai/...",
     // ebooks:        "https://courses.trainwithshubham.ai/...",
@@ -117,6 +121,6 @@ export const site = {
   contactEmail: "trainwithshubham.ai@gmail.com",
 
   // --- analytics ---
-  ga4Id: "TODO_GA4_ID",
+  ga4Id: "G-H313D578QS",
   metaPixelId: "TODO_META_PIXEL_ID",
 } as const;
