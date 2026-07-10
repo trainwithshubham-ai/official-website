@@ -11,7 +11,7 @@ export const site = {
   // --- batch ---
   batchStartISO: "2026-07-26T20:00:00+05:30",
   classDays: "Sat & Sun",
-  classTime: "8–10 PM IST",
+  classTime: "7–10 PM IST",
   // Live-schedule facts authored from the ops sheet (references only — the sheet
   // is NEVER embedded/fetched; golden rule 8). Update here if the batch changes.
   programLength: "3-month", // 26 Jul → late Oct 2026
