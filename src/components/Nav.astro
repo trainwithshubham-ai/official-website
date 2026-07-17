@@ -1,8 +1,9 @@
 ---
 // Nav — sticky, quiet, conversion-forward. Logo + jump links + a compact
-// Countdown chip + the Enroll CTA. JS-free: a persistent translucent backdrop
-// reads as "floating" without a scroll listener (interactivity budget = the
-// countdown only). Collapses gracefully to logo + Enroll at 380px.
+// Countdown chip + a ghost Log-in button (out to the Learnyst LMS) + the yellow
+// Enroll CTA. JS-free: a persistent translucent backdrop reads as "floating"
+// without a scroll listener (interactivity budget = the countdown only).
+// Collapses gracefully to logo + Log in + Enroll at 380px.
 import { site } from "../config/site";
 import Button from "./primitives/Button.astro";
 import Countdown from "./Countdown.astro";
@@ -63,6 +64,16 @@ const links = [
       <div class="hidden lg:block">
         <Countdown variant="chip" />
       </div>
+      <Button
+        variant="ghost"
+        href={site.lms.signIn}
+        class="px-4 py-2 text-sm"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-track="login"
+        aria-label="Log in to your account on the student platform"
+        >Log in</Button
+      >
       <Button href="#pricing" class="px-4 py-2 text-sm">Enroll now</Button>
     </div>
   </nav>
