@@ -18,7 +18,7 @@ export const site = {
   liveHours: "150+", // hours of live instruction across the batch (sheet total: 151)
 
   // --- scarcity ---
-  earlyBirdEndsISO: "2026-07-18T23:59:00+05:30", // real macro deadline (countdown target)
+  earlyBirdEndsISO: "2026-07-20T23:59:00+05:30", // real macro deadline (countdown target)
 
   // --- daily bonus (honest "evergreen") ---
   // A REAL, repeatable bonus: enroll on any given day (before midnight IST) and
