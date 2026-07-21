@@ -9,12 +9,12 @@ export const site = {
   tagline: "Happy Learning", // warm sign-off (footer / instructor / closing CTA)
 
   // --- batch ---
-  batchStartISO: "2026-07-26T20:00:00+05:30",
+  batchStartISO: "2026-07-25T20:00:00+05:30",
   classDays: "Sat & Sun",
   classTime: "7–10 PM IST",
   // Live-schedule facts authored from the ops sheet (references only — the sheet
   // is NEVER embedded/fetched; golden rule 8). Update here if the batch changes.
-  programLength: "3-month", // 26 Jul → late Oct 2026
+  programLength: "3-month", // 25 Jul → late Oct 2026
   liveHours: "150+", // hours of live instruction across the batch (sheet total: 151)
 
   // --- scarcity ---
