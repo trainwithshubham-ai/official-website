@@ -1,11 +1,9 @@
 ---
 // Pricing — the conversion core (ARCHITECTURE.md §4.10).
-// Transparent dual pricing (India / US, no IP geo-switch — golden rule 6),
-// the early-bird window Countdown, inclusions, and the Enroll CTA.
-//
-// Honest scarcity: when the countdown expires it sets html[data-early-bird-ended]
-// (see Countdown.astro). CSS below swaps the early-bird card for the full-price
-// card — no JS here, no layout shift, and it can't show a fake discount.
+// Transparent dual pricing (India / US, no IP geo-switch — golden rule 6), a
+// "batch starts in" Countdown, inclusions, and the Enroll CTA. One standing price:
+// `now` beside a struck `list` original — a discount, NOT an early-bird window
+// (no expiry, no price flip; golden rule 6 — honesty over fake urgency).
 import { site } from "../config/site";
 import Section from "./primitives/Section.astro";
 import Countdown from "./Countdown.astro";
@@ -14,75 +12,43 @@ import BonusBar from "./BonusBar.astro";
 import { inclusions } from "../content/data";
 
 const refundReady = !site.refundPolicy.startsWith("TODO");
-// Build-time gate: if the early-bird window has already passed at build, ship the
-// full-price card as the DEFAULT (no fake-discount flash before JS runs). The
-// runtime swap (html[data-early-bird-ended], set by Countdown) still handles a
-// tab that's open across the deadline. Site rebuilds on every push, so this stays
-// accurate. (ARCHITECTURE §5 / golden rule 6 — honesty over fake urgency.)
-const earlyBirdOver = Date.now() > new Date(site.earlyBirdEndsISO).getTime();
 
-// Screen-reader price breakdowns — built as strings so Astro's whitespace
-// trimming around {expressions} can't drop spaces between price + currency.
-const earlyBirdSr = `Early-bird pricing: ${site.price.india.early} for India (regularly ${site.price.india.regular}), ${site.price.world.early} for the rest of the world (regularly ${site.price.world.regular}). The price rises when the early-bird window closes; choose your region to pay.`;
-const fullPriceSr = `Full price ${site.price.india.regular} for India, ${site.price.world.regular} for the rest of the world. The early-bird window has closed.`;
+// Screen-reader price breakdown — built as a string so Astro's whitespace trimming
+// around {expressions} can't drop spaces between price + currency.
+const priceSr = `Price: ${site.price.india.now} for India (originally ${site.price.india.list}), ${site.price.world.now} for the rest of the world (originally ${site.price.world.list}). Choose your region to pay.`;
 ---
 
-<Section id="pricing" eyebrow="pricing" title="Enroll at the early-bird price">
+<Section id="pricing" eyebrow="pricing" title="Enrol now — secure your seat">
   <div
-    class:list={[
-      "pricing-card surface-card grad-border mx-auto w-full max-w-xl rounded-[var(--radius-card)] p-8 text-center sm:p-10",
-      earlyBirdOver && "is-expired",
-    ]}
+    class="pricing-card surface-card grad-border mx-auto w-full max-w-xl rounded-[var(--radius-card)] p-8 text-center sm:p-10"
   >
-    <!-- EARLY-BIRD (default) -->
-    <div class="price-early">
-      <p
-        class="font-mono text-[length:var(--text-eyebrow)] lowercase tracking-[0.08em] text-signal"
+    <p
+      class="font-mono text-[length:var(--text-eyebrow)] lowercase tracking-[0.08em] text-primary"
+    >
+      ❯ your price
+    </p>
+    <!-- Region-priced: the visitor's likely currency (browser timezone, never
+         IP — flag set pre-paint on <html>) is the big anchor; the other stays
+         visible but smaller. Both always shown — emphasis, never a hide/swap
+         (golden rule 6). India is the default anchor when region is unknown. -->
+    <div aria-hidden="true">
+      <div
+        class="mt-3 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1"
       >
-        ❯ early-bird price
+        <span class="text-lg text-muted">from</span>
+        <span class="price-amt amt-india">{site.price.india.now}</span>
+        <span class="price-sep">·</span>
+        <span class="price-amt amt-world">{site.price.world.now}</span>
+      </div>
+      <p class="mt-2 text-sm text-muted">
+        originally <s>{site.price.india.list}</s> /
+        <s>{site.price.world.list}</s>
       </p>
-      <!-- Region-priced: the visitor's likely currency (browser timezone, never
-           IP — flag set pre-paint on <html>) is the big anchor; the other stays
-           visible but smaller. Both always shown — emphasis, never a hide/swap
-           (golden rule 6). India is the default anchor when region is unknown. -->
-      <div aria-hidden="true">
-        <div
-          class="mt-3 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1"
-        >
-          <span class="text-lg text-muted">from</span>
-          <span class="price-amt amt-india">{site.price.india.early}</span>
-          <span class="price-sep">·</span>
-          <span class="price-amt amt-world">{site.price.world.early}</span>
-        </div>
-        <p class="mt-2 text-sm text-muted">
-          regularly <s>{site.price.india.regular}</s> /
-          <s>{site.price.world.regular}</s> · price rises when the early-bird
-          window closes.
-        </p>
-      </div>
-      <p class="sr-only">{earlyBirdSr}</p>
-
-      <div class="mt-6 flex justify-center">
-        <Countdown variant="full" class="items-center" />
-      </div>
     </div>
+    <p class="sr-only">{priceSr}</p>
 
-    <!-- FULL PRICE (revealed by CSS after expiry, or default if built post-deadline) -->
-    <div class="price-full">
-      <p
-        class="font-mono text-[length:var(--text-eyebrow)] lowercase tracking-[0.08em] text-muted"
-      >
-        ❯ full price
-      </p>
-      <div class="mt-4" aria-hidden="true">
-        <div class="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1">
-          <span class="price-amt amt-india">{site.price.india.regular}</span>
-          <span class="price-sep">·</span>
-          <span class="price-amt amt-world">{site.price.world.regular}</span>
-        </div>
-        <p class="mt-3 text-sm text-muted">The early-bird window has closed.</p>
-      </div>
-      <p class="sr-only">{fullPriceSr}</p>
+    <div class="mt-6 flex justify-center">
+      <Countdown variant="full" class="items-center" />
     </div>
 
     <!-- inclusions -->
@@ -160,23 +126,5 @@ const fullPriceSr = `Full price ${site.price.india.regular} for India, ${site.pr
     font-size: 1.5rem;
     font-weight: 300;
     color: var(--color-muted);
-  }
-
-  .price-full {
-    display: none;
-  }
-  /* runtime swap — Countdown sets this on expiry while a tab is open */
-  :global(html[data-early-bird-ended]) .price-early {
-    display: none;
-  }
-  :global(html[data-early-bird-ended]) .price-full {
-    display: block;
-  }
-  /* build-time swap — page was built after the deadline */
-  .pricing-card.is-expired .price-early {
-    display: none;
-  }
-  .pricing-card.is-expired .price-full {
-    display: block;
   }
 </style>

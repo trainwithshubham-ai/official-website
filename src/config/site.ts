@@ -17,9 +17,6 @@ export const site = {
   programLength: "3-month", // 25 Jul → late Oct 2026
   liveHours: "150+", // hours of live instruction across the batch (sheet total: 151)
 
-  // --- scarcity ---
-  earlyBirdEndsISO: "2026-07-22T23:59:00+05:30", // real macro deadline (countdown target)
-
   // --- daily bonus (honest "evergreen") ---
   // A REAL, repeatable bonus: enroll on any given day (before midnight IST) and
   // get the ebook. The bonus timer counts to TONIGHT'S midnight IST and genuinely
@@ -36,13 +33,13 @@ export const site = {
   // --- pricing ---
   // India bills in INR, rest of world in USD — shown transparently (no IP
   // geo-switch, golden rule 6). The page LEADS with the India price; the world
-  // price stays in the screen-reader text and at Learnyst checkout. `regular` is
-  // the pre-early-bird list price: the struck-through anchor now, and the
-  // post-deadline full-price card after the window closes. Pre-formatted display
-  // strings (currency symbol included) — no math is done on these anywhere.
+  // price stays in the screen-reader text and at Learnyst checkout. `now` is the
+  // price you pay; `list` is the struck-through original shown beside it — a
+  // standing discount, NOT an early-bird window (there is no expiry or price flip).
+  // Pre-formatted display strings (currency symbol included) — no math anywhere.
   price: {
-    india: { early: "₹14,999", regular: "₹25,000" },
-    world: { early: "$249", regular: "$299" },
+    india: { now: "₹19,999", list: "₹25,000" },
+    world: { now: "$249", list: "$299" },
   },
 
   // --- conversion ---

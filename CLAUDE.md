@@ -200,14 +200,13 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
 
 ## Key facts (mirror of `site.ts` — edit there, not here)
 
-- Product: DevOps: Zero to Hero (AI Powered) · cohort batch · starts 26 Jul 2026
+- Product: DevOps: Zero to Hero (AI Powered) · cohort batch · starts 25 Jul 2026
   · open to all levels (beginners welcome, no prior experience required)
-- Early bird ends: 3 Jul 2026, 23:59 IST
-- Price (dual currency, no IP geo-switch): India ~~₹25,000~~ → early bird
-  **₹14,999**; rest of world ~~$249~~ → early bird **$199**. Page leads with the
-  India price; the world price lives in the SR breakdown + at checkout. Region pay
-  buttons are price-free (flag / globe).
+- No early-bird window — the offer has ended. There is NO countdown-to-price and
+  NO price flip; the Countdown now counts down to the **batch start** (`batchStartISO`).
+- Price (dual currency, no IP geo-switch): India ~~₹25,000~~ → **₹19,999**; rest
+  of world ~~$299~~ → **$249**. Shown as a standing `now`/`list` discount (never
+  "early bird"). Page leads with the India price; the world price lives in the SR
+  breakdown + at checkout. Region pay buttons are price-free (flag / globe).
 - Proof: 10,000+ engineers trained; 4.9 ★ · 232 Google reviews (real, seeded in
   reviews.json); YouTube 1.5L+, LinkedIn 1L+, Instagram 10k+
-- Site should be **live ~30 Jun** to give an early-bird selling runway — 26 Jul
-  is the batch start, not the site launch.

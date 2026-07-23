@@ -23,8 +23,8 @@ interface Props {
   checkout?: CourseCheckout;
   /** Per-course prices (for the aria-labels); defaults to site.price. */
   price?: CoursePrice;
-  /** SR-label price qualifier. Defaults to "early bird" (the live DevOps page's
-   *  early-bird pricing); pass "" for courses with no early-bird window (/python). */
+  /** SR-label price qualifier appended after the amount (e.g. "launch price").
+   *  Defaults to "" — the page carries no early-bird/limited-window framing. */
   priceQualifier?: string;
   /** Course slug forwarded to the enroll_click analytics event (per-course funnel). */
   courseSlug?: string;
@@ -34,7 +34,7 @@ const {
   note = false,
   checkout = site.checkout,
   price = site.price,
-  priceQualifier = "early bird",
+  priceQualifier = "",
   courseSlug,
 } = Astro.props;
 const q = priceQualifier ? ` ${priceQualifier}` : "";
@@ -49,7 +49,7 @@ const q = priceQualifier ? ` ${priceQualifier}` : "";
       data-region="india"
       data-region-btn="india"
       data-course={courseSlug}
-      aria-label={`Pay — India pricing, ${price.india.early}${q} (opens in a new tab)`}
+      aria-label={`Pay — India pricing, ${price.india.now}${q} (opens in a new tab)`}
       class="region-btn w-full sm:w-auto sm:min-w-[13rem]"
     >
       <FlagIndia width={18} height={12} />
@@ -63,7 +63,7 @@ const q = priceQualifier ? ` ${priceQualifier}` : "";
       data-region="world"
       data-region-btn="world"
       data-course={courseSlug}
-      aria-label={`Pay — rest-of-world pricing, ${price.world.early}${q} (opens in a new tab)`}
+      aria-label={`Pay — rest-of-world pricing, ${price.world.now}${q} (opens in a new tab)`}
       class="region-btn w-full sm:w-auto sm:min-w-[13rem]"
     >
       <Globe size={18} />

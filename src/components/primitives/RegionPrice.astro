@@ -11,16 +11,16 @@ interface Props {
   class?: string;
 }
 const { price, class: className = "" } = Astro.props;
-const sr = `Price: ${price.india.early} for India (regularly ${price.india.regular}), ${price.world.early} for the rest of the world (regularly ${price.world.regular}). Choose your region to pay.`;
+const sr = `Price: ${price.india.now} for India (originally ${price.india.list}), ${price.world.now} for the rest of the world (originally ${price.world.list}). Choose your region to pay.`;
 ---
 
 <div class:list={["price", className]} aria-hidden="true">
   <span class="price-from">from</span>
-  <span class="price-amt amt-india">{price.india.early}</span>
+  <span class="price-amt amt-india">{price.india.now}</span>
   <span class="price-sep">·</span>
-  <span class="price-amt amt-world">{price.world.early}</span>
+  <span class="price-amt amt-world">{price.world.now}</span>
   <span class="price-reg">
-    regularly <s>{price.india.regular}</s> / <s>{price.world.regular}</s>
+    originally <s>{price.india.list}</s> / <s>{price.world.list}</s>
   </span>
 </div>
 <p class="sr-only">{sr}</p>

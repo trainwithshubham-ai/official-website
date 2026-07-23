@@ -5,11 +5,11 @@
   <circle cx="980" cy="150" r="300" fill="#21D4B4" opacity="0.10"/>
 
   <!-- eyebrow -->
-  <text x="80" y="150" fill="#8A97A6" font-size="26" font-family="'SF Mono','Menlo',monospace">&#10095; beginners welcome &#183; starts 18 Jul 2026</text>
+  <text x="80" y="150" fill="#8A97A6" font-size="26" font-family="'SF Mono','Menlo',monospace">&#10095; beginners welcome &#183; starts 25 Jul 2026</text>
 
   <!-- price chip (top-right, above the title) -->
   <rect x="858" y="92" width="262" height="62" rx="31" fill="#12181F" stroke="#243240"/>
-  <text x="989" y="131" fill="#E8EEF2" font-size="26" text-anchor="middle">early bird <tspan font-weight="700">$149</tspan></text>
+  <text x="989" y="131" fill="#E8EEF2" font-size="26" text-anchor="middle">from <tspan font-weight="700">$249</tspan></text>
 
   <!-- title -->
   <text x="78" y="258" fill="#E8EEF2" font-size="72" font-weight="700">DevOps: Zero to Hero</text>

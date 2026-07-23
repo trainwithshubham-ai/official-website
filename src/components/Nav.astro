@@ -80,25 +80,25 @@ const links = [
 
   <!-- Mobile/tablet urgency: the desktop nav chip is hidden below lg, so phone
        users would feel no deadline until Pricing. This slim strip keeps the
-       early-bird countdown persistent. The "ends in" label hides on expiry (the
-       chip itself flips to "early-bird ended" via its cd-ended state) so the
-       strip never contradicts itself. Reuses the shared Countdown island. -->
+       batch-start countdown persistent. Once the batch starts the chip flips to
+       "batch is live" via its cd-ended state, and the "starts in" label hides
+       (see CSS) so the strip never contradicts itself. Reuses the Countdown island. -->
   <div
     class="nav-urgency flex items-center justify-center gap-2 border-t border-line/60 px-4 py-1.5 lg:hidden"
   >
     <span
       class="nav-urgency-lbl font-mono text-[0.7rem] lowercase tracking-[0.06em] text-muted"
     >
-      ❯ early-bird ends in
+      ❯ batch starts in
     </span>
     <Countdown variant="chip" />
   </div>
 </header>
 
 <style>
-  /* On expiry the chip flips to "early-bird ended · full price" itself, so drop
-     the now-false "ends in" lead-in. */
-  :global(html[data-early-bird-ended]) .nav-urgency-lbl {
+  /* Once the batch is live the chip shows "batch is live" itself, so drop the
+     now-false "starts in" lead-in. Keyed off the chip's own expired state. */
+  :global(.nav-urgency:has([data-expired="true"])) .nav-urgency-lbl {
     display: none;
   }
   /* In the slim mobile strip, drop the seconds unit: it keeps the label + chip
@@ -107,7 +107,7 @@ const links = [
   :global(.nav-urgency .cd-unit:last-child) {
     display: none;
   }
-  /* Compact the chip so "early-bird ends in" + d/h/m fits at 380px. */
+  /* Compact the chip so "batch starts in" + d/h/m fits at 380px. */
   :global(.nav-urgency .cd-units) {
     gap: 0.2rem;
   }

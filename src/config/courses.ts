@@ -11,8 +11,10 @@
 import { site } from "./site";
 
 export interface CoursePrice {
-  india: { early: string; regular: string };
-  world: { early: string; regular: string };
+  /** `now` = the price you pay; `list` = the struck-through original beside it
+   *  (a standing discount, never an early-bird window — no expiry, no price flip). */
+  india: { now: string; list: string };
+  world: { now: string; list: string };
 }
 export interface CourseCheckout {
   india: string;
@@ -63,8 +65,6 @@ export interface Course {
   schedule?: { dates: string; time: string };
   /** Topic-based syllabus, split live (weekend) vs recorded (self-study). */
   curriculum?: { module: string; mode: "live" | "recorded"; desc?: string }[];
-  /** Optional — set to enable a countdown; omitted = discount-only. */
-  earlyBirdEndsISO?: string;
   /** Optional cohort start (ISO). */
   batchStartISO?: string;
   /** Optional per-course accent (text-safe on dark). Unset → brand purple. */
@@ -86,8 +86,8 @@ export const courses = {
     // Also bundled free with the flagship DevOps enrolment.
     bonus: true,
     price: {
-      india: { early: "₹1,999", regular: "₹4,999" },
-      world: { early: "$19", regular: "$49" },
+      india: { now: "₹1,999", list: "₹4,999" },
+      world: { now: "$19", list: "$49" },
     },
     checkout: {
       // Region-specific Learnyst fast-checkout (same course 281058, region priceId):
@@ -316,9 +316,9 @@ export const flagshipBonuses: BonusCourse[] = Object.values(courses)
   .map((c: Course) => ({
     href: `/${c.slug}`,
     title: c.title,
-    // "Normally ₹X" = the REGULAR standalone price (matches the course page's struck
+    // "Normally ₹X" = the LIST standalone price (matches the course page's struck
     // "regularly" figure), so the bonus reflects full value, not the discounted price.
-    value: c.price?.india.regular,
+    value: c.price?.india.list,
     poster: c.poster,
     comingSoon: c.comingSoon,
     theme: c.theme,

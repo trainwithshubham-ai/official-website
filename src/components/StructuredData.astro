@@ -65,16 +65,9 @@ if (collection) {
   graph = [organization];
 } else if (course) {
   // --- Standalone course page ---
-  // Mirror Pricing's build-time gate: once the early-bird window has passed, advertise
-  // the REGULAR price and drop priceValidUntil (a past validUntil marks the offer expired).
-  const courseEarlyBirdOver =
-    !!course.earlyBirdEndsISO &&
-    Date.now() > new Date(course.earlyBirdEndsISO).getTime();
-  const validUntil = courseEarlyBirdOver
-    ? undefined
-    : course.earlyBirdEndsISO?.slice(0, 10);
-  const pick = (p: { early: string; regular: string }) =>
-    toNum(courseEarlyBirdOver ? p.regular : p.early);
+  // Advertise the price the page actually renders (the `now` price). No early-bird
+  // window means no priceValidUntil — a standing offer with no expiry.
+  const pick = (p: { now: string; list: string }) => toNum(p.now);
   // Trailing slash to match BaseLayout's canonical (new URL(pathname) → "/python/").
   const url = `${site.domain}/${course.slug}/`;
   graph = [
@@ -100,8 +93,8 @@ if (collection) {
       ...(course.price
         ? {
             offers: [
-              makeOffer("INR", pick(course.price.india), `${url}#enroll`, validUntil),
-              makeOffer("USD", pick(course.price.world), `${url}#enroll`, validUntil),
+              makeOffer("INR", pick(course.price.india), `${url}#enroll`),
+              makeOffer("USD", pick(course.price.world), `${url}#enroll`),
             ],
           }
         : {}),
@@ -121,17 +114,10 @@ if (collection) {
   ];
 } else {
   // --- Main DevOps course (default) ---
-  // Mirror Pricing.astro's build-time gate so the schema price equals the rendered price.
-  const earlyBirdOver = Date.now() > new Date(site.earlyBirdEndsISO).getTime();
-  const inrPrice = toNum(
-    earlyBirdOver ? site.price.india.regular : site.price.india.early,
-  );
-  const usdPrice = toNum(
-    earlyBirdOver ? site.price.world.regular : site.price.world.early,
-  );
-  const priceValidUntil = earlyBirdOver
-    ? undefined
-    : site.earlyBirdEndsISO.slice(0, 10);
+  // Advertise the price the page actually renders (the `now` price). No early-bird
+  // window means no priceValidUntil — a standing offer with no expiry.
+  const inrPrice = toNum(site.price.india.now);
+  const usdPrice = toNum(site.price.world.now);
 
   // Same token substitution FAQ.astro applies (no literal {classDays}… placeholders).
   const batchStart = new Date(site.batchStartISO).toLocaleDateString("en-IN", {
@@ -172,8 +158,8 @@ if (collection) {
         },
       },
       offers: [
-        makeOffer("INR", inrPrice, pricingUrl, priceValidUntil),
-        makeOffer("USD", usdPrice, pricingUrl, priceValidUntil),
+        makeOffer("INR", inrPrice, pricingUrl),
+        makeOffer("USD", usdPrice, pricingUrl),
       ],
     },
     {

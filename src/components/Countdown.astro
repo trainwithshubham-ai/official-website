@@ -1,17 +1,17 @@
 ---
 // Countdown — the ONLY interactive island (ARCHITECTURE.md §5).
-// Framed as the deploy window for early-bird pricing (BRAND.md §2, §6).
+// Framed as the deploy window counting down to the batch start (BRAND.md §2, §6).
 //
-// One component, four mounts (nav / hero / pricing / final CTA). The <script>
-// below is emitted once by Astro no matter how many times the component renders;
-// it drives every [data-countdown] instance on the page.
+// One component, several mounts (nav / hero / pricing). The <script> below is
+// emitted once by Astro no matter how many times the component renders; it drives
+// every [data-countdown] instance on the page.
 //
 // Honest scarcity: on expiry it does NOT reset or vanish — it flips to a calm
-// "early-bird ended · full price live" state via [data-expired] (CSS swap, no
-// layout shift, works even if JS is slow).
+// "batch is live · enrolment open" state via [data-expired] (CSS swap, no layout
+// shift, works even if JS is slow).
 //
 // Two modes (one shared script):
-//   • fixed  (default) — counts to site.earlyBirdEndsISO, the real macro deadline.
+//   • fixed  (default) — counts to site.batchStartISO, the real cohort start.
 //   • daily  — counts to TONIGHT'S midnight IST for the repeatable daily bonus,
 //     then genuinely rolls to the next day. A real end-of-day deadline, never a
 //     fake per-visit 24h reset (golden rule 6 stays intact).
@@ -19,7 +19,7 @@ import { site } from "../config/site";
 
 interface Props {
   variant?: "full" | "chip" | "bonus";
-  /** "daily" rolls to the next IST midnight (bonus); "fixed" is the early-bird date. */
+  /** "daily" rolls to the next IST midnight (bonus); "fixed" is the batch-start date. */
   mode?: "fixed" | "daily";
   /** Expose the deadline to screen readers. Set on exactly ONE mount per page
    *  so the same deadline isn't announced multiple times. */
@@ -34,7 +34,7 @@ const {
 } = Astro.props;
 
 // Static, screen-reader-friendly deadline (the ticking digits are aria-hidden).
-const deadlineLabel = new Date(site.earlyBirdEndsISO).toLocaleString("en-IN", {
+const deadlineLabel = new Date(site.batchStartISO).toLocaleString("en-IN", {
   day: "numeric",
   month: "long",
   year: "numeric",
@@ -55,7 +55,7 @@ const units = [
   class:list={["countdown", `countdown--${variant}`, className]}
   data-countdown
   data-mode={mode}
-  data-deadline={mode === "fixed" ? site.earlyBirdEndsISO : undefined}
+  data-deadline={mode === "fixed" ? site.batchStartISO : undefined}
   data-expired="false"
 >
   {
@@ -71,7 +71,7 @@ const units = [
         <div class="cd-live" aria-hidden="true">
           {variant === "full" && (
             <p class="font-mono text-[length:var(--text-eyebrow)] lowercase tracking-[0.08em] text-signal">
-              ❯ early-bird window closes
+              ❯ batch starts in
             </p>
           )}
           <div class="cd-units">
@@ -91,13 +91,13 @@ const units = [
           <span class="text-signal" aria-hidden="true">
             ●
           </span>{" "}
-          early-bird ended · full price live
+          batch is live · enrolment open
         </p>
 
         {/* Accessible deadline — exposed on exactly ONE mount (announceDeadline)
             so screen readers don't hear the same deadline repeated. */}
         {announceDeadline && (
-          <span class="sr-only">Early-bird pricing ends {deadlineLabel} IST.</span>
+          <span class="sr-only">The batch starts {deadlineLabel} IST.</span>
         )}
       </Fragment>
     )
@@ -184,10 +184,10 @@ const units = [
 
 <script>
   // Drives every countdown on the page from ONE timer. No framework.
-  // Per node: mode="fixed" → counts to its data-deadline, then flips to the
-  // expired state (and signals global expiry). mode="daily" → counts to the next
-  // midnight IST and ROLLS to the following day (the repeatable bonus deadline);
-  // it never expires. IST is a fixed +5:30 offset (no DST).
+  // Per node: mode="fixed" → counts to its data-deadline (the batch start), then
+  // flips to the calm expired state. mode="daily" → counts to the next midnight
+  // IST and ROLLS to the following day (the repeatable bonus deadline); it never
+  // expires. IST is a fixed +5:30 offset (no DST).
   const nodes = Array.from(
     document.querySelectorAll<HTMLElement>("[data-countdown]"),
   );
@@ -225,8 +225,6 @@ const units = [
           diff = st.target - Date.now();
         } else {
           st.n.dataset.expired = "true";
-          // signal global expiry so Pricing can flip to full price (ARCHITECTURE §5)
-          document.documentElement.dataset.earlyBirdEnded = "true";
           st.done = true;
           return;
         }
