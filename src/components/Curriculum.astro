@@ -43,8 +43,11 @@ const liveMeta = [
           <details class="surface-card card" open={i === 0}>
             <summary>
               <span class="grow">
-                <span class="stage-label">
-                  stage {s.stage} · {s.label}
+                <span class="stage-head">
+                  <span class="stage-label">
+                    stage {s.stage} · {s.label}
+                  </span>
+                  {i === 0 && <span class="free-pill">Free preview</span>}
                 </span>
                 <h3 class="mt-1">{s.title}</h3>
                 <span class="tags">
@@ -76,6 +79,30 @@ const liveMeta = [
                 <li>{b}</li>
               ))}
             </ul>
+            {i === 0 && (
+              /* First session is a free preview — link out to the LMS (new tab,
+                 never embedded — golden rule 8). data-track fires outbound_click,
+                 not a checkout event. */
+              <a
+                class="free-watch"
+                href={site.lms.demoLesson}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-track="demo-lesson-curriculum"
+              >
+                ❯ Watch this session free
+                <svg class="ext" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path
+                    d="M7.5 4.5h8v8M15.5 4.5l-10 10"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                <span class="sr-only">(opens on the LMS in a new tab)</span>
+              </a>
+            )}
           </details>
         </li>
       ))
@@ -214,11 +241,51 @@ const liveMeta = [
     flex: 1;
   }
 
+  .stage-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
   .stage-label {
     font-family: var(--font-mono);
     font-size: 0.78rem;
     letter-spacing: 0.06em;
     color: var(--color-primary);
+  }
+
+  /* "Free preview" pill on the first stage — signal-amber (this is genuine, real
+     access; not the yellow CTA — golden rule 5). */
+  .free-pill {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-signal);
+    padding: 0.15rem 0.5rem;
+    border: 1px solid color-mix(in srgb, var(--color-signal) 45%, var(--color-line));
+    border-radius: var(--radius-pill);
+  }
+
+  /* First-session watch link — inside the open accordion, aligned with the
+     bullets. Mono, primary, with an external-link arrow. */
+  .free-watch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 1.25rem 1.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-primary);
+    transition: color 0.15s ease;
+  }
+  .free-watch:hover {
+    color: var(--color-text);
+  }
+  .free-watch:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 
   .tags {

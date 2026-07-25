@@ -1,0 +1,55 @@
+---
+// ClosingCTA — the final conversion beat, after the FAQ (ARCHITECTURE.md §4).
+// A last risk-reducer for anyone who scrolled the whole page without enrolling:
+// enrol, or watch the first session free first. The free-demo link goes OUT to the
+// LMS in a new tab (never embedded — golden rule 8); data-track fires outbound_click,
+// not a checkout event. Yellow stays on Enrol only (golden rule 5).
+import { site } from "../config/site";
+import Section from "./primitives/Section.astro";
+import Button from "./primitives/Button.astro";
+---
+
+<Section class="closing">
+  <div
+    class="closing-card surface-card grad-border mx-auto flex w-full max-w-2xl flex-col items-center gap-5 rounded-[var(--radius-card)] p-8 text-center sm:p-10"
+  >
+    <p
+      class="font-mono text-[length:var(--text-eyebrow)] lowercase tracking-[0.08em] text-primary"
+    >
+      ❯ still deciding?
+    </p>
+    <h2 class="max-w-xl text-balance">See a real session before you enrol</h2>
+    <p class="max-w-md text-pretty text-muted">
+      Watch the first session — “Introduction to DevOps” — free, then decide.
+    </p>
+    <div class="flex flex-col items-center gap-4 sm:flex-row">
+      <Button href="#pricing">Enrol now</Button>
+      <Button
+        variant="ghost"
+        href={site.lms.demoLesson}
+        data-track="demo-lesson-final"
+        target="_blank"
+      >
+        Watch the first session free
+        <svg class="ext" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path
+            d="M7.5 4.5h8v8M15.5 4.5l-10 10"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <span class="sr-only">(opens on the LMS in a new tab)</span>
+      </Button>
+    </div>
+  </div>
+</Section>
+
+<style>
+  .ext {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+</style>

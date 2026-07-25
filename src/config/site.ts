@@ -9,7 +9,7 @@ export const site = {
   tagline: "Happy Learning", // warm sign-off (footer / instructor / closing CTA)
 
   // --- batch ---
-  batchStartISO: "2026-07-25T20:00:00+05:30",
+  batchStartISO: "2026-07-25T19:00:00+05:30",
   classDays: "Sat & Sun",
   classTime: "7–10 PM IST",
   // Live-schedule facts authored from the ops sheet (references only — the sheet
@@ -65,6 +65,14 @@ export const site = {
     // (the on-page rail is a curated marketing view; this is the exhaustive list).
     devopsCurriculum:
       "https://courses.trainwithshubham.ai/learn/DevOps-Zero-To-Hero-AI-Powered-Curriculum",
+    // Free demo — session 1 ("Introduction to DevOps"), meant to be watchable
+    // WITHOUT enrolment (visitorFlow=true unlocks it for logged-out visitors;
+    // disableLessonChange keeps the preview to just this lesson). Linked out in a
+    // new tab, NEVER embedded (golden rule 8). Verify it plays logged-out before
+    // promising "no signup"; if the embedPlayer chrome looks bare in a full tab,
+    // drop the embedPlayer=1 param.
+    demoLesson:
+      "https://courses.trainwithshubham.ai/learn/home/devops-zero-to-hero/section/785198/lesson/5121342?embedPlayer=1&disableLessonChange=true&visitorFlow=true",
     // TODO: add when live —
     // masterclasses: "https://courses.trainwithshubham.ai/...",
     // ebooks:        "https://courses.trainwithshubham.ai/...",
