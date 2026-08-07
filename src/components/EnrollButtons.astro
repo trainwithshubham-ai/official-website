@@ -9,7 +9,7 @@
 // never hides or swaps a price. Checkouts open in a new tab so a wrong click is
 // recoverable. Both buttons are `data-enroll`: BaseLayout forwards UTM (+ src),
 // preserves ?priceId, and fires enroll_click with the data-region.
-import { site } from "../config/site";
+import { activePrice, activeCheckout } from "../config/site";
 import type { CoursePrice, CourseCheckout } from "../config/courses";
 import Button from "./primitives/Button.astro";
 import FlagIndia from "./primitives/FlagIndia.astro";
@@ -19,9 +19,9 @@ interface Props {
   class?: string;
   /** Show the welcoming geo-pricing note under the buttons (Pricing box only). */
   note?: boolean;
-  /** Per-course checkout URLs; defaults to the main DevOps course (site.checkout). */
+  /** Per-course checkout URLs; defaults to the main DevOps course (activeCheckout). */
   checkout?: CourseCheckout;
-  /** Per-course prices (for the aria-labels); defaults to site.price. */
+  /** Per-course prices (for the aria-labels); defaults to activePrice. */
   price?: CoursePrice;
   /** SR-label price qualifier appended after the amount (e.g. "launch price").
    *  Defaults to "" — the page carries no early-bird/limited-window framing. */
@@ -32,8 +32,8 @@ interface Props {
 const {
   class: className = "",
   note = false,
-  checkout = site.checkout,
-  price = site.price,
+  checkout = activeCheckout,
+  price = activePrice,
   priceQualifier = "",
   courseSlug,
 } = Astro.props;

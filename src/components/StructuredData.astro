@@ -7,7 +7,7 @@
 // standalone course page's graph instead (name/price/faq from courses.ts). Nothing is
 // fabricated (golden rule 4): a course page carries NO aggregateRating, because the
 // 4.9/232 Google reviews are the DevOps business rating, not that course's.
-import { site } from "../config/site";
+import { site, saleLive, activePrice } from "../config/site";
 import { faq } from "../content/data";
 import type { Course } from "../config/courses";
 
@@ -114,10 +114,12 @@ if (collection) {
   ];
 } else {
   // --- Main DevOps course (default) ---
-  // Advertise the price the page actually renders (the `now` price). No early-bird
-  // window means no priceValidUntil — a standing offer with no expiry.
-  const inrPrice = toNum(site.price.india.now);
-  const usdPrice = toNum(site.price.world.now);
+  // Advertise the price the page actually renders (activePrice's `now`). While a
+  // sale is live that's the sale price, and priceValidUntil carries its real end
+  // date; with no sale it's a standing offer with no expiry.
+  const inrPrice = toNum(activePrice.india.now);
+  const usdPrice = toNum(activePrice.world.now);
+  const validUntil = saleLive ? site.sale.endsISO : undefined;
 
   // Same token substitution FAQ.astro applies (no literal {classDays}… placeholders).
   const batchStart = new Date(site.batchStartISO).toLocaleDateString("en-IN", {
@@ -158,8 +160,8 @@ if (collection) {
         },
       },
       offers: [
-        makeOffer("INR", inrPrice, pricingUrl),
-        makeOffer("USD", usdPrice, pricingUrl),
+        makeOffer("INR", inrPrice, pricingUrl, validUntil),
+        makeOffer("USD", usdPrice, pricingUrl, validUntil),
       ],
     },
     {

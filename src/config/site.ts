@@ -30,6 +30,38 @@ export const site = {
     name: "#90DaysOfDevOps ebook",
   },
 
+  // --- sale (a REAL time-boxed offer; golden rule 6) ---
+  // Independence Day sale: ₹5,000 / $50 off the standing price, ending on the date
+  // below. `list` anchors to the STANDING price (₹19,999 / $249) — NOT the ₹25,000
+  // original — so "₹5,000 off" is literally true and the page can't imply a bigger
+  // discount than is being given.
+  //
+  // The discount is applied by a COUPON at checkout, not by a repriced product. That
+  // means Learnyst still shows the standing ₹19,999 / $249 until the code is entered,
+  // so the page MUST state the code wherever it states the sale price — otherwise the
+  // number on the page and the number at checkout disagree (golden rule 6).
+  //
+  // ENDING IT: set enabled:false and push, and deactivate the coupon in Learnyst. The
+  // site is static, so the countdown expiring only flips the urgency copy to "sale
+  // ended" — the PRICE does not revert on its own.
+  sale: {
+    enabled: true,
+    name: "Independence Day sale",
+    endsISO: "2026-08-15T23:59:59+05:30",
+    price: {
+      india: { now: "₹14,999", list: "₹19,999" },
+      world: { now: "$199", list: "$249" },
+    },
+    off: { india: "₹5,000 off", world: "$50 off" },
+    // Entered by the learner at Learnyst checkout. Set to null if a future sale is
+    // done by repricing the product instead — the hint then disappears on its own.
+    coupon: "AUGUST15",
+    // null → reuse `checkout` below. A coupon-based sale needs no separate links,
+    // since the discount happens inside checkout. Replace with
+    // { india: "...", world: "..." } only if you mint separate sale priceIds.
+    checkout: null,
+  },
+
   // --- pricing ---
   // India bills in INR, rest of world in USD — shown transparently (no IP
   // geo-switch, golden rule 6). The page LEADS with the India price; the world
@@ -129,3 +161,13 @@ export const site = {
   ga4Id: "G-H313D578QS",
   metaPixelId: "TODO_META_PIXEL_ID",
 } as const;
+
+// --- derived: what the page actually charges today -------------------------
+// Components render THESE, not site.price/site.checkout, so a sale is a one-flag
+// change in the block above and can never leave a displayed price out of step with
+// the button beside it. (Course pages pass their own price/checkout explicitly, so
+// the DevOps sale can't leak onto /python.)
+export const saleLive: boolean = site.sale.enabled;
+export const activePrice = saleLive ? site.sale.price : site.price;
+export const activeCheckout =
+  saleLive && site.sale.checkout ? site.sale.checkout : site.checkout;

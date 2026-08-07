@@ -204,9 +204,27 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
   · open to all levels (beginners welcome, no prior experience required)
 - No early-bird window — the offer has ended. There is NO countdown-to-price and
   NO price flip; the Countdown now counts down to the **batch start** (`batchStartISO`).
-- Price (dual currency, no IP geo-switch): India ~~₹25,000~~ → **₹19,999**; rest
-  of world ~~$299~~ → **$249**. Shown as a standing `now`/`list` discount (never
-  "early bird"). Page leads with the India price; the world price lives in the SR
-  breakdown + at checkout. Region pay buttons are price-free (flag / globe).
+- Price (dual currency, no IP geo-switch): standing price is India ~~₹25,000~~ →
+  **₹19,999**; rest of world ~~$299~~ → **$249**. Shown as a standing `now`/`list`
+  discount (never "early bird"). Page leads with the India price; the world price
+  lives in the SR breakdown + at checkout. Region pay buttons are price-free
+  (flag / globe).
+- **SALE LIVE — Independence Day** (`site.sale`, ends **15 Aug 2026, 23:59 IST**):
+  ₹5,000 / $50 off → **₹14,999 · $199**, struck against the standing ₹19,999 /
+  $249 (never against ₹25,000 — the discount claim must stay literally true).
+  Components render the derived `activePrice` / `activeCheckout` from `site.ts`,
+  never `site.price` directly. The offer lives in a **slim row inside the sticky
+  header** (`Nav.astro`, `.nav-sale`) so it stays pinned instead of scrolling away;
+  it replaces the mobile-only `.nav-urgency` strip while the sale runs. On expiry
+  the countdown flips to "sale ended" and `:has([data-expired="true"])` drops the
+  now-false offer claim — the row keeps its height, so the sticky header never
+  shrinks under the reader. No seconds in that row (it's pinned; BRAND.md §9).
+  The discount is applied by **coupon `AUGUST15` at Learnyst checkout**, not by
+  repricing the product — so checkout shows ₹19,999 until the code is entered, and
+  the Pricing card MUST keep stating the code right above the pay buttons (it's in
+  the SR breakdown too). `sale.checkout` stays null; priceIds are unchanged.
+  **To end it:** set `sale.enabled:false`, push, and deactivate the coupon in
+  Learnyst — the site is static, so the price does NOT revert on its own when the
+  countdown runs out.
 - Proof: 10,000+ engineers trained; 4.9 ★ · 232 Google reviews (real, seeded in
   reviews.json); YouTube 1.5L+, LinkedIn 1L+, Instagram 10k+

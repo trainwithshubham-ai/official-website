@@ -1,27 +1,70 @@
 ---
 // Pricing — the conversion core (ARCHITECTURE.md §4.10).
 // Transparent dual pricing (India / US, no IP geo-switch — golden rule 6), a
-// "batch starts in" Countdown, inclusions, and the Enroll CTA. One standing price:
-// `now` beside a struck `list` original — a discount, NOT an early-bird window
-// (no expiry, no price flip; golden rule 6 — honesty over fake urgency).
-import { site } from "../config/site";
+// "batch starts in" Countdown, inclusions, and the Enroll CTA. Renders `activePrice`
+// (site.ts) — the standing price normally, the sale price while site.sale is live —
+// so the amount shown and the amount the button charges can never drift apart.
+import { site, saleLive, activePrice } from "../config/site";
 import Section from "./primitives/Section.astro";
 import Countdown from "./Countdown.astro";
 import EnrollButtons from "./EnrollButtons.astro";
 import BonusBar from "./BonusBar.astro";
+import StatusDot from "./primitives/StatusDot.astro";
 import { inclusions } from "../content/data";
 
 const refundReady = !site.refundPolicy.startsWith("TODO");
 
 // Screen-reader price breakdown — built as a string so Astro's whitespace trimming
 // around {expressions} can't drop spaces between price + currency.
-const priceSr = `Price: ${site.price.india.now} for India (originally ${site.price.india.list}), ${site.price.world.now} for the rest of the world (originally ${site.price.world.list}). Choose your region to pay.`;
+// The purchase point states the deadline in full — the header's slim row only has
+// room for "ends 15 Aug", and a ticking timer alone never spells the date out.
+const saleEndsFull = new Date(site.sale.endsISO).toLocaleString("en-IN", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+  timeZone: "Asia/Kolkata",
+});
+
+// The sale price is unlocked by a coupon at checkout, so the SR breakdown has to
+// carry the code too — a blind visitor must not reach Learnyst, see the standing
+// price and have no idea why.
+const coupon = saleLive ? site.sale.coupon : null;
+const saleSr = saleLive
+  ? `${site.sale.name} — ${site.sale.off.india} in India, ${site.sale.off.world} elsewhere${coupon ? `, with coupon ${coupon} applied at checkout` : ""}. `
+  : "";
+const priceSr = `${saleSr}Price: ${activePrice.india.now} for India (originally ${activePrice.india.list}), ${activePrice.world.now} for the rest of the world (originally ${activePrice.world.list}). Choose your region to pay.`;
 ---
 
 <Section id="pricing" eyebrow="pricing" title="Enrol now — secure your seat">
   <div
     class="pricing-card surface-card grad-border mx-auto w-full max-w-xl rounded-[var(--radius-card)] p-8 text-center sm:p-10"
   >
+    {/* Sale chip — amber (urgency), never yellow (golden rule 5). Carries the real
+        deadline; the Countdown flips itself to "sale ended" when it passes. */}
+    {
+      saleLive && (
+        <div class="sale-chip">
+          <p class="sale-chip-row">
+            <StatusDot tone="signal" />
+            <span class="sale-chip-name">{site.sale.name}</span>
+            <span class="sale-chip-off">
+              {site.sale.off.india} · {site.sale.off.world}
+            </span>
+          </p>
+          <Countdown
+            variant="chip"
+            deadline={site.sale.endsISO}
+            endedText="sale ended"
+            class="sale-chip-cd"
+          />
+          <p class="sale-chip-ends">Ends {saleEndsFull} IST</p>
+        </div>
+      )
+    }
+
     <p
       class="font-mono text-[length:var(--text-eyebrow)] lowercase tracking-[0.08em] text-primary"
     >
@@ -36,13 +79,14 @@ const priceSr = `Price: ${site.price.india.now} for India (originally ${site.pri
         class="mt-3 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1"
       >
         <span class="text-lg text-muted">from</span>
-        <span class="price-amt amt-india">{site.price.india.now}</span>
+        <span class="price-amt amt-india">{activePrice.india.now}</span>
         <span class="price-sep">·</span>
-        <span class="price-amt amt-world">{site.price.world.now}</span>
+        <span class="price-amt amt-world">{activePrice.world.now}</span>
       </div>
       <p class="mt-2 text-sm text-muted">
-        originally <s>{site.price.india.list}</s> /
-        <s>{site.price.world.list}</s>
+        {saleLive ? "was" : "originally"} <s>{activePrice.india.list}</s>
+        <span> / </span>
+        <s>{activePrice.world.list}</s>
       </p>
     </div>
     <p class="sr-only">{priceSr}</p>
@@ -84,7 +128,24 @@ const priceSr = `Price: ${site.price.india.now} for India (originally ${site.pri
     <!-- CTA — one button per region (transparent, learner picks; golden rule 6).
          `note` shows the welcoming geo-pricing helper here (the main conversion
          point); FinalCTA reuses the buttons without it. -->
-    <EnrollButtons class="mt-5" note />
+    {/* Coupon hint — sits immediately above the pay buttons, the last thing read
+        before leaving for Learnyst. It has to be here: checkout shows the standing
+        price until the code is entered, so without this the page and the checkout
+        would disagree. Selectable text, no copy button (JS budget = the countdown). */}
+    {
+      coupon && (
+        <p class="coupon-hint">
+          Apply coupon <code class="coupon-code">{coupon}</code>{" "}
+          <span class="coupon-where">at checkout</span>
+        </p>
+      )
+    }
+
+    <EnrollButtons
+      class="mt-3"
+      note
+      priceQualifier={saleLive ? `${site.sale.name} price` : ""}
+    />
 
     {
       refundReady && (
@@ -95,6 +156,85 @@ const priceSr = `Price: ${site.price.india.now} for India (originally ${site.pri
 </Section>
 
 <style>
+  /* Sale chip — amber urgency band above the price. Sits on surface-2 with a
+     signal-tinted hairline so it reads as a temporary state, not a permanent part
+     of the card. It disappears with the sale (the whole block is gated on
+     saleLive), and its Countdown flips to "sale ended" the moment the real
+     deadline passes — no reset, no fake urgency (golden rule 6). */
+  .sale-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    margin-bottom: 1.25rem;
+    padding: 0.55rem 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--color-signal) 35%, transparent);
+    /* Rounded rect, NOT --radius-pill: the row wraps to two lines at 380px and a
+       999px radius turns the block into a balloon. */
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--color-signal) 8%, transparent);
+    font-size: 0.8rem;
+  }
+  .sale-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem 0.5rem;
+  }
+  .sale-chip-name {
+    font-weight: 600;
+    color: var(--color-signal);
+  }
+  .sale-chip-off {
+    color: var(--color-muted);
+  }
+  .sale-chip-ends {
+    font-size: 0.72rem;
+    color: var(--color-muted);
+  }
+
+  /* Coupon hint. Amber --signal ties it to the sale; deliberately NOT yellow, which
+     belongs to the Enroll button sitting right beneath it (golden rule 5) — two
+     yellow things stacked would fight for the same click. */
+  .coupon-hint {
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+    color: var(--color-muted);
+  }
+  .coupon-code {
+    display: inline-block;
+    margin-inline: 0.15rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px dashed color-mix(in srgb, var(--color-signal) 55%, transparent);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--color-signal) 10%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--color-signal);
+    /* the code is meant to be selected and pasted into Learnyst */
+    user-select: all;
+  }
+  /* Keep "at checkout" together so it breaks after the code rather than orphaning
+     "checkout" onto a line of its own at 380px. */
+  .coupon-where {
+    white-space: nowrap;
+  }
+  /* Once it's over the literal end date is no longer news — the countdown's own
+     "sale ended" says it. Keeps the card from stating a deadline in the past. */
+  .sale-chip:has([data-expired="true"]) .sale-chip-ends {
+    display: none;
+  }
+  /* Drop the seconds unit on phones — the row is already two lines there and a
+     per-second flicker inside the price card reads noisy, not urgent. */
+  @media (max-width: 30rem) {
+    :global(.sale-chip-cd .cd-unit:last-child) {
+      display: none;
+    }
+  }
+
   /* Region-priced headline: the detected region's amount (html[data-region-guess],
      set pre-paint in BaseLayout — timezone, never IP) is the big anchor; the other
      stays visible but smaller. Emphasis only — both always shown (golden rule 6).

@@ -25,6 +25,8 @@ import Footer from "../components/Footer.astro";
 ---
 
 <BaseLayout>
+  {/* The time-boxed offer lives INSIDE the sticky header (Nav's slim sale row), so
+      it stays pinned rather than scrolling away. */}
   <Nav />
   <main id="main" tabindex="-1">
     {/* Order: proof up top → curriculum → price (moved up, right after the

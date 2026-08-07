@@ -4,9 +4,18 @@
 // Enroll CTA. JS-free: a persistent translucent backdrop reads as "floating"
 // without a scroll listener (interactivity budget = the countdown only).
 // Collapses gracefully to logo + Log in + Enroll at 380px.
-import { site } from "../config/site";
+import { site, saleLive } from "../config/site";
 import Button from "./primitives/Button.astro";
 import Countdown from "./Countdown.astro";
+import StatusDot from "./primitives/StatusDot.astro";
+
+// Short form for the slim row — "15 Aug". The full "15 August 2026, 23:59 IST" is
+// stated in the Pricing card's sale chip, where the purchase decision happens.
+const saleEndsShort = new Date(site.sale.endsISO).toLocaleDateString("en-IN", {
+  day: "numeric",
+  month: "short",
+  timeZone: "Asia/Kolkata",
+});
 
 const links = [
   { href: "#curriculum", label: "Curriculum" },
@@ -60,10 +69,16 @@ const links = [
 
     <div class="ml-auto flex items-center gap-3">
       <!-- wrap to hide on mobile: the Countdown's scoped display:inline-flex would
-           otherwise override a `hidden` utility placed directly on it. -->
-      <div class="hidden lg:block">
-        <Countdown variant="chip" />
-      </div>
+           otherwise override a `hidden` utility placed directly on it.
+           While a sale is live the slim row below owns urgency, so this bare chip
+           (which would just repeat a second deadline) stands down. -->
+      {
+        !saleLive && (
+          <div class="hidden lg:block">
+            <Countdown variant="chip" />
+          </div>
+        )
+      }
       <Button
         variant="ghost"
         href={site.lms.signIn}
@@ -78,24 +93,116 @@ const links = [
     </div>
   </nav>
 
-  <!-- Mobile/tablet urgency: the desktop nav chip is hidden below lg, so phone
-       users would feel no deadline until Pricing. This slim strip keeps the
-       batch-start countdown persistent. Once the batch starts the chip flips to
-       "batch is live" via its cd-ended state, and the "starts in" label hides
-       (see CSS) so the strip never contradicts itself. Reuses the Countdown island. -->
-  <div
-    class="nav-urgency flex items-center justify-center gap-2 border-t border-line/60 px-4 py-1.5 lg:hidden"
-  >
-    <span
-      class="nav-urgency-lbl font-mono text-[0.7rem] lowercase tracking-[0.06em] text-muted"
-    >
-      ❯ batch starts in
-    </span>
-    <Countdown variant="chip" />
-  </div>
+  {
+    saleLive ? (
+      /* Slim sale row — INSIDE the sticky header, at every width, so the offer stays
+         pinned instead of scrolling away like a top banner would. It replaces both
+         the old above-nav banner and the mobile-only urgency strip with one element.
+         Amber --signal (urgency), never yellow — yellow is the Enroll CTA alone. */
+      <div class="nav-sale">
+        <p class="nav-sale-lead">
+          <StatusDot tone="signal" />
+          <span class="nav-sale-name font-mono">
+            {site.sale.name.toLowerCase()}
+          </span>
+        </p>
+        {/* Both currencies, always — emphasis is never a hide/swap. On expiry this
+            claim is dropped (see CSS) while the row keeps its height, so a sticky
+            header can never shrink under the reader mid-scroll. */}
+        <p class="nav-sale-claim">
+          <strong class="nav-sale-off">
+            {site.sale.off.india} · {site.sale.off.world}
+          </strong>
+          <span class="nav-sale-ends"> · ends {saleEndsShort}</span>
+        </p>
+        <Countdown
+          variant="chip"
+          deadline={site.sale.endsISO}
+          endedText="sale ended"
+          class="nav-sale-cd"
+        />
+      </div>
+    ) : (
+      /* No sale: the pre-sale behaviour. The desktop chip is hidden below lg, so
+         phone users would otherwise feel no deadline until Pricing. Once the batch
+         starts the chip flips to "batch is live" via cd-ended and the now-false
+         "starts in" label hides (see CSS), so the strip never contradicts itself. */
+      <div class="nav-urgency flex items-center justify-center gap-2 border-t border-line/60 px-4 py-1.5 lg:hidden">
+        <span class="nav-urgency-lbl font-mono text-[0.7rem] lowercase tracking-[0.06em] text-muted">
+          ❯ batch starts in
+        </span>
+        <Countdown variant="chip" />
+      </div>
+    )
+  }
 </header>
 
 <style>
+  /* --- slim sale row (inside the sticky header) --- */
+  .nav-sale {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem 0.6rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-signal) 22%, transparent);
+    background: color-mix(in srgb, var(--color-signal) 7%, transparent);
+    padding: 0.4rem 1rem;
+    text-align: center;
+  }
+  .nav-sale-lead {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .nav-sale-name {
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--color-signal);
+  }
+  .nav-sale-claim {
+    font-size: 0.78rem;
+    color: var(--color-muted);
+  }
+  /* Decorative separator so the sale name doesn't run into the discount. Lives in
+     CSS, not the DOM, so screen readers hear "…sale" then "₹5,000 off…" cleanly —
+     and it disappears with the claim on expiry. */
+  .nav-sale-claim::before {
+    content: "· ";
+    color: var(--color-muted);
+  }
+  .nav-sale-off {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+  .nav-sale-ends {
+    white-space: nowrap;
+  }
+  /* Honest expiry WITHOUT a sticky-header height change: the Countdown flips itself
+     to "sale ended", and the now-false offer claim is dropped. The row survives, so
+     nothing jumps under the reader. */
+  .nav-sale:has([data-expired="true"]) .nav-sale-claim {
+    display: none;
+  }
+  /* No seconds in the header, at any width. This row is PINNED to the viewport, and
+     a digit flipping every second in permanent view reads as restless rather than
+     urgent (BRAND.md §9 — restrained motion). Minute precision is plenty for a
+     multi-day deadline; the Pricing card, which scrolls normally, keeps its seconds. */
+  :global(.nav-sale-cd .cd-unit:last-child) {
+    display: none;
+  }
+  /* Phones: the row already wraps to two lines — drop the redundant end date (the
+     timer says the same thing, and Pricing states it in full). */
+  @media (max-width: 30rem) {
+    .nav-sale {
+      gap: 0.1rem 0.45rem;
+      padding-inline: 0.75rem;
+    }
+    .nav-sale-ends {
+      display: none;
+    }
+  }
+
   /* Once the batch is live the chip shows "batch is live" itself, so drop the
      now-false "starts in" lead-in. Keyed off the chip's own expired state. */
   :global(.nav-urgency:has([data-expired="true"])) .nav-urgency-lbl {

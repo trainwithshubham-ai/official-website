@@ -11,7 +11,9 @@
 // shift, works even if JS is slow).
 //
 // Two modes (one shared script):
-//   • fixed  (default) — counts to site.batchStartISO, the real cohort start.
+//   • fixed  (default) — counts to `deadline`, which defaults to site.batchStartISO
+//     (the real cohort start). Nav's sale row / Pricing's sale chip pass
+//     site.sale.endsISO instead, so one island drives both real deadlines, no extra JS.
 //   • daily  — counts to TONIGHT'S midnight IST for the repeatable daily bonus,
 //     then genuinely rolls to the next day. A real end-of-day deadline, never a
 //     fake per-visit 24h reset (golden rule 6 stays intact).
@@ -19,22 +21,35 @@ import { site } from "../config/site";
 
 interface Props {
   variant?: "full" | "chip" | "bonus";
-  /** "daily" rolls to the next IST midnight (bonus); "fixed" is the batch-start date. */
+  /** "daily" rolls to the next IST midnight (bonus); "fixed" counts to `deadline`. */
   mode?: "fixed" | "daily";
+  /** What "fixed" counts to. Defaults to the batch start; the sale passes
+   *  site.sale.endsISO so one island serves both deadlines. */
+  deadline?: string;
+  /** Eyebrow above the digits in the "full" variant. */
+  label?: string;
+  /** Copy shown once the deadline passes (the calm, honest flip — never a reset). */
+  endedText?: string;
   /** Expose the deadline to screen readers. Set on exactly ONE mount per page
    *  so the same deadline isn't announced multiple times. */
   announceDeadline?: boolean;
+  /** SR sentence wrapping the deadline; "{date}" is replaced with it. */
+  srLabel?: string;
   class?: string;
 }
 const {
   variant = "full",
   mode = "fixed",
+  deadline = site.batchStartISO,
+  label = "batch starts in",
+  endedText = "batch is live · enrolment open",
   announceDeadline = false,
+  srLabel = "The batch starts {date} IST.",
   class: className = "",
 } = Astro.props;
 
 // Static, screen-reader-friendly deadline (the ticking digits are aria-hidden).
-const deadlineLabel = new Date(site.batchStartISO).toLocaleString("en-IN", {
+const deadlineLabel = new Date(deadline).toLocaleString("en-IN", {
   day: "numeric",
   month: "long",
   year: "numeric",
@@ -55,7 +70,7 @@ const units = [
   class:list={["countdown", `countdown--${variant}`, className]}
   data-countdown
   data-mode={mode}
-  data-deadline={mode === "fixed" ? site.batchStartISO : undefined}
+  data-deadline={mode === "fixed" ? deadline : undefined}
   data-expired="false"
 >
   {
@@ -71,7 +86,7 @@ const units = [
         <div class="cd-live" aria-hidden="true">
           {variant === "full" && (
             <p class="font-mono text-[length:var(--text-eyebrow)] lowercase tracking-[0.08em] text-signal">
-              ❯ batch starts in
+              ❯ {label}
             </p>
           )}
           <div class="cd-units">
@@ -91,13 +106,15 @@ const units = [
           <span class="text-signal" aria-hidden="true">
             ●
           </span>{" "}
-          batch is live · enrolment open
+          {endedText}
         </p>
 
         {/* Accessible deadline — exposed on exactly ONE mount (announceDeadline)
             so screen readers don't hear the same deadline repeated. */}
         {announceDeadline && (
-          <span class="sr-only">The batch starts {deadlineLabel} IST.</span>
+          <span class="sr-only">
+            {srLabel.replace("{date}", `${deadlineLabel}`)}
+          </span>
         )}
       </Fragment>
     )
