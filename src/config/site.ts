@@ -41,16 +41,28 @@ export const site = {
   // so the page MUST state the code wherever it states the sale price — otherwise the
   // number on the page and the number at checkout disagree (golden rule 6).
   //
-  // ENDING IT: set enabled:false and push, and deactivate the coupon in Learnyst. The
-  // site is static, so the countdown expiring only flips the urgency copy to "sale
-  // ended" — the PRICE does not revert on its own.
+  // Learnyst pre-coupon amounts during the sale: India 281722 = ₹19,999 (→ ₹14,999),
+  // world 280727 = $299 (→ $249).
+  //
+  // ENDING IT — THREE steps, all required:
+  //   1. set enabled:false and push;
+  //   2. deactivate the AUGUST15 coupon in Learnyst;
+  //   3. drop world priceId 280727 back to $249.
+  // Step 3 is easy to forget and it BITES: with the sale off, the page falls back to
+  // the standing `price` below ($249 world) while checkout would still be at $299 —
+  // the page and the checkout would disagree. (India needs no equivalent step: 281722
+  // is already ₹19,999, which IS the standing price.) The site is static, so the
+  // countdown expiring only flips the urgency copy to "sale ended" — the PRICE does
+  // not revert on its own.
   sale: {
     enabled: true,
     name: "Independence Day sale",
     endsISO: "2026-08-15T23:59:59+05:30",
     price: {
       india: { now: "₹14,999", list: "₹19,999" },
-      world: { now: "$199", list: "$249" },
+      // $299 (not a round $300) — it's the real list price already in `price` below,
+      // and it keeps "$50 off" exact rather than an approximation.
+      world: { now: "$249", list: "$299" },
     },
     off: { india: "₹5,000 off", world: "$50 off" },
     // Entered by the learner at Learnyst checkout. Set to null if a future sale is

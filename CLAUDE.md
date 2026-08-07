@@ -210,8 +210,9 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
   lives in the SR breakdown + at checkout. Region pay buttons are price-free
   (flag / globe).
 - **SALE LIVE — Independence Day** (`site.sale`, ends **15 Aug 2026, 23:59 IST**):
-  ₹5,000 / $50 off → **₹14,999 · $199**, struck against the standing ₹19,999 /
-  $249 (never against ₹25,000 — the discount claim must stay literally true).
+  ₹5,000 / $50 off → **₹14,999 · $249**, struck against ₹19,999 / $299. India is
+  anchored to the standing price (never ₹25,000) so "₹5,000 off" is literally true;
+  world is anchored to its list $299, so world's $249 equals the standing world price.
   Components render the derived `activePrice` / `activeCheckout` from `site.ts`,
   never `site.price` directly. The offer lives in a **slim row inside the sticky
   header** (`Nav.astro`, `.nav-sale`) so it stays pinned instead of scrolling away;
@@ -222,9 +223,12 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
   The discount is applied by **coupon `AUGUST15` at Learnyst checkout**, not by
   repricing the product — so checkout shows ₹19,999 until the code is entered, and
   the Pricing card MUST keep stating the code right above the pay buttons (it's in
-  the SR breakdown too). `sale.checkout` stays null; priceIds are unchanged.
-  **To end it:** set `sale.enabled:false`, push, and deactivate the coupon in
-  Learnyst — the site is static, so the price does NOT revert on its own when the
-  countdown runs out.
+  the SR breakdown too). `sale.checkout` stays null. Learnyst pre-coupon amounts:
+  India `281722` = ₹19,999, world `280727` = **$299**.
+  **To end it — three steps:** (1) `sale.enabled:false` + push, (2) deactivate the
+  AUGUST15 coupon, (3) **drop world `280727` back to $249**. Miss step 3 and the page
+  (standing $249) contradicts checkout ($299). India needs no step 3 — `281722` is
+  already at the standing ₹19,999. The site is static: the price does NOT revert on
+  its own when the countdown runs out.
 - Proof: 10,000+ engineers trained; 4.9 ★ · 232 Google reviews (real, seeded in
   reviews.json); YouTube 1.5L+, LinkedIn 1L+, Instagram 10k+
