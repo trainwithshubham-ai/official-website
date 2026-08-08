@@ -10,19 +10,28 @@
 // "batch is live · enrolment open" state via [data-expired] (CSS swap, no layout
 // shift, works even if JS is slow).
 //
-// Two modes (one shared script):
+// Three modes (one shared script):
 //   • fixed  (default) — counts to `deadline`, which defaults to site.batchStartISO
-//     (the real cohort start). Nav's sale row / Pricing's sale chip pass
-//     site.sale.endsISO instead, so one island drives both real deadlines, no extra JS.
+//     (the real cohort start). The sale's expiry marker passes site.sale.endsISO,
+//     so one island drives every real deadline with no extra JS.
 //   • daily  — counts to TONIGHT'S midnight IST for the repeatable daily bonus,
 //     then genuinely rolls to the next day. A real end-of-day deadline, never a
 //     fake per-visit 24h reset (golden rule 6 stays intact).
+//   • session — counts to the NEXT live class (site.session: Sat/Sun 19:00 IST) and
+//     rolls to the following one each weekend. COMPUTED in the browser, never a
+//     hardcoded date, so a static site can carry a recurring schedule without a
+//     weekly commit — and it can never advertise a session that has already passed.
+//
+// The `marker` variant renders nothing: it exists purely so a container can key CSS
+// off a deadline it doesn't visibly display (e.g. the sale claim hiding itself when
+// the sale ends, while the visible timer next to it counts to the next class).
 import { site } from "../config/site";
 
 interface Props {
-  variant?: "full" | "chip" | "bonus";
-  /** "daily" rolls to the next IST midnight (bonus); "fixed" counts to `deadline`. */
-  mode?: "fixed" | "daily";
+  variant?: "full" | "chip" | "bonus" | "marker";
+  /** "daily" rolls to the next IST midnight; "session" to the next class; "fixed"
+   *  counts to `deadline`. */
+  mode?: "fixed" | "daily" | "session";
   /** What "fixed" counts to. Defaults to the batch start; the sale passes
    *  site.sale.endsISO so one island serves both deadlines. */
   deadline?: string;
@@ -49,14 +58,19 @@ const {
 } = Astro.props;
 
 // Static, screen-reader-friendly deadline (the ticking digits are aria-hidden).
-const deadlineLabel = new Date(deadline).toLocaleString("en-IN", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  timeZone: "Asia/Kolkata",
-});
+// For "session" the target is computed client-side, so the SR sentence describes the
+// recurring schedule instead of a single instant — always true, never stale.
+const deadlineLabel =
+  mode === "session"
+    ? `${site.classDays}, ${site.classTime}`
+    : new Date(deadline).toLocaleString("en-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Asia/Kolkata",
+      });
 
 const units = [
   { key: "d", label: "days" },
@@ -71,10 +85,14 @@ const units = [
   data-countdown
   data-mode={mode}
   data-deadline={mode === "fixed" ? deadline : undefined}
+  data-session-days={mode === "session" ? site.session.days.join(",") : undefined}
+  data-session-hour={mode === "session" ? String(site.session.hourIST) : undefined}
   data-expired="false"
+  hidden={variant === "marker"}
+  aria-hidden={variant === "marker" ? "true" : undefined}
 >
   {
-    variant === "bonus" ? (
+    variant === "marker" ? null : variant === "bonus" ? (
       /* slim inline HH:MM:SS for the daily bonus (digits aria-hidden) */
       <span class="cd-bonus font-mono" aria-hidden="true">
         <span data-unit="h">--</span>:<span data-unit="m">--</span>:
@@ -126,6 +144,11 @@ const units = [
     display: inline-flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+  /* The marker is a deadline signal only — it must never occupy space. Needs its own
+     rule because .countdown's display:inline-flex would otherwise beat [hidden]. */
+  .countdown--marker {
+    display: none;
   }
   .cd-units {
     display: flex;
@@ -201,10 +224,11 @@ const units = [
 
 <script>
   // Drives every countdown on the page from ONE timer. No framework.
-  // Per node: mode="fixed" → counts to its data-deadline (the batch start), then
-  // flips to the calm expired state. mode="daily" → counts to the next midnight
-  // IST and ROLLS to the following day (the repeatable bonus deadline); it never
-  // expires. IST is a fixed +5:30 offset (no DST).
+  // Per node: mode="fixed" → counts to its data-deadline, then flips to the calm
+  // expired state. mode="daily" → next midnight IST, ROLLS to the following day.
+  // mode="session" → the next live class (data-session-days / data-session-hour),
+  // ROLLS to the following one. Rolling modes never expire. IST is a fixed +5:30
+  // offset (no DST), so all of this is plain arithmetic — no timezone library.
   const nodes = Array.from(
     document.querySelectorAll<HTMLElement>("[data-countdown]"),
   );
@@ -212,33 +236,53 @@ const units = [
     const pad = (n: number) => String(n).padStart(2, "0");
     const IST = 19_800_000; // +5:30 in ms
     const DAY = 86_400_000;
+    const HOUR = 3_600_000;
     const nextISTMidnight = () =>
       (Math.floor((Date.now() + IST) / DAY) + 1) * DAY - IST;
 
+    // Next class start, computed — never a hardcoded date, so the schedule can't go
+    // stale and a passed session is never advertised. Works in "IST-shifted" epoch
+    // (real + 5:30) so getUTCDay()/day boundaries line up with the IST calendar.
+    const nextSession = (n: HTMLElement) => {
+      const days = (n.dataset.sessionDays || "6,0").split(",").map(Number);
+      const hour = Number(n.dataset.sessionHour || "19");
+      const now = Date.now();
+      const istMidnight = Math.floor((now + IST) / DAY) * DAY;
+      // Scan today + 7 days: any weekly schedule has a hit inside that window.
+      for (let i = 0; i <= 7; i++) {
+        const day = istMidnight + i * DAY;
+        if (!days.includes(new Date(day).getUTCDay())) continue;
+        const start = day + hour * HOUR - IST;
+        if (start > now) return start;
+      }
+      return now + DAY; // unreachable with a non-empty schedule; keeps types total
+    };
+
     type St = {
       n: HTMLElement;
-      daily: boolean;
+      rolls: boolean;
+      next: () => number;
       target: number;
       done: boolean;
     };
     const states: St[] = nodes.map((n) => {
-      const daily = n.dataset.mode === "daily";
-      return {
-        n,
-        daily,
-        target: daily
-          ? nextISTMidnight()
-          : new Date(n.dataset.deadline || "").getTime(),
-        done: false,
-      };
+      const mode = n.dataset.mode;
+      const rolls = mode === "daily" || mode === "session";
+      const next =
+        mode === "daily"
+          ? nextISTMidnight
+          : mode === "session"
+            ? () => nextSession(n)
+            : () => new Date(n.dataset.deadline || "").getTime();
+      return { n, rolls, next, target: next(), done: false };
     });
 
     const renderNode = (st: St) => {
       if (st.done) return;
       let diff = st.target - Date.now();
       if (diff <= 0) {
-        if (st.daily) {
-          st.target = nextISTMidnight(); // roll to the next day — real deadline
+        if (st.rolls) {
+          st.target = st.next(); // roll to the next real occurrence
           diff = st.target - Date.now();
         } else {
           st.n.dataset.expired = "true";

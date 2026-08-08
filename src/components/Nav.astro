@@ -115,23 +115,29 @@ const links = [
           </strong>
           <span class="nav-sale-ends"> · ends {saleEndsShort}</span>
         </p>
-        <Countdown
-          variant="chip"
-          deadline={site.sale.endsISO}
-          endedText="sale ended"
-          class="nav-sale-cd"
-        />
+        {/* Invisible: the sale's real deadline, so the claim above can drop itself
+            when the sale ends. The visible timer beside it counts to the next class,
+            which never expires and so can't carry that signal. */}
+        <Countdown variant="marker" deadline={site.sale.endsISO} />
+        {/* Labelled, or a bare row of digits next to a sale would read as the sale's
+            own deadline. Must be a <div>, not a <p>: Countdown's root is a <div>, and
+            the parser auto-closes <p> before it — which silently split the label and
+            the digits onto two flex lines. */}
+        <div class="nav-sale-next">
+          <span class="nav-sale-next-lbl font-mono">❯ next session in</span>
+          <Countdown variant="chip" mode="session" class="nav-sale-cd" />
+        </div>
       </div>
     ) : (
-      /* No sale: the pre-sale behaviour. The desktop chip is hidden below lg, so
-         phone users would otherwise feel no deadline until Pricing. Once the batch
-         starts the chip flips to "batch is live" via cd-ended and the now-false
-         "starts in" label hides (see CSS), so the strip never contradicts itself. */
+      /* No sale: the desktop chip is hidden below lg, so phone users would otherwise
+         feel no urgency until Pricing. Carries the same next-class timer, which is
+         always true and never expires — unlike the old batch countdown, which went
+         permanently stale the day the cohort started. */
       <div class="nav-urgency flex items-center justify-center gap-2 border-t border-line/60 px-4 py-1.5 lg:hidden">
         <span class="nav-urgency-lbl font-mono text-[0.7rem] lowercase tracking-[0.06em] text-muted">
-          ❯ batch starts in
+          ❯ next session in
         </span>
-        <Countdown variant="chip" />
+        <Countdown variant="chip" mode="session" />
       </div>
     )
   }
@@ -178,21 +184,27 @@ const links = [
   .nav-sale-ends {
     white-space: nowrap;
   }
+  .nav-sale-next {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .nav-sale-next-lbl {
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
   /* Honest expiry WITHOUT a sticky-header height change: the Countdown flips itself
      to "sale ended", and the now-false offer claim is dropped. The row survives, so
      nothing jumps under the reader. */
   .nav-sale:has([data-expired="true"]) .nav-sale-claim {
     display: none;
   }
-  /* No seconds in the header, at any width. This row is PINNED to the viewport, and
-     a digit flipping every second in permanent view reads as restless rather than
-     urgent (BRAND.md §9 — restrained motion). Minute precision is plenty for a
-     multi-day deadline; the Pricing card, which scrolls normally, keeps its seconds. */
-  :global(.nav-sale-cd .cd-unit:last-child) {
-    display: none;
-  }
-  /* Phones: the row already wraps to two lines — drop the redundant end date (the
-     timer says the same thing, and Pricing states it in full). */
+  /* Phones: drop the redundant end date (the timer says the same thing, and Pricing
+     states it in full), and shrink the digits so the label + all four units still
+     share ONE line. Without this, seconds push the row to three lines and the sticky
+     header eats a third of a 380px viewport. */
   @media (max-width: 30rem) {
     .nav-sale {
       gap: 0.1rem 0.45rem;
@@ -201,19 +213,23 @@ const links = [
     .nav-sale-ends {
       display: none;
     }
+    .nav-sale-next {
+      gap: 0.3rem;
+    }
+    :global(.nav-sale-cd .cd-units) {
+      gap: 0.15rem;
+    }
+    :global(.nav-sale-cd .cd-unit) {
+      padding: 0.2rem 0.2rem;
+    }
+    :global(.nav-sale-cd .cd-num) {
+      font-size: 0.75rem;
+    }
+    :global(.nav-sale-cd .cd-lbl) {
+      font-size: 0.45rem;
+    }
   }
 
-  /* Once the batch is live the chip shows "batch is live" itself, so drop the
-     now-false "starts in" lead-in. Keyed off the chip's own expired state. */
-  :global(.nav-urgency:has([data-expired="true"])) .nav-urgency-lbl {
-    display: none;
-  }
-  /* In the slim mobile strip, drop the seconds unit: it keeps the label + chip
-     within 380px and reads calmer (no per-second flicker in the nav). The
-     full-precision countdowns in Pricing / Hero are untouched. */
-  :global(.nav-urgency .cd-unit:last-child) {
-    display: none;
-  }
   /* Compact the chip so "batch starts in" + d/h/m fits at 380px. */
   :global(.nav-urgency .cd-units) {
     gap: 0.2rem;

@@ -42,11 +42,14 @@ const priceSr = `${saleSr}Price: ${activePrice.india.now} for India (originally 
   <div
     class="pricing-card surface-card grad-border mx-auto w-full max-w-xl rounded-[var(--radius-card)] p-8 text-center sm:p-10"
   >
-    {/* Sale chip — amber (urgency), never yellow (golden rule 5). Carries the real
-        deadline; the Countdown flips itself to "sale ended" when it passes. */}
+    {/* Sale chip — amber (urgency), never yellow (golden rule 5). The visible timer
+        below now counts to the next class, so the sale states its deadline in words.
+        The invisible marker keeps the honest-expiry behaviour: when the sale really
+        ends it flips [data-expired] and the CSS drops these now-false lines. */}
     {
       saleLive && (
         <div class="sale-chip">
+          <Countdown variant="marker" deadline={site.sale.endsISO} />
           <p class="sale-chip-row">
             <StatusDot tone="signal" />
             <span class="sale-chip-name">{site.sale.name}</span>
@@ -54,12 +57,6 @@ const priceSr = `${saleSr}Price: ${activePrice.india.now} for India (originally 
               {site.sale.off.india} · {site.sale.off.world}
             </span>
           </p>
-          <Countdown
-            variant="chip"
-            deadline={site.sale.endsISO}
-            endedText="sale ended"
-            class="sale-chip-cd"
-          />
           <p class="sale-chip-ends">Ends {saleEndsFull} IST</p>
         </div>
       )
@@ -222,17 +219,12 @@ const priceSr = `${saleSr}Price: ${activePrice.india.now} for India (originally 
   .coupon-where {
     white-space: nowrap;
   }
-  /* Once it's over the literal end date is no longer news — the countdown's own
-     "sale ended" says it. Keeps the card from stating a deadline in the past. */
-  .sale-chip:has([data-expired="true"]) .sale-chip-ends {
+  /* When the sale really ends, the hidden marker flips [data-expired] and the whole
+     chip goes — it would otherwise keep advertising a discount and a deadline that
+     have both passed. Safe to remove entirely (unlike the sticky header row): this
+     card scrolls normally, so nothing jumps under the reader. */
+  .sale-chip:has([data-expired="true"]) {
     display: none;
-  }
-  /* Drop the seconds unit on phones — the row is already two lines there and a
-     per-second flicker inside the price card reads noisy, not urgent. */
-  @media (max-width: 30rem) {
-    :global(.sale-chip-cd .cd-unit:last-child) {
-      display: none;
-    }
   }
 
   /* Region-priced headline: the detected region's amount (html[data-region-guess],

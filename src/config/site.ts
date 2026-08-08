@@ -12,6 +12,14 @@ export const site = {
   batchStartISO: "2026-07-25T19:00:00+05:30",
   classDays: "Sat & Sun",
   classTime: "7–10 PM IST",
+  // Machine-readable mirror of classDays/classTime, used by the "next live session"
+  // countdown. The timer COMPUTES the next session from these and rolls itself over
+  // each weekend — nothing here goes stale, so no weekly commit is needed on a static
+  // site. Keep in sync with the two human-readable strings above.
+  session: {
+    days: [6, 0], // JS getDay() in IST — 6 = Saturday, 0 = Sunday
+    hourIST: 19, // 19:00 IST = 7 PM, the start of each live session
+  },
   // Live-schedule facts authored from the ops sheet (references only — the sheet
   // is NEVER embedded/fetched; golden rule 8). Update here if the batch changes.
   programLength: "3-month", // 25 Jul → late Oct 2026
