@@ -54,16 +54,6 @@ const links = [
     </a>
 
     <ul class="ml-2 flex items-center gap-4 md:gap-6">
-      <!-- The one cross-page ROUTE in this row: the others scroll this page, this
-           one navigates. That's also why it survives the md collapse below — with
-           the anchors gone on a phone it's the only thing left to navigate with. -->
-      <li>
-        <a
-          href="/courses"
-          class="whitespace-nowrap text-sm text-muted transition-colors hover:text-text"
-          >Courses</a
-        >
-      </li>
       {
         links.map((l) => (
           <li class="hidden md:block">
@@ -76,6 +66,18 @@ const links = [
           </li>
         ))
       }
+      <!-- The one cross-page ROUTE in this row: the others scroll this page, this one
+           navigates away. LAST on purpose — this is a single-product sales page, so
+           the scan order leads with the sales path (curriculum → price → proof) and
+           the exit comes after it. It's also the only item that survives the md
+           collapse, so a phone still has something to navigate with. -->
+      <li>
+        <a
+          href="/courses"
+          class="whitespace-nowrap text-sm text-muted transition-colors hover:text-text"
+          >Courses</a
+        >
+      </li>
     </ul>
 
     <!-- gap tightens at 380px: logo + Courses + Log in + Enroll is exactly at the
