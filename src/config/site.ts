@@ -159,7 +159,7 @@ export const site = {
   // --- proof (established TWS brand) ---
   studentsTrained: "10,000+",
   googleRating: 4.9,
-  googleReviewCount: 232,
+  googleReviewCount: 260,
   googleReviewUrl: "https://g.page/r/CdJiTEIAtbNpEAI/review", // "Rate us on Google" CTA
   googleProfileUrl: "TODO_PUBLIC_GOOGLE_PROFILE_URL", // badge → "read all reviews"
   // public verification page for the DevOps Engineer (Associate) credential

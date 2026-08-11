@@ -62,7 +62,7 @@ npm run preview      # preview the build
 4. **Never fabricate proof.** Do not invent reviews, student names, companies,
    salary numbers, or stats. Use only real values: `10,000+` trained, the real
    social counts, and the **real Google reviews seeded in `reviews.json`**
-   (4.9 ★ · 232). Show review cards as trimmed excerpts that link to the full
+   (4.9 ★ · 260). Show review cards as trimmed excerpts that link to the full
    review on Google; never edit a reviewer's words into something they didn't say.
    If content is missing, omit it — don't invent.
 5. **Yellow (`--cta`) is for the Enroll CTA only.** Purple (`--primary`) is
@@ -230,5 +230,5 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
   (standing $249) contradicts checkout ($299). India needs no step 3 — `281722` is
   already at the standing ₹19,999. The site is static: the price does NOT revert on
   its own when the countdown runs out.
-- Proof: 10,000+ engineers trained; 4.9 ★ · 232 Google reviews (real, seeded in
+- Proof: 10,000+ engineers trained; 4.9 ★ · 260 Google reviews (real, seeded in
   reviews.json); YouTube 1.5L+, LinkedIn 1L+, Instagram 10k+

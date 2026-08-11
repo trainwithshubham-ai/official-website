@@ -164,7 +164,7 @@ workhorse body, and a real monospace that does actual semantic work.
   project tags. Monochrome only (BRAND §3); conceptual tags with no tool logo
   stay text. Trademarks belong to their owners — monochrome, nominative use to
   denote what's taught.
-- **Reviews:** the aggregate badge reads `4.9 ★ · 232 Google reviews` — stars in
+- **Reviews:** the aggregate badge reads `4.9 ★ · 260 Google reviews` — stars in
   `--signal` (amber), the rest muted, with the Google mark for trust. Review
   cards sit on `--surface` with a purple left-rule, show name + relative date +
   five amber stars + a trimmed excerpt, and link out to the full review. The

@@ -47,7 +47,7 @@ export const site = {
   // --- proof (established TWS brand) ---
   studentsTrained: "10,000+",
   googleRating: 4.9,
-  googleReviewCount: 232,
+  googleReviewCount: 260,
   googleReviewUrl:  "https://g.page/r/CdJiTEIAtbNpEAI/review", // "Rate us on Google" CTA
   googleProfileUrl: "TODO_PUBLIC_GOOGLE_PROFILE_URL",         // badge → "read all reviews"
   social: {
@@ -101,7 +101,7 @@ src/content/
 ```
 
 **Content integrity:** `reviews.json` is seeded with **real Google reviews**
-(4.9 ★ · 232 total) — name, rating, date, text, and the reviewer's Google
+(4.9 ★ · 260 total) — name, rating, date, text, and the reviewer's Google
 contributor link. Never invent or edit reviews; cards show a trimmed excerpt
 that links to the full review on Google. If a review field is ever blank, the
 component omits that card rather than fabricating content.
@@ -190,7 +190,7 @@ trainwithshubham-ai/
 1. `Nav` — sticky, scroll-aware; contains a compact `Countdown` chip.
 2. `Hero` — badge (DevOps · Zero to Hero [Live]), H1, subhead, batch date/time,
    animated pipeline, `Countdown`, dual CTA (`Button` yellow CTA + ghost). No price line.
-3. `TrustBar` — `studentsTrained` (10,000+) + **4.9 ★ · 232 Google reviews**
+3. `TrustBar` — `studentsTrained` (10,000+) + **4.9 ★ · 260 Google reviews**
    badge + social counts.
 4. `LogoMarquee` — "our learners now work at" CSS-only auto-scrolling wordmark
    strip from `companies.json` (real alumni employers only); pauses on hover,
@@ -198,7 +198,7 @@ trainwithshubham-ai/
    Reviews so proof escalates: stats → logos → testimonials.
 5. `Reviews` — **learner testimonials** from `reviews.json` (real photo +
    role/company + the student's own quote; honest monogram fallback). Headed by a
-   standalone **4.9 ★ · 232 reviews on Google →** link-out badge (kept separate so
+   standalone **4.9 ★ · 260 reviews on Google →** link-out badge (kept separate so
    it doesn't imply the cards are Google reviews). **Proof leads — testimonials
    before price.**
 6. `Curriculum` — the pipeline. Stages from `curriculum.json` (with per-stage tool

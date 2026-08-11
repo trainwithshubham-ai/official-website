@@ -6,7 +6,7 @@
 // Default = the main DevOps course (from site.ts + faq.json). Pass `course` to emit a
 // standalone course page's graph instead (name/price/faq from courses.ts). Nothing is
 // fabricated (golden rule 4): a course page carries NO aggregateRating, because the
-// 4.9/232 Google reviews are the DevOps business rating, not that course's.
+// 4.9/260 Google reviews are the DevOps business rating, not that course's.
 import { site, saleLive, activePrice } from "../config/site";
 import { faq } from "../content/data";
 import type { Course } from "../config/courses";
@@ -142,7 +142,7 @@ if (collection) {
       description,
       url: home,
       provider: { "@id": orgId },
-      // Real learner rating (4.9 / 232) — on the Course (the reviewed product), not the
+      // Real learner rating (4.9 / 260) — on the Course (the reviewed product), not the
       // Organization, so it's rich-result eligible and not a self-serving org rating.
       aggregateRating: {
         "@type": "AggregateRating",
