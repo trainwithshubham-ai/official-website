@@ -49,7 +49,7 @@ const q = priceQualifier ? ` ${priceQualifier}` : "";
       data-region="india"
       data-region-btn="india"
       data-course={courseSlug}
-      aria-label={`Pay — India pricing, ${price.india.now}${q} (opens in a new tab)`}
+      aria-label={`Pay · India · ${price.india.now}${q} — India pricing (opens in a new tab)`}
       class="region-btn w-full sm:w-auto sm:min-w-[13rem]"
     >
       <FlagIndia width={18} height={12} />
@@ -63,7 +63,7 @@ const q = priceQualifier ? ` ${priceQualifier}` : "";
       data-region="world"
       data-region-btn="world"
       data-course={courseSlug}
-      aria-label={`Pay — rest-of-world pricing, ${price.world.now}${q} (opens in a new tab)`}
+      aria-label={`Pay · Global · ${price.world.now}${q} — rest-of-world pricing (opens in a new tab)`}
       class="region-btn w-full sm:w-auto sm:min-w-[13rem]"
     >
       <Globe size={18} />
