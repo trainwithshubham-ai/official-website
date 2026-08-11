@@ -30,11 +30,12 @@ const socials = [
 ];
 
 // Outbound wayfinding to the LMS (Learnyst) on courses.trainwithshubham.ai. Add
-// future destinations (store, free masterclasses, ebooks) here — one line each.
-const lmsLinks = [
-  { href: site.lms.explore, label: "All courses", track: "all-courses" },
-  { href: site.lms.signIn, label: "Log in", track: "login" },
-];
+// future destinations (masterclasses, ebooks) here — one line each.
+// The Learnyst catalog is deliberately NOT here: it sat next to the internal
+// "Courses" link below under the near-identical label "All courses", so the column
+// offered two catalogs and no way to tell them apart. Our own /courses index comes
+// first and links out to the store at the bottom of that page (CoursesIndex.astro).
+const lmsLinks = [{ href: site.lms.signIn, label: "Log in", track: "login" }];
 ---
 
 <footer class="border-t border-line">

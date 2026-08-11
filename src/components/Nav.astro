@@ -3,7 +3,8 @@
 // Countdown chip + a ghost Log-in button (out to the Learnyst LMS) + the yellow
 // Enroll CTA. JS-free: a persistent translucent backdrop reads as "floating"
 // without a scroll listener (interactivity budget = the countdown only).
-// Collapses gracefully to logo + Log in + Enroll at 380px.
+// Left = where you are (on-page anchors, md+). Right = where you can go (Courses,
+// Log in, Enroll). Collapses to logo + Courses + Log in + Enroll at 380px.
 import { site, saleLive } from "../config/site";
 import Button from "./primitives/Button.astro";
 import Countdown from "./Countdown.astro";
@@ -29,7 +30,7 @@ const links = [
   class="sticky top-0 z-50 border-b border-line/70 bg-ink/80 backdrop-blur-xl supports-[backdrop-filter]:bg-ink/65"
 >
   <nav
-    class="mx-auto flex h-20 max-w-[var(--container-content)] items-center gap-4 px-6"
+    class="mx-auto flex h-20 max-w-[var(--container-content)] items-center gap-2 px-6 sm:gap-4"
     aria-label="Primary"
   >
     <a
@@ -67,7 +68,9 @@ const links = [
       }
     </ul>
 
-    <div class="ml-auto flex items-center gap-3">
+    <!-- gap tightens at 380px: logo + Courses + Log in + Enroll is exactly at the
+         width budget there, and without this the two buttons wrap to two lines. -->
+    <div class="ml-auto flex items-center gap-2 sm:gap-3">
       <!-- wrap to hide on mobile: the Countdown's scoped display:inline-flex would
            otherwise override a `hidden` utility placed directly on it.
            While a sale is live the slim row below owns urgency, so this bare chip
@@ -79,17 +82,27 @@ const links = [
           </div>
         )
       }
+      <!-- The one cross-page ROUTE in this header, so it sits with the actions on the
+           right, not in the anchor row on the left (those all scroll this page).
+           Same treatment as .ch-link on the course pages: quiet text, every width. -->
+      <a
+        href="/courses"
+        class="whitespace-nowrap text-sm text-muted transition-colors hover:text-text"
+        >Courses</a
+      >
       <Button
         variant="ghost"
         href={site.lms.signIn}
-        class="px-4 py-2 text-sm"
+        class="whitespace-nowrap px-4 py-2 text-sm"
         target="_blank"
         rel="noopener noreferrer"
         data-track="login"
         aria-label="Log in to your account on the student platform"
         >Log in</Button
       >
-      <Button href="#pricing" class="px-4 py-2 text-sm">Enroll now</Button>
+      <Button href="#pricing" class="whitespace-nowrap px-4 py-2 text-sm"
+        >Enroll now</Button
+      >
     </div>
   </nav>
 

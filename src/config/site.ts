@@ -112,7 +112,9 @@ export const site = {
   lms: {
     base: "https://courses.trainwithshubham.ai",
     signIn: "https://courses.trainwithshubham.ai/learn/account/signin",
-    explore: "https://courses.trainwithshubham.ai/learn", // catalog / "All courses"
+    // Learnyst store catalog. Linked from the bottom of our own /courses index only,
+    // never from the footer — see the note in Footer.astro.
+    explore: "https://courses.trainwithshubham.ai/learn",
     // Full DevOps syllabus on the LMS — the complete, module-by-module curriculum
     // (the on-page rail is a curated marketing view; this is the exhaustive list).
     devopsCurriculum:

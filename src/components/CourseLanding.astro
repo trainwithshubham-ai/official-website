@@ -58,7 +58,9 @@ const footerLinks = [
   ...(course.reviews ? [{ href: "#reviews", label: "Reviews" }] : []),
   { href: "#enroll", label: course.comingSoon ? "Coming soon" : "Enroll" },
   ...(course.faq ? [{ href: "#faq", label: "FAQ" }] : []),
-  { href: "/courses", label: "All courses" },
+  // No /courses entry here — the footer's own "Learn" column already links it, and
+  // two labels for one destination in one footer is worse than none. The flagship
+  // cross-link stays: it's a real path off a course page that nothing else covers.
   { href: "/", label: "DevOps: Zero to Hero" },
 ];
 ---

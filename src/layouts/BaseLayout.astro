@@ -154,9 +154,10 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
     </script>
 
     <script is:inline>
-      /* Outbound wayfinding tracking: any [data-track] link (footer "All courses"
-         / "Log in", the community #90DaysOfDevOps + YouTube links, future
-         store/masterclass links) fires one outbound_click event, the data-track
+      /* Outbound wayfinding tracking: any [data-track] link (footer "Log in", the
+         "Browse the store" link on /courses, the community #90DaysOfDevOps +
+         YouTube links, future store/masterclass links) fires one outbound_click
+         event, the data-track
          value as its label. Kept separate from enroll — no UTM forwarding and no
          checkout event; a login/catalog/community click is not an
          InitiateCheckout. No-ops safely until GA4 is wired (ga4Id still TODO). */
