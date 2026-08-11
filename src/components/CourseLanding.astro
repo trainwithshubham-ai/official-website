@@ -14,6 +14,7 @@ import ToolIcon from "./primitives/ToolIcon.astro";
 import EnrollButtons from "./EnrollButtons.astro";
 import StatusDot from "./primitives/StatusDot.astro";
 import Instructor from "./Instructor.astro";
+import Reviews from "./Reviews.astro";
 import Footer from "./Footer.astro";
 import { site } from "../config/site";
 import { themeVars, type Course } from "../config/courses";
@@ -25,22 +26,36 @@ const { course } = Astro.props;
 
 const themeStyle = themeVars(course.theme);
 
-// Split the topic syllabus into the two groups (stable order preserved).
+// Split the topic syllabus into the two groups (stable order preserved). A course
+// with no live modules (a recorded one) renders as a single rail instead — see below.
 const liveModules = course.curriculum?.filter((m) => m.mode === "live") ?? [];
 const recordedModules =
   course.curriculum?.filter((m) => m.mode === "recorded") ?? [];
+// One rail when there's nothing live to separate out, or when the course is flagged
+// self-paced (so a stray mode:"live" entry can't resurrect a "Live weekend" heading).
+const singleRail = !!course.selfPaced || liveModules.length === 0;
+const allModules = course.curriculum ?? [];
 
-// Hero eyebrow/pill label — "Coming soon" for a teaser course, else "live N-day cohort".
+// WebP siblings of the poster (generated next to the .jpg in /public/posters).
+// The <picture> below falls back to the .jpg, so a course whose WebP is missing
+// still renders — it just doesn't get the smaller file.
+const posterWebp = course.poster?.replace(/\.(jpg|jpeg|png)$/i, ".webp");
+const posterWebp640 = course.poster?.replace(/\.(jpg|jpeg|png)$/i, "-640.webp");
+
+// Hero eyebrow/pill label — the course's three states, in order of precedence.
 const heroBadge = course.comingSoon
   ? "Coming soon"
-  : course.format
-    ? `live ${course.format.days}-day cohort`
-    : "Live cohort";
+  : course.selfPaced
+    ? "recorded course · self-paced"
+    : course.format
+      ? `live ${course.format.days}-day cohort`
+      : "Live cohort";
 
 // Only link sections that actually render on this course (a coming-soon course has no
 // curriculum/faq → no dead footer anchors). #enroll exists in both live + coming-soon.
 const footerLinks = [
   ...(course.curriculum ? [{ href: "#curriculum", label: "Curriculum" }] : []),
+  ...(course.reviews ? [{ href: "#reviews", label: "Reviews" }] : []),
   { href: "#enroll", label: course.comingSoon ? "Coming soon" : "Enroll" },
   ...(course.faq ? [{ href: "#faq", label: "FAQ" }] : []),
   { href: "/courses", label: "All courses" },
@@ -142,18 +157,31 @@ const footerLinks = [
           <figure class="poster grad-border">
             {
               course.poster ? (
-                <img
-                  src={course.poster}
-                  alt={`${course.title} — course poster`}
-                  width="1280"
-                  height="720"
-                  loading="eager"
-                  fetchpriority="high"
-                  decoding="async"
-                />
+                /* This is the LCP element, so serve WebP with a 640w variant for
+                   phones and keep the JPG as the fallback (same jpg+webp pattern as
+                   the instructor photo). A 1280w JPG into a ~360px slot cost ~600ms
+                   of LCP on mobile. */
+                <picture>
+                  <source
+                    type="image/webp"
+                    srcset={`${posterWebp640} 640w, ${posterWebp} 1280w`}
+                    sizes="(max-width: 640px) 100vw, 720px"
+                  />
+                  <img
+                    src={course.poster}
+                    alt={`${course.title} — course poster`}
+                    width="1280"
+                    height="720"
+                    loading="eager"
+                    fetchpriority="high"
+                    decoding="async"
+                  />
+                </picture>
               ) : (
                 <div class="poster-ph">
-                  <span class="poster-ph-eyebrow font-mono">live cohort</span>
+                  <span class="poster-ph-eyebrow font-mono">
+                    {course.selfPaced ? "recorded course" : "live cohort"}
+                  </span>
                   <span class="poster-ph-title font-display">{course.title}</span>
                   <span class="poster-ph-note font-mono">poster coming soon</span>
                 </div>
@@ -184,9 +212,24 @@ const footerLinks = [
                   </a>
                 </>
               ) : (
-                <Button href="#enroll" variant="primary" class="pulse-cta">
-                  Enroll now
-                </Button>
+                <>
+                  <Button href="#enroll" variant="primary" class="pulse-cta">
+                    Enroll now
+                  </Button>
+                  {/* Low-commitment second door: lesson 1 is a free trial on the LMS.
+                      Ghost, never yellow — the CTA colour stays with Enroll. */}
+                  {course.trialLesson && (
+                    <Button
+                      href={course.trialLesson}
+                      variant="ghost"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-track={`${course.slug}-trial`}
+                    >
+                      Start a free trial
+                    </Button>
+                  )}
+                </>
               )
             }
           </div>
@@ -245,19 +288,20 @@ const footerLinks = [
         course.curriculum && (
           <Section id="curriculum" eyebrow="curriculum" title="Topics we cover">
             <p class="mb-9 max-w-2xl text-pretty text-muted">
-              The live weekend covers the flagship, hands-on topics. Everything else is
-              recorded for self-study — yours for 4 years, including future updates.
+              {
+                singleRail
+                  ? `Every module below is recorded and waiting for you. Follow the path top to bottom, or jump straight to the topic you need. Yours for 4 years, including future updates.`
+                  : `The live weekend covers the flagship, hands-on topics. Everything else is recorded for self-study, yours for 4 years, including future updates.`
+              }
             </p>
-            <div class="cur-groups">
-              <div class="cur-group">
-                <p class="cur-group-h">
-                  <span class="cur-badge cur-badge--live">Live</span> weekend sessions
-                </p>
-                <ol class="rail" role="list">
-                  {liveModules.map((m, i) => (
+            {
+              singleRail ? (
+                /* Recorded course: one continuous rail, no live-vs-recorded split. */
+                <ol class="rail rail--single" role="list">
+                  {allModules.map((m, i) => (
                     <li class="stage">
                       <span
-                        class:list={["dot", i === liveModules.length - 1 && "pulse-dot"]}
+                        class:list={["dot", i === allModules.length - 1 && "pulse-dot"]}
                         aria-hidden="true"
                       />
                       <div class="surface-card lift cur-card">
@@ -269,32 +313,71 @@ const footerLinks = [
                     </li>
                   ))}
                 </ol>
-              </div>
-              <div class="cur-group">
-                <p class="cur-group-h">
-                  <span class="cur-badge">Recorded</span> self-study · 4 years access
-                </p>
-                <ol class="rail" role="list">
-                  {recordedModules.map((m) => (
-                    <li class="stage">
-                      <span class="dot dot--muted" aria-hidden="true" />
-                      <div class="surface-card lift cur-card">
-                        <h3>{m.module}</h3>
-                        {m.desc && (
-                          <p class="mt-1 text-pretty text-sm text-muted">{m.desc}</p>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            </div>
+              ) : (
+                <div class="cur-groups">
+                  <div class="cur-group">
+                    <p class="cur-group-h">
+                      <span class="cur-badge cur-badge--live">Live</span> weekend sessions
+                    </p>
+                    <ol class="rail" role="list">
+                      {liveModules.map((m, i) => (
+                        <li class="stage">
+                          <span
+                            class:list={[
+                              "dot",
+                              i === liveModules.length - 1 && "pulse-dot",
+                            ]}
+                            aria-hidden="true"
+                          />
+                          <div class="surface-card lift cur-card">
+                            <h3>{m.module}</h3>
+                            {m.desc && (
+                              <p class="mt-1 text-pretty text-sm text-muted">{m.desc}</p>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                  <div class="cur-group">
+                    <p class="cur-group-h">
+                      <span class="cur-badge">Recorded</span> self-study · 4 years access
+                    </p>
+                    <ol class="rail" role="list">
+                      {recordedModules.map((m) => (
+                        <li class="stage">
+                          <span class="dot dot--muted" aria-hidden="true" />
+                          <div class="surface-card lift cur-card">
+                            <h3>{m.module}</h3>
+                            {m.desc && (
+                              <p class="mt-1 text-pretty text-sm text-muted">{m.desc}</p>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </div>
+              )
+            }
           </Section>
         )
       }
 
       <!-- INSTRUCTOR — shared component (universal across all pages, reads site.ts) -->
       <Instructor />
+
+      <!-- PROOF — real learner testimonials, right before the price. The heading says
+           "about TrainWithShubham" on purpose: these people took Shubham's courses,
+           not necessarily this one, and we don't imply otherwise (golden rule 4). -->
+      {
+        course.reviews ? (
+          <Reviews
+            limit={course.reviews}
+            title="What learners say about TrainWithShubham"
+          />
+        ) : null
+      }
 
       <!-- ENROLL (live course) — or COMING SOON (teaser) -->
       {
@@ -325,8 +408,40 @@ const footerLinks = [
             </div>
           </Section>
         ) : (
-          <Section id="enroll" eyebrow="enroll" title="Grab your seat">
+          <Section
+            id="enroll"
+            eyebrow="enroll"
+            title={course.selfPaced ? "Get instant access" : "Grab your seat"}
+          >
             <div class="enroll-card surface-card grad-border">
+              {course.availability && (
+                <p class="cohort-line">
+                  {/* play-in-circle: "press play whenever you like", the self-paced
+                      counterpart to the live cohort's calendar icon */}
+                  <svg
+                    class="cohort-icon"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      cx="10"
+                      cy="10"
+                      r="7.2"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                    />
+                    <path
+                      d="M8.4 7.4l4 2.6-4 2.6V7.4z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  <span>
+                    <span class="cohort-label">Self-paced</span>
+                    {course.availability}
+                  </span>
+                </p>
+              )}
               {course.schedule && (
                 <p class="cohort-line">
                   <svg
@@ -391,6 +506,16 @@ const footerLinks = [
                   note
                 />
               )}
+              {course.trialLesson && (
+                <p class="trial-note">
+                  Not ready yet? <a
+                    href={course.trialLesson}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-track={`${course.slug}-trial`}>Start a free trial</a
+                  > and watch lesson 1 first.
+                </p>
+              )}
               {course.price && course.checkout && (
                 <p class="trust-row font-mono">
                   <span><StatusDot tone="primary" /> Secure checkout</span>
@@ -439,8 +564,9 @@ const footerLinks = [
             <div class="repo-callout surface-card grad-border">
               <div class="repo-copy">
                 <p class="text-pretty text-muted">
-                  Every script and project we build is open-source. Fork the repo,
-                  follow along live, and keep building long after the cohort ends.
+                  {course.selfPaced
+                    ? "Every script and project we build is open-source. Fork the repo, code along with the recordings, and keep building long after you finish."
+                    : "Every script and project we build is open-source. Fork the repo, follow along live, and keep building long after the cohort ends."}
                 </p>
                 {course.repoForks && (
                   <p class="repo-forks font-mono">
@@ -714,6 +840,20 @@ const footerLinks = [
   }
 
 
+  /* free-trial escape hatch, between the pay buttons and the trust row */
+  .trial-note {
+    margin: 1.1rem 0 0;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+  }
+  .trial-note a {
+    color: var(--color-primary);
+    text-underline-offset: 2px;
+  }
+  .trial-note a:hover {
+    text-decoration: underline;
+  }
+
   /* --- payment trust row (under the pay buttons) --- */
   .trust-row {
     display: flex;
@@ -771,6 +911,11 @@ const footerLinks = [
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+  /* A recorded course has one rail instead of two side-by-side, so cap its width:
+     full-bleed cards over a 12-stage list read as stretched, not as a pipeline. */
+  .rail--single {
+    max-width: 46rem;
   }
   .rail .stage {
     position: relative;

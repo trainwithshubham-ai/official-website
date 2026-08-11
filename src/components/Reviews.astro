@@ -2,13 +2,24 @@
 // Reviews — REAL, consented learner testimonials from reviews.json (validated by
 // the content collection). Each card shows a real photo + role/company + the
 // student's own words (a trimmed excerpt). A standalone badge links to the real
-// 4.9★/232 Google rating. Never fabricate or misquote (golden rule 4, BRAND.md
+// 4.9★/260 Google rating. Never fabricate or misquote (golden rule 4, BRAND.md
 // §6). Google reviews (with a `url`) and student testimonials can coexist here.
 import { getCollection } from "astro:content";
 import Section from "./primitives/Section.astro";
 import { site } from "../config/site";
 
-const reviews = (await getCollection("reviews")).map((e) => e.data);
+interface Props {
+  /** Show only the first N testimonials (course pages take 3, one clean grid row).
+   *  Unset → all of them, which is what the homepage wants. */
+  limit?: number;
+  /** Override the section heading. Course pages say "about TrainWithShubham" so a
+   *  reader never mistakes these for reviews of that specific course (golden rule 4). */
+  title?: string;
+}
+const { limit, title = "What learners say" } = Astro.props;
+
+const all = (await getCollection("reviews")).map((e) => e.data);
+const reviews = limit ? all.slice(0, limit) : all;
 
 const readAllHref = site.googleProfileUrl.startsWith("TODO")
   ? site.googleReviewUrl
@@ -32,7 +43,7 @@ const subline = (r: { role?: string; company?: string; location?: string }) =>
     .join(" · ");
 ---
 
-<Section id="reviews" eyebrow="reviews" title="What learners say">
+<Section id="reviews" eyebrow="reviews" title={title}>
   <!-- Standalone Google rating stat that links out — kept separate from the
        student-testimonial cards below so it doesn't imply those are Google reviews. -->
   <a
@@ -53,7 +64,7 @@ const subline = (r: { role?: string; company?: string; location?: string }) =>
 
   <ul class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list">
     {
-      reviews.map((r, i) => (
+      reviews.map((r) => (
         <li class="surface-card lift flex flex-col rounded-[var(--radius-card)] border border-line border-l-2 border-l-primary bg-surface p-6 hover:border-l-primary/80">
           <div class="flex items-center gap-3">
             {r.photo ? (
@@ -63,7 +74,7 @@ const subline = (r: { role?: string; company?: string; location?: string }) =>
                 width="44"
                 height="44"
                 class="size-11 shrink-0 rounded-full object-cover"
-                loading={i < 3 ? "eager" : "lazy"}
+                loading="lazy"
                 decoding="async"
               />
             ) : (
