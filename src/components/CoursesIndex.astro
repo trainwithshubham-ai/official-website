@@ -13,7 +13,7 @@ import { site } from "../config/site";
 
 <Section eyebrow="courses" title="Learn by building" as="h1">
   <p class="mb-10 max-w-2xl text-pretty text-muted">
-    Live, hands-on cohorts and courses — pick the one for where you are, and start
+    Live cohorts and self-paced courses. Pick the one for where you are and start
     building. Every one is taught the way it's done in production.
   </p>
 
@@ -29,28 +29,24 @@ import { site } from "../config/site";
             theme={c.theme}
             ctaLabel={c.comingSoon ? "Preview" : "View course"}
           >
-            <span
-              slot="tags"
-              class="font-mono text-xs uppercase tracking-[0.08em] text-muted"
-            >
-              {c.meta}
-            </span>
-            {c.flagship && (
-              <span
-                slot="tags"
-                class="rounded-[var(--radius-pill)] border border-line px-2 py-0.5 font-mono text-[0.62rem] uppercase tracking-[0.08em] text-primary"
-              >
-                Flagship
+            {/* One Fragment for the whole tag row: Astro keeps only the LAST child
+                assigned to a named slot, so three sibling slot="tags" spans meant the
+                format label and the Flagship pill were silently dropped. */}
+            <Fragment slot="tags">
+              <span class="font-mono text-xs uppercase tracking-[0.08em] text-muted">
+                {c.meta}
               </span>
-            )}
-            {c.comingSoon && (
-              <span
-                slot="tags"
-                class="rounded-[var(--radius-pill)] border border-line px-2 py-0.5 font-mono text-[0.62rem] uppercase tracking-[0.08em] text-primary"
-              >
-                Coming soon
-              </span>
-            )}
+              {c.flagship && (
+                <span class="rounded-[var(--radius-pill)] border border-line px-2 py-0.5 font-mono text-[0.62rem] uppercase tracking-[0.08em] text-primary">
+                  Flagship
+                </span>
+              )}
+              {c.comingSoon && (
+                <span class="rounded-[var(--radius-pill)] border border-line px-2 py-0.5 font-mono text-[0.62rem] uppercase tracking-[0.08em] text-primary">
+                  Coming soon
+                </span>
+              )}
+            </Fragment>
             <p class="text-pretty text-sm text-muted">{c.blurb}</p>
           </CourseCard>
         </li>
@@ -65,7 +61,9 @@ import { site } from "../config/site";
       target="_blank"
       rel="noopener noreferrer"
       data-track="all-courses"
-      class="text-primary transition-colors hover:underline"
+      {/* underlined by default, not just on hover: inside a paragraph, colour alone
+          is not a sufficient affordance (WCAG 1.4.1 / Lighthouse link-in-text-block) */}
+      class="text-primary underline underline-offset-2 transition-colors hover:no-underline"
     >
       Browse the store →
     </a>
