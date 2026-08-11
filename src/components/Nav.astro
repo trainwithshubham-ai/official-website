@@ -3,8 +3,8 @@
 // Countdown chip + a ghost Log-in button (out to the Learnyst LMS) + the yellow
 // Enroll CTA. JS-free: a persistent translucent backdrop reads as "floating"
 // without a scroll listener (interactivity budget = the countdown only).
-// Left = where you are (on-page anchors, md+). Right = where you can go (Courses,
-// Log in, Enroll). Collapses to logo + Courses + Log in + Enroll at 380px.
+// Nav row = Courses (a route) + the on-page anchors (md+ only). Right = Log in +
+// Enroll. Collapses to logo + Courses + Log in + Enroll at 380px.
 import { site, saleLive } from "../config/site";
 import Button from "./primitives/Button.astro";
 import Countdown from "./Countdown.astro";
@@ -53,10 +53,20 @@ const links = [
       >
     </a>
 
-    <ul class="ml-2 hidden items-center gap-6 md:flex">
+    <ul class="ml-2 flex items-center gap-4 md:gap-6">
+      <!-- The one cross-page ROUTE in this row: the others scroll this page, this
+           one navigates. That's also why it survives the md collapse below — with
+           the anchors gone on a phone it's the only thing left to navigate with. -->
+      <li>
+        <a
+          href="/courses"
+          class="whitespace-nowrap text-sm text-muted transition-colors hover:text-text"
+          >Courses</a
+        >
+      </li>
       {
         links.map((l) => (
-          <li>
+          <li class="hidden md:block">
             <a
               href={l.href}
               class="text-sm text-muted transition-colors hover:text-text"
@@ -82,14 +92,6 @@ const links = [
           </div>
         )
       }
-      <!-- The one cross-page ROUTE in this header, so it sits with the actions on the
-           right, not in the anchor row on the left (those all scroll this page).
-           Same treatment as .ch-link on the course pages: quiet text, every width. -->
-      <a
-        href="/courses"
-        class="whitespace-nowrap text-sm text-muted transition-colors hover:text-text"
-        >Courses</a
-      >
       <Button
         variant="ghost"
         href={site.lms.signIn}
