@@ -7,7 +7,6 @@ import { site } from "../config/site";
 import Button from "./primitives/Button.astro";
 import Countdown from "./Countdown.astro";
 import Eyebrow from "./primitives/Eyebrow.astro";
-import StatusDot from "./primitives/StatusDot.astro";
 import PipelineAnim from "./PipelineAnim.astro";
 
 const batchDate = new Date(site.batchStartISO).toLocaleDateString("en-IN", {
@@ -24,17 +23,6 @@ const scheduleBits = [
   daysReady ? site.classDays : null,
   timeReady ? site.classTime : null,
 ].filter(Boolean);
-
-// What you get, above the fold — static, always readable, never rotating. Numbers
-// come from site.ts so they can't drift. "job prep" deliberately, NOT "job
-// assistance": inclusions.json scopes this to resume, LinkedIn and mock interviews,
-// and to an audience that is actively job-hunting the broader phrase would read as
-// placement support we don't promise (golden rule 4).
-const heroFacts = [
-  `${site.programLength} live cohort`,
-  `${site.liveHours} live hours`,
-  "job prep included",
-];
 ---
 
 <section id="top" class="relative overflow-hidden">
@@ -70,21 +58,6 @@ const heroFacts = [
       Start from the fundamentals and go all the way to shipping real systems —
       pipelines, Kubernetes, Terraform and observability, with AI in your
       workflow. No prior experience required.
-    </p>
-
-    <!-- Facts row. Mirrors the .trust-row pattern on the course pages (mono, muted,
-         purple status dots = "included/healthy", BRAND.md §2). Negative top margin so
-         it reads as attached to the subhead above it rather than as its own beat —
-         the hero already has enough separate beats before the CTA. -->
-    <p class="hero-facts -mt-4 font-mono">
-      {
-        heroFacts.map((f) => (
-          <span>
-            <StatusDot tone="primary" />
-            {f}
-          </span>
-        ))
-      }
     </p>
 
     <PipelineAnim />
@@ -164,21 +137,6 @@ const heroFacts = [
     100% {
       opacity: 0;
     }
-  }
-
-  /* --- facts row (same shape as .trust-row on the course pages) --- */
-  .hero-facts {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.4rem 1.1rem;
-    font-size: 0.72rem;
-    color: var(--color-muted);
-  }
-  .hero-facts span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
   }
 
   /* faint infra grid behind the hero, faded with a radial mask (BRAND.md §5) */
