@@ -412,7 +412,10 @@ export const courses = {
     // front removes the reason to show up live. Owner's call; revisit after 16 Aug and
     // flip this entry to selfPaced with an availability line at that point.
     batchStartISO: "2026-08-16T09:00:00+05:30",
-    schedule: { dates: "Saturday 16 August 2026", time: "9:00 AM IST" },
+    // 16 Aug 2026 is a SUNDAY (verified against the calendar). The day name here is
+    // hand-written while batchStartISO above is the machine-readable truth, so they can
+    // drift — check them against each other whenever either changes.
+    schedule: { dates: "Sunday 16 August 2026", time: "9:00 AM IST" },
     formatLabel: "free live session",
     // Real learner testimonials. Rendered under "about TrainWithShubham", so they never
     // imply these people took THIS course (golden rule 4). They still do real work here:
@@ -557,7 +560,7 @@ export const courses = {
         // batchStartISO above), and saying nothing is honest; claiming "live only" would
         // not be. Revisit this answer after 16 Aug.
         q: "When is it and how do I join?",
-        a: "It runs live on Saturday 16 August 2026 at 9:00 AM IST. Enrol now, and you'll get the joining details on the course platform.",
+        a: "It runs live on Sunday 16 August 2026 at 9:00 AM IST. Enrol now, and you'll get the joining details on the course platform.",
       },
       {
         q: "What should I have ready?",
