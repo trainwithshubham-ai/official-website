@@ -142,7 +142,8 @@ trainwithshubham-ai/
 ├─ public/
 │  ├─ logo.png                 # downloaded TWS mark
 │  ├─ favicon.svg
-│  ├─ og-image.png             # 1200×630 dark, pipeline motif
+│  ├─ posters/<slug>.jpg       # 1280×720 course poster = the OG/social card
+│  │                           # (+ .webp and -640.webp via scripts/generate-posters.mjs)
 │  └─ CNAME                    # "trainwithshubham.ai"
 ├─ src/
 │  ├─ config/site.ts           # SINGLE SOURCE OF TRUTH
@@ -253,6 +254,17 @@ no cross-talk.**
     end-of-day deadline for the repeatable `site.bonus`, never a fake per-visit
     reset (golden rule 6). The script ticks all `[data-countdown]` nodes from one
     `setInterval`; daily nodes never "expire."
+- **`VideoTeaser.astro`** is the ONE sanctioned exception (owner decision, 14 Aug 2026).
+  A free course page lives or dies on "show me the teaching before I sign up", and the
+  alternative — linking out to YouTube — hands the viewer a sidebar full of competitors
+  at the moment we are trying to convert them. It is a **click-to-load facade**: a local
+  poster image plus a play button, and *nothing* loads from YouTube until the visitor
+  clicks. So it costs no third-party request, no cookie and no LCP on load, and the fixed
+  16:9 box means the player swap causes zero layout shift. It ships as a real link
+  (`fallbackHref`), so with JS blocked the teaser still plays — it just opens YouTube in
+  a new tab. Uses `youtube-nocookie.com`. Roughly fifteen lines, delegated, emitted once
+  per page and tree-shaken entirely when no course on the page has a video.
+  **Do not add a third island without the same level of justification.**
 - **Accordions** (Curriculum, FAQ) use native `<details>/<summary>` — zero JS.
 - **Scroll reveals** (optional): CSS-only or a 1–2KB IntersectionObserver, gated
   behind `prefers-reduced-motion`. Skippable for v1.

@@ -30,8 +30,10 @@ hero**: welcoming, no prior experience required.
 - Fonts self-hosted via `@fontsource` (Space Grotesk, Inter, JetBrains Mono),
   imported in `BaseLayout.astro`.
 - Deploy: **GitHub Actions** → GitHub Pages.
-- The only runtime JS that ships is the **Countdown** (+ the tiny inline
-  UTM-capture helper in `BaseLayout`, ARCHITECTURE.md §6). Nothing else.
+- The only runtime JS that ships is the **Countdown**, the **VideoTeaser**
+  click-to-load facade on course pages (the one sanctioned second island — see
+  ARCHITECTURE.md §5 for why and for the rules it has to keep), and the tiny
+  inline UTM-capture helper in `BaseLayout` (ARCHITECTURE.md §6). Nothing else.
 - See **§ Modern stack & web-platform baseline** below for the trends/best
   practices this project commits to.
 
@@ -53,8 +55,10 @@ npm run preview      # preview the build
    lives in `src/config/site.ts`. **Never hardcode these in a component.** If you
    need a volatile value, import it from `site.ts`. If it's missing, add it there.
 2. **No backend, no database, no client framework.** Don't reach for React/Vue.
-   Astro components are static HTML. Interactivity budget is the countdown only
-   (see ARCHITECTURE.md §5). Accordions use native `<details>`.
+   Astro components are static HTML. Interactivity budget is the countdown plus
+   the VideoTeaser facade, and nothing else (see ARCHITECTURE.md §5, which also
+   sets the bar any future island would have to clear). Accordions use native
+   `<details>`.
 3. **Content lives in JSON** under `src/content/`, validated by zod at build
    (`reviews` via its content collection; the rest via `src/content/data.ts`,
    which components import instead of the raw JSON — a malformed edit fails the

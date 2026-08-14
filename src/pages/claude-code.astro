@@ -1,0 +1,8 @@
+---
+// /claude-code — free Claude Code course. Thin: all layout lives in the shared
+// CourseLanding template, all content in courses.ts.
+import CourseLanding from "../components/CourseLanding.astro";
+import { courses } from "../config/courses";
+---
+
+<CourseLanding course={courses["claude-code"]} />

@@ -1,0 +1,252 @@
+---
+// VideoTeaser — a click-to-load YouTube facade.
+//
+// INTERACTIVITY BUDGET EXCEPTION. CLAUDE.md and ARCHITECTURE.md §5 say the Countdown is
+// the only client island. This is the second one, added deliberately (owner decision,
+// 14 Aug 2026) because a free course page lives or dies on "show me the teaching before
+// I sign up", and the alternative — linking out to YouTube — hands the viewer a sidebar
+// full of competitors at the exact moment we are trying to convert them.
+//
+// The cost is kept to roughly fifteen lines of inline JS, and nothing about it is
+// speculative:
+//   • NOTHING from youtube.com loads until the visitor clicks. No third-party request,
+//     no cookie, no script. The facade is a local image we already ship.
+//   • So it cannot affect LCP, and the fixed 16:9 aspect-ratio box means it cannot
+//     shift layout when the player swaps in (zero CLS).
+//   • It is a real <button>, so it is keyboard reachable and screen-reader labelled.
+//     Without JS it stays a button that does nothing visible, so `fallbackHref` gives
+//     a plain link out as the no-JS path.
+//   • Uses youtube-nocookie.com, so the viewer isn't tracked for watching a teaser.
+interface Props {
+  /** YouTube video ID (not the full URL). */
+  id: string;
+  /** Accessible/visible description, e.g. "Linux course teaser". */
+  title: string;
+  /** Local facade image. Should be the course poster; MUST be a repo asset, never a
+   *  hotlinked i.ytimg.com thumbnail (that would be a third-party request on load, which
+   *  is the entire thing this component exists to avoid). */
+  thumb?: string;
+  /** WebP siblings of `thumb`. The facade takes the hero slot, so it becomes the page's
+   *  LCP element — it needs the same eager + WebP + 640w treatment the static poster
+   *  gets, or wiring a video silently downgrades LCP from a 27KB WebP to a 96KB JPG. */
+  thumbWebp?: string;
+  thumb640?: string;
+  /** Runtime shown on the play button, e.g. "2 min". Naming the time cost measurably
+   *  lifts play rate, so pass it whenever it is known. */
+  duration?: string;
+  /** Where the button links if JS never runs. Defaults to the YouTube watch page. */
+  fallbackHref?: string;
+  class?: string;
+}
+const {
+  id,
+  title,
+  thumb,
+  thumbWebp,
+  thumb640,
+  duration,
+  fallbackHref = `https://www.youtube.com/watch?v=${id}`,
+  class: className = "",
+} = Astro.props;
+
+const label = duration ? `Play the teaser (${duration})` : "Play the teaser";
+---
+
+<div class:list={["vt", className]} data-video-teaser data-video-id={id}>
+  {/* An <a> upgraded to a button by the script. As shipped it is a working link out, so
+      with JS blocked the teaser still plays — it just opens YouTube in a new tab. */}
+  <a
+    class="vt-btn"
+    href={fallbackHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    data-vt-play
+    {/* Contains the visible label verbatim (WCAG 2.5.3). Says "plays here" because that
+        is what happens in the normal case; the YouTube fallback only applies with JS
+        off, and promising it to everyone would be the inaccurate half of the time. */}
+    aria-label={`${label}: ${title}. Plays on this page.`}
+  >
+    {
+      thumb ? (
+        /* eager + fetchpriority + WebP srcset: this sits in the hero, so it IS the LCP
+           element. Lazy-loading it would defer the largest paint behind the loader. */
+        <picture>
+          {thumbWebp && (
+            <source
+              type="image/webp"
+              srcset={thumb640 ? `${thumb640} 640w, ${thumbWebp} 1280w` : thumbWebp}
+              sizes="(max-width: 640px) 100vw, 608px"
+            />
+          )}
+          <img
+            class="vt-thumb"
+            src={thumb}
+            alt=""
+            width="1280"
+            height="720"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </picture>
+      ) : (
+        <span class="vt-thumb vt-thumb--ph" aria-hidden="true" />
+      )
+    }
+    <span class="vt-scrim" aria-hidden="true"></span>
+    <span class="vt-play" aria-hidden="true">
+      <svg viewBox="0 0 68 48" focusable="false">
+        <path
+          class="vt-play-bg"
+          d="M66.5 7.7c-.8-2.9-3-5.1-5.9-5.9C55.3.5 34 .5 34 .5s-21.3 0-26.6 1.3C4.5 2.6 2.3 4.8 1.5 7.7.2 13 .2 24 .2 24s0 11 1.3 16.3c.8 2.9 3 5.1 5.9 5.9C12.7 47.5 34 47.5 34 47.5s21.3 0 26.6-1.3c2.9-.8 5.1-3 5.9-5.9C67.8 35 67.8 24 67.8 24s0-11-1.3-16.3z"
+        />
+        <path class="vt-play-tri" d="M27 34V14l18 10-18 10z" />
+      </svg>
+    </span>
+    <span class="vt-label">
+      {label}
+    </span>
+  </a>
+</div>
+
+<script>
+  // Swap the facade for the real player on click. One listener, delegated, shared by
+  // every teaser on the page. Emitted once by Astro no matter how many mounts exist.
+  document.addEventListener("click", (e) => {
+    // Let modified clicks through untouched. Swallowing them would break cmd/ctrl-click
+    // "open in a new tab" on an element that is, in the markup, exactly that: a link.
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    const target = e.target as HTMLElement | null;
+    const btn = target?.closest?.("[data-vt-play]") as HTMLAnchorElement | null;
+    if (!btn) return;
+    const host = btn.closest("[data-video-teaser]") as HTMLElement | null;
+    const id = host?.dataset.videoId;
+    if (!host || !id) return; // no id → let the href fall through to YouTube
+    e.preventDefault();
+    const frame = document.createElement("iframe");
+    // nocookie host: no tracking cookie for someone who only watched a teaser.
+    frame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+    frame.title = btn.getAttribute("aria-label") || "Course teaser";
+    frame.allow =
+      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    frame.allowFullscreen = true;
+    frame.className = "vt-frame";
+    host.replaceChildren(frame);
+    frame.focus(); // keyboard users land in the player they just opened
+  });
+</script>
+
+<style>
+  .vt {
+    position: relative;
+    width: 100%;
+    /* Reserving the ratio up front is what makes the swap cost zero layout shift. */
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+  }
+  .vt-btn {
+    position: absolute;
+    inset: 0;
+    display: block;
+    cursor: pointer;
+    border: 0;
+    padding: 0;
+    background: none;
+  }
+  .vt picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .vt-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .vt-thumb--ph {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(
+        120% 120% at 50% 0%,
+        color-mix(in srgb, var(--color-primary) 22%, transparent),
+        transparent 60%
+      ),
+      var(--color-surface);
+  }
+  /* Darkens the thumbnail so the white play glyph and label stay legible on any art. */
+  .vt-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.15),
+      rgba(0, 0, 0, 0.45)
+    );
+  }
+  .vt-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(3.5rem, 8vw, 4.75rem);
+  }
+  .vt-play svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  /* Brand purple, not YouTube red: the palette has no red and this is our page. */
+  .vt-play-bg {
+    fill: var(--color-primary-deep);
+    opacity: 0.92;
+  }
+  .vt-play-tri {
+    fill: #fff;
+  }
+  .vt-label {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(0.75rem, 3vw, 1.25rem);
+    transform: translateX(-50%);
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--color-ink) 72%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--color-text);
+    white-space: nowrap;
+  }
+  .vt-btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -3px;
+    border-radius: var(--radius-card);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .vt-play,
+    .vt-thumb {
+      transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+    }
+    .vt-btn:hover .vt-play {
+      transform: translate(-50%, -50%) scale(1.06);
+    }
+    .vt-btn:hover .vt-thumb {
+      transform: scale(1.02);
+    }
+  }
+  /* The swapped-in player fills the same reserved box. */
+  .vt :global(.vt-frame) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+</style>

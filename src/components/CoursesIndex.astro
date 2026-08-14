@@ -41,6 +41,14 @@ import { site } from "../config/site";
                   Flagship
                 </span>
               )}
+              {/* "Free" is the strongest word on a catalog page, so it gets its own
+                  marker rather than hiding inside the blurb. Amber --signal, never the
+                  yellow --cta, which belongs to Enroll/Pay alone (golden rule 5). */}
+              {c.free && (
+                <span class="rounded-[var(--radius-pill)] border border-signal/45 px-2 py-0.5 font-mono text-[0.62rem] uppercase tracking-[0.08em] text-signal">
+                  Free
+                </span>
+              )}
               {c.comingSoon && (
                 <span class="rounded-[var(--radius-pill)] border border-line px-2 py-0.5 font-mono text-[0.62rem] uppercase tracking-[0.08em] text-primary">
                   Coming soon

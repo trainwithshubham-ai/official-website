@@ -54,11 +54,19 @@ runs `npm ci` → `astro build` → uploads `./dist` → publishes to GitHub Pag
 One-time GitHub setup: **Settings → Pages → Build and deployment → Source =
 GitHub Actions**.
 
-The OG image is committed to `public/og-image.png`. To regenerate it after
-editing `public/og-image.svg`:
+Social cards use the real course posters in `public/posters/`, not a generated card.
+`BaseLayout` defaults to `/posters/devops.jpg`; each course page passes its own via
+`ogImage` in `src/config/courses.ts`.
+
+`public/og-image.svg` is a leftover from the old generated card and is **not** referenced
+by any page. `scripts/generate-og.mjs` would rasterise it to `og-image.png`, which is not
+committed, so do not point anything at that filename without running it first.
+
+After adding a new poster JPG, generate its WebP variants (the poster is the LCP element
+on a course page):
 
 ```bash
-node scripts/generate-og.mjs
+node scripts/generate-posters.mjs linux   # or with no argument, for all posters
 ```
 
 ## Custom domain (DNS)

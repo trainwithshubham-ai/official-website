@@ -35,6 +35,9 @@ interface Props {
   course?: Course;
   /** Catalog/index pages (e.g. /courses): emit Organization-only JSON-LD. */
   collection?: boolean;
+  /** Keep this route out of search results. Used by draft course pages, which build so
+   *  they can be reviewed locally but must never be indexed while incomplete. */
+  noindex?: boolean;
 }
 
 const {
@@ -49,6 +52,7 @@ const {
   imageAlt = `${site.brand} — ${site.product}`,
   course,
   collection,
+  noindex = false,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, site.domain).href;
@@ -66,7 +70,10 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="robots" content="index,follow" />
+    <meta
+      name="robots"
+      content={noindex ? "noindex,nofollow" : "index,follow"}
+    />
     <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#0A0E12" />
 
@@ -146,10 +153,24 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
         var region = a.getAttribute("data-region") || undefined;
         /* course slug (multi-course funnel attribution); undefined on the DevOps page */
         var course = a.getAttribute("data-course") || undefined;
+        /* "free" on a zero-cost course enrolment, absent on a paid checkout. Keeps the
+           two funnels separable in GA4 instead of averaging a ₹0 signup and a ₹14,999
+           purchase into one conversion number. */
+        var kind = a.getAttribute("data-enroll-kind") || "paid";
         if (typeof window.gtag === "function")
-          window.gtag("event", "enroll_click", { region: region, course: course });
+          window.gtag("event", "enroll_click", {
+            region: region,
+            course: course,
+            kind: kind,
+          });
         if (typeof window.fbq === "function")
-          window.fbq("track", "InitiateCheckout", { region: region, course: course });
+          /* A free enrolment is a Lead, not an InitiateCheckout — sending the checkout
+             event for it would poison purchase-optimised ad delivery with signups that
+             can never convert to revenue. */
+          window.fbq("track", kind === "free" ? "Lead" : "InitiateCheckout", {
+            region: region,
+            course: course,
+          });
       });
     </script>
 

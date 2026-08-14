@@ -1,67 +1,183 @@
 ---
-// RegionPrice — the region-adaptive dual-currency price. The visitor's likely currency
-// (html[data-region-guess], set pre-paint in BaseLayout — timezone, never IP) is the big
-// anchor; the other stays visible but smaller. BOTH always shown — emphasis, never a
-// hide/swap (golden rule 6). India is the default anchor. Shared so course pages read
-// identically to the main site.
+// RegionPrice — the ONE region-adaptive price on the course pages. The visitor's likely
+// currency (html[data-region-guess], set pre-paint in BaseLayout — timezone, never IP) is
+// the big anchor; the other stays visible but smaller. BOTH always shown — emphasis,
+// never a hide/swap (golden rule 6). India is the default anchor.
+//
+// Three sizes, one component, so the hero / enrol card / sticky bar can never drift apart
+// (they used to be three separate blocks of markup):
+//   • hero — compact inline line for above the fold
+//   • card — the large figure inside the enrol card
+//   • bar  — the mobile sticky bar
+//
+// `free` renders "Free" instead of any currency. A free course has no region split, so
+// there is nothing to emphasise and no screen-reader breakdown to give.
+//
+// The struck-through "originally" line renders ONLY when `list` is set. A permanent
+// strike-through with no reason and no deadline trains a technical reader to distrust the
+// number, so a course that just costs what it costs omits `list` entirely.
 import type { CoursePrice } from "../../config/courses";
 
 interface Props {
-  price: CoursePrice;
+  /** Omitted when `free` is set. */
+  price?: CoursePrice;
+  /** Free course: renders "Free" and skips the whole dual-currency treatment. */
+  free?: boolean;
+  /** Supporting line under the amount, e.g. "one-time · 4 years access". Optional so a
+   *  caller can stay bare (the sticky bar has no room for it). */
+  note?: string;
+  /** Emit the screen-reader price breakdown. Set on EXACTLY ONE mount per page — the
+   *  enrol card, where the region buttons actually are. The visible amounts are
+   *  aria-hidden on every mount, so with three mounts on a page (hero, card, bar) an
+   *  unguarded breakdown would read the same prices out three times, twice telling the
+   *  listener to "choose your region" somewhere no region control exists. */
+  announce?: boolean;
+  variant?: "hero" | "card" | "bar";
   class?: string;
 }
-const { price, class: className = "" } = Astro.props;
-const sr = `Price: ${price.india.now} for India (originally ${price.india.list}), ${price.world.now} for the rest of the world (originally ${price.world.list}). Choose your region to pay.`;
+const {
+  price,
+  free = false,
+  note,
+  announce = false,
+  variant = "card",
+  class: className = "",
+} = Astro.props;
+
+// Per-currency, not all-or-nothing: `list` is optional on each side independently, so
+// requiring both would silently drop a strike-through that was really set.
+const inrList = price?.india.list;
+const usdList = price?.world.list;
+// Built as one string so Astro's whitespace trimming around {expressions} can't drop the
+// spaces between amount and currency.
+// The announcing mount carries the note too, because every visible copy of it is
+// aria-hidden as a duplicate. Without this, a note that only appears on a non-announcing
+// mount (the hero's "one-time · 4 years of access") would be lost to AT entirely.
+// Don't double up terminal punctuation: notes are written as prose and usually already
+// end in a full stop ("No payment. Sign in and start."), which produced "…start..".
+const srNote = note ? ` ${note}${/[.!?]$/.test(note) ? "" : "."}` : "";
+const sr = !announce
+  ? ""
+  : free
+    ? `This course is free.${srNote}`
+    : price
+      ? `Price: ${price.india.now}${inrList ? ` (originally ${inrList})` : ""} for India, ` +
+        `${price.world.now}${usdList ? ` (originally ${usdList})` : ""} for the rest of the world.` +
+        `${srNote} Choose your region to pay.`
+      : "";
 ---
 
-<div class:list={["price", className]} aria-hidden="true">
-  <span class="price-from">from</span>
-  <span class="price-amt amt-india">{price.india.now}</span>
-  <span class="price-sep">·</span>
-  <span class="price-amt amt-world">{price.world.now}</span>
-  <span class="price-reg">
-    originally <s>{price.india.list}</s> / <s>{price.world.list}</s>
-  </span>
+<div class:list={["rp", `rp--${variant}`, className]}>
+  {
+    free ? (
+      /* aria-hidden like the paid branch: on the announcing mount the sr-only paragraph
+         below carries the whole thing, so leaving this visible to AT would read "Free"
+         and the note twice over. */
+      <p class="rp-row" aria-hidden="true">
+        <span class="rp-amt rp-free">Free</span>
+      </p>
+    ) : price ? (
+      <p class="rp-row" aria-hidden="true">
+        <span class="rp-from">from</span>
+        <span class="rp-amt amt-india">{price.india.now}</span>
+        <span class="rp-sep">·</span>
+        <span class="rp-amt amt-world">{price.world.now}</span>
+        {(inrList || usdList) && (
+          <span class="rp-list">
+            originally {inrList && <s>{inrList}</s>}
+            {inrList && usdList ? " / " : ""}
+            {usdList && <s>{usdList}</s>}
+          </span>
+        )}
+      </p>
+    ) : null
+  }
+  {note && <p class="rp-note" aria-hidden="true">{note}</p>}
+  {sr && <p class="sr-only">{sr}</p>}
 </div>
-<p class="sr-only">{sr}</p>
 
 <style>
-  .price {
+  /* Per-variant sizing lives in custom properties, NOT in variant-prefixed selectors.
+     The region rules below have to start at html[data-region-guess], which is an
+     ANCESTOR of this component — so ".rp--card html[...] .amt-world" would never match.
+     Setting the sizes as variables keeps one region rule that works for every variant. */
+  .rp {
+    --amt-anchor: clamp(2rem, 8vw, 2.5rem);
+    --amt-alt: 1.4rem;
+    --amt-meta: 0.85rem;
+  }
+  .rp--hero {
+    --amt-anchor: clamp(1.75rem, 6vw, 2.15rem);
+    --amt-alt: 1.2rem;
+  }
+  .rp--bar {
+    --amt-anchor: 1.05rem;
+    --amt-alt: 0.85rem;
+  }
+
+  .rp-row {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
     justify-content: center;
     gap: 0.25rem 0.6rem;
+    margin: 0;
   }
-  .price-from {
+  .rp-from {
+    font-size: 0.95rem;
     color: var(--color-muted);
   }
-  .price-amt {
+  .rp-amt {
     font-family: var(--font-display);
     line-height: 1.1;
   }
-  /* ANCHOR (big) = detected region; ALT (small) = the other. India default. */
+  .rp-sep {
+    font-family: var(--font-display);
+    font-size: var(--amt-alt);
+    font-weight: 300;
+    color: var(--color-muted);
+  }
+  .rp-list,
+  .rp-note {
+    width: 100%;
+    margin: 0;
+    text-align: center;
+    font-size: var(--amt-meta);
+    color: var(--color-muted);
+  }
+  .rp--hero .rp-note {
+    margin-top: 0.2rem;
+  }
+
+  /* ANCHOR (big) = the visitor's own currency; ALT (small) = the other, still fully
+     visible. The html[...] selector outspecifies the base rule, so on a world visitor
+     .amt-world wins the anchor and .amt-india falls through to the ALT sizing. */
   .amt-india,
   :global(html[data-region-guess="world"]) .amt-world {
-    font-size: clamp(2rem, 8vw, 2.5rem);
+    font-size: var(--amt-anchor);
     font-weight: 700;
     color: var(--color-text);
   }
   .amt-world,
   :global(html[data-region-guess="world"]) .amt-india {
-    font-size: 1.4rem;
+    font-size: var(--amt-alt);
     font-weight: 600;
     color: var(--color-muted);
   }
-  .price-sep {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-weight: 300;
-    color: var(--color-muted);
+  .rp-free {
+    font-size: var(--amt-anchor);
+    font-weight: 700;
+    color: var(--color-text);
   }
-  .price-reg {
-    width: 100%;
-    font-size: 0.85rem;
-    color: var(--color-muted);
+
+  /* The sticky bar has no room for the supporting lines, and the button beside it
+     already says what the action is. */
+  .rp--bar .rp-row {
+    gap: 0.4rem;
+  }
+  .rp--bar .rp-from,
+  .rp--bar .rp-list,
+  .rp--bar .rp-note {
+    display: none;
   }
 </style>

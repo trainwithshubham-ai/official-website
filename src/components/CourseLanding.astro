@@ -8,8 +8,11 @@
 // scripts (in BaseLayout) that run on every page.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Section from "./primitives/Section.astro";
+import Eyebrow from "./primitives/Eyebrow.astro";
 import Button from "./primitives/Button.astro";
 import RegionPrice from "./primitives/RegionPrice.astro";
+import VideoTeaser from "./primitives/VideoTeaser.astro";
+import Countdown from "./Countdown.astro";
 import ToolIcon from "./primitives/ToolIcon.astro";
 import EnrollButtons from "./EnrollButtons.astro";
 import StatusDot from "./primitives/StatusDot.astro";
@@ -17,7 +20,12 @@ import Instructor from "./Instructor.astro";
 import Reviews from "./Reviews.astro";
 import Footer from "./Footer.astro";
 import { site } from "../config/site";
-import { themeVars, type Course } from "../config/courses";
+import {
+  themeVars,
+  isDraftCourse,
+  isPlaceholder,
+  type Course,
+} from "../config/courses";
 
 interface Props {
   course: Course;
@@ -36,27 +44,145 @@ const recordedModules =
 const singleRail = !!course.selfPaced || liveModules.length === 0;
 const allModules = course.curriculum ?? [];
 
+// Phase grouping, when the syllabus declares one. Grouped by CONSECUTIVE runs rather
+// than by collecting all matching names, so the data's order is always the page's order
+// and a phase can never be silently reordered or merged with a later one of the same
+// name. Takes precedence over the live/recorded split.
+const hasPhases = allModules.some((m) => m.phase);
+const phaseGroups: { name: string; modules: typeof allModules }[] = [];
+for (const m of allModules) {
+  const name = m.phase ?? "";
+  const last = phaseGroups[phaseGroups.length - 1];
+  if (last && last.name === name) last.modules.push(m);
+  else phaseGroups.push({ name, modules: [m] });
+}
+// Count DISTINCT names, not runs. Grouping is by consecutive run (so the data's order is
+// always the display order), but if a phase name ever appeared non-consecutively the run
+// count would exceed the real number of phases — and this figure is published in the hero
+// size line and the curriculum intro.
+const phaseCount = new Set(phaseGroups.map((g) => g.name)).size;
+
+// A scheduled, non-self-paced course. Copy elsewhere defaults to "recorded and waiting
+// for you" / "work down at your own pace", which is exactly wrong for a live session.
+const isLiveSession = !course.selfPaced && !!course.batchStartISO;
+
 // WebP siblings of the poster (generated next to the .jpg in /public/posters).
 // The <picture> below falls back to the .jpg, so a course whose WebP is missing
 // still renders — it just doesn't get the smaller file.
 const posterWebp = course.poster?.replace(/\.(jpg|jpeg|png)$/i, ".webp");
 const posterWebp640 = course.poster?.replace(/\.(jpg|jpeg|png)$/i, "-640.webp");
 
-// Hero eyebrow/pill label — the course's three states, in order of precedence.
+// Hero eyebrow/pill label — the course's states, in order of precedence.
+const isFree = !!course.free;
+// `formatLabel` wins when set: a one-off live session is neither self-paced nor an
+// N-day cohort, and the derivation below would mis-describe it either way.
 const heroBadge = course.comingSoon
   ? "Coming soon"
-  : course.selfPaced
-    ? "recorded course · self-paced"
-    : course.format
-      ? `live ${course.format.days}-day cohort`
-      : "Live cohort";
+  : (course.formatLabel ??
+    (isFree && course.selfPaced
+      ? "free course · self-paced"
+      : course.selfPaced
+        ? "recorded course · self-paced"
+        : course.format
+          ? `live ${course.format.days}-day cohort`
+          : "Live cohort"));
+
+// A TODO_ placeholder is NOT a URL (same convention as site.ga4Id / site.refundPolicy,
+// which gate on the same prefix). Without this check a course awaiting its real Learnyst
+// link would render a normal-looking CTA that 404s — exactly the silent breakage golden
+// rule 7 exists to stop. The pending state below is deliberately unmistakable, so this
+// cannot be mistaken for finished work at review time.
+const enrolUrlPending = isDraftCourse(course);
+
+// The scaffolding note is a message to whoever maintains this repo, not to a visitor, so
+// it renders in `astro dev` only. In a production build the enrol card simply has no CTA
+// (and the route is noindex + out of the sitemap + out of the catalog), rather than
+// publishing internal instructions to real people and to Google.
+const showDevNote = enrolUrlPending && import.meta.env.DEV;
+
+// Same TODO convention as enrollUrl: a placeholder video id must never reach an iframe
+// src or a YouTube href, so it degrades to the plain poster instead.
+const hasVideo = !!course.video && !isPlaceholder(course.video.id);
+
+// Can a visitor actually act right now? Free needs a REAL enrolment URL; paid needs both
+// a price and a checkout. Drives the sticky bar, the mid-page nudge and the enrol card,
+// so a half-configured course degrades to a readable page instead of a dead button.
+const canEnrol = isFree
+  ? !enrolUrlPending
+  : !!(course.price && course.checkout);
+
+// A draft in a PRODUCTION build has nothing actionable to offer, so the whole enrol
+// section stands down. Leaving it up would headline "Start it free, right now" and
+// "Sign in and start" above no control at all — an instruction the reader cannot follow.
+// In dev it stays, carrying the TODO note, so the layout is still reviewable.
+// (Declared after canEnrol: const arrow/expression bindings are not hoisted.)
+const showEnrolCard = canEnrol || showDevNote;
+
+// THE primary action, resolved once. The header, hero, mid-page nudge and sticky bar all
+// read this, so they can never drift into saying different things. A free course links
+// straight out to its enrolment (no region to pick, so no reason to make someone scroll
+// first); a paid course scrolls to the card where the region choice lives.
+const primary =
+  isFree && !enrolUrlPending && course.enrollUrl
+    ? {
+        href: course.enrollUrl,
+        label: "Start free",
+        attrs: {
+          enroll: true,
+          "data-enroll-kind": "free",
+          "data-course": course.slug,
+          // Every mount of this CTA is external, so Button gives them all
+          // target="_blank". The announcement has to travel with it, or four of the five
+          // "Start free" buttons open a new tab unannounced. Contains the visible label
+          // verbatim (WCAG 2.5.3).
+          "aria-label": "Start free (opens in a new tab)",
+        },
+      }
+    : {
+        // Paid, or a free course still waiting on its real link: scroll to the card.
+        href: "#enroll",
+        label: isFree ? "Start free" : "Enroll now",
+        attrs: {},
+      };
+
+// The only price note the template may assert itself: "free" is a property of the offer,
+// not a claim about this particular course's contents. Everything else (access term,
+// certificate, billing shape) comes from `course.priceNote` / `course.trust`.
+// "Sign in and start" would promise instant access, which is false for a scheduled
+// session, so the live variant says what actually happens next.
+const freeNote = isLiveSession
+  ? "No payment. Enrol and join us live."
+  : "No payment. Sign in and start.";
+
+// Scannable size line under the hero. Module and project counts are DERIVED from the
+// data already on the page, so they can never disagree with the rails below; hours and
+// lesson count come from `volume` and simply don't render until they're known. Nothing
+// here is estimated (golden rule 4).
+const moduleCount = course.curriculum?.length ?? 0;
+const buildCount = course.builds?.length ?? 0;
+// Explicit `volume.projects` wins, so a course can state a project count without having
+// to enumerate every build; otherwise it derives from `builds`.
+const projectCount = course.volume?.projects ?? buildCount;
+const volumeBits = [
+  moduleCount ? `${moduleCount} modules` : null,
+  // Derived too, so the phase count can never disagree with the rails below it.
+  hasPhases ? `${phaseCount} phases` : null,
+  course.volume?.lessons ? `${course.volume.lessons} lessons` : null,
+  course.volume?.hours ? `${course.volume.hours} of video` : null,
+  projectCount ? `${projectCount} projects` : null,
+].filter(Boolean);
 
 // Only link sections that actually render on this course (a coming-soon course has no
 // curriculum/faq → no dead footer anchors). #enroll exists in both live + coming-soon.
 const footerLinks = [
   ...(course.curriculum ? [{ href: "#curriculum", label: "Curriculum" }] : []),
   ...(course.reviews ? [{ href: "#reviews", label: "Reviews" }] : []),
-  { href: "#enroll", label: course.comingSoon ? "Coming soon" : "Enroll" },
+  // Only link #enroll when there is something to do there.
+  ...(course.comingSoon
+    ? [{ href: "#enroll", label: "Coming soon" }]
+    : canEnrol
+      ? [{ href: "#enroll", label: isFree ? "Start free" : "Enroll" }]
+      : []),
   ...(course.faq ? [{ href: "#faq", label: "FAQ" }] : []),
   // No /courses entry here — the footer's own "Learn" column already links it, and
   // two labels for one destination in one footer is worse than none. The flagship
@@ -68,14 +194,18 @@ const footerLinks = [
 <BaseLayout
   title={`${course.title} — ${site.brand}`}
   description={course.description}
-  image={course.ogImage ?? "/og-image.png"}
-  imageWidth={course.ogImage ? (course.ogImageWidth ?? 1200) : 1200}
-  imageHeight={course.ogImage ? (course.ogImageHeight ?? 630) : 630}
+  {/* No local fallback string here: public/ has og-image.svg, never og-image.png, so
+      the old `?? "/og-image.png"` shipped a 404 social card for any course without its
+      own poster. Passing undefined lets BaseLayout's real default apply. */}
+  image={course.ogImage}
+  imageWidth={course.ogImageWidth}
+  imageHeight={course.ogImageHeight}
   imageAlt={`${course.title} — ${site.brand}`}
   course={course}
+  noindex={enrolUrlPending}
 >
   <div
-    class:list={["course", course.price && course.checkout && "has-sticky"]}
+    class:list={["course", canEnrol && "has-sticky"]}
     style={themeStyle}
   >
     <!-- slim sticky header (logo → home + one Enroll CTA; no jump-links) -->
@@ -109,9 +239,11 @@ const footerLinks = [
               </Button>
             )
           ) : (
-            <Button href="#enroll" class="px-4 py-2 text-sm">
-              Enroll now
-            </Button>
+            canEnrol && (
+              <Button class="px-4 py-2 text-sm" href={primary.href} {...primary.attrs}>
+                {primary.label}
+              </Button>
+            )
           )
         }
       </div>
@@ -147,18 +279,48 @@ const footerLinks = [
             {heroBadge}
           </span>
 
-          <h1 class="mt-4 text-balance">{course.title}</h1>
+          {/* The h1 carries the PROMISE, not the catalog name. `heroHeadline` must
+              still contain the course's primary keyword, because <title>, the meta
+              description and the JSON-LD name all keep the plain product name — this is
+              the only place the outcome can live. Falls back to the title when unset. */}
+          <h1 class="mt-4 text-balance">{course.heroHeadline ?? course.title}</h1>
 
           <p class="mx-auto mt-4 max-w-xl text-pretty text-lg text-muted">
             {course.tagline}
           </p>
 
+          {
+            volumeBits.length > 0 && (
+              <p class="hero-volume font-mono">{volumeBits.join(" · ")}</p>
+            )
+          }
+
           <!-- Course poster — the hero visual, right below the title. Swap in real art
                via course.poster; otherwise a branded 16:9 placeholder frame renders
-               (picks up the course accent). -->
+               (picks up the course accent).
+               When the course has a teaser video, the playable facade takes this slot
+               instead: two large visuals stacked would just push the CTA further down,
+               and the poster art is more use as the video's thumbnail than as a second
+               static image. -->
           <figure class="poster grad-border">
             {
-              course.poster ? (
+              hasVideo ? (
+                <VideoTeaser
+                  id={course.video!.id}
+                  title={`${course.title} teaser`}
+                  thumb={course.poster}
+                  thumbWebp={posterWebp}
+                  thumb640={posterWebp640}
+                  {/* `duration` needs the same placeholder guard as `id`: without it,
+                      filling in a real video id but not the runtime would render a play
+                      button reading "Play the teaser (TODO)" and put it in the label. */}
+                  duration={
+                    isPlaceholder(course.video!.duration)
+                      ? undefined
+                      : course.video!.duration
+                  }
+                />
+              ) : course.poster ? (
                 /* This is the LCP element, so serve WebP with a 640w variant for
                    phones and keep the JPG as the fallback (same jpg+webp pattern as
                    the instructor photo). A 1280w JPG into a ~360px slot cost ~600ms
@@ -167,7 +329,10 @@ const footerLinks = [
                   <source
                     type="image/webp"
                     srcset={`${posterWebp640} 640w, ${posterWebp} 1280w`}
-                    sizes="(max-width: 640px) 100vw, 720px"
+                    {/* Must track .poster's max-width (38rem ≈ 608px). Left at the old
+                        720px it would keep picking the 1280w file for a 608px slot on
+                        DPR-1 desktop, on the page's LCP element. */}
+                    sizes="(max-width: 640px) 100vw, 608px"
                   />
                   <img
                     src={course.poster}
@@ -182,7 +347,11 @@ const footerLinks = [
               ) : (
                 <div class="poster-ph">
                   <span class="poster-ph-eyebrow font-mono">
-                    {course.selfPaced ? "recorded course" : "live cohort"}
+                    {isFree
+                      ? "free course"
+                      : course.selfPaced
+                        ? "recorded course"
+                        : "live cohort"}
                   </span>
                   <span class="poster-ph-title font-display">{course.title}</span>
                   <span class="poster-ph-note font-mono">poster coming soon</span>
@@ -191,9 +360,63 @@ const footerLinks = [
             }
           </figure>
 
-          <!-- one clean above-the-fold action. Live course → yellow Enroll (scrolls to
-               the priced card below). Coming-soon → ghost repo CTA (nothing to enrol in
-               yet, so never yellow) + a secondary link to the other courses. -->
+          {/* Price ABOVE THE FOLD. On a low-ticket course the number is the pitch, and
+              burying it until the enrol card makes the reader work for the one fact most
+              likely to close them. Both currencies always visible (golden rule 6).
+              Gated on HAVING a price, not on `canEnrol`: what a course costs is a fact
+              about the course, so a free one still says "Free" while its enrolment link
+              is being wired. */}
+          {
+            (isFree || course.price) && (
+              <RegionPrice
+                class="hero-price"
+                variant="hero"
+                free={isFree}
+                price={course.price}
+                note={course.priceNote ?? (isFree ? freeNote : undefined)}
+                {/* The enrol card normally owns the screen-reader price, but it doesn't
+                    always render (a draft course, or one with a price and no checkout).
+                    When it won't, the hero has to announce instead, or every visible
+                    amount on the page is aria-hidden and an SR user gets no price at
+                    all. */}
+                announce={!showEnrolCard}
+              />
+            )
+          }
+
+          {/* WHEN it happens, then HOW LONG until it does, sitting directly above the
+              CTA so urgency and action are adjacent. Honest scarcity (golden rule 6):
+              a real session at a real time, never a reset. The Countdown flips itself to
+              a calm ended state on its own, so nothing here goes stale mid-morning. */}
+          {/* No "live ·" prefix on the date: the badge above already says "free live
+              session" and the countdown label below says "live session starts in".
+              Three mentions in one column reads as padding. */}
+          {
+            course.schedule && (
+              <p class="hero-when font-mono">
+                <span aria-hidden="true">❯</span> {course.schedule.dates} ·{" "}
+                {course.schedule.time}
+              </p>
+            )
+          }
+          {
+            course.batchStartISO && (
+              <Countdown
+                class="hero-countdown items-center"
+                variant="full"
+                deadline={course.batchStartISO}
+                label="live session starts in"
+                endedText="this session has started"
+                announceDeadline
+                srLabel="The live session starts {date} IST."
+              />
+            )
+          }
+
+          <!-- one clean above-the-fold action. Enrollable course → yellow primary
+               (a free course goes straight out to enrolment; a paid one scrolls to the
+               card where the region choice lives). Coming-soon → ghost repo CTA
+               (nothing to enrol in yet, so never yellow). -->
           <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             {
               course.comingSoon ? (
@@ -215,12 +438,18 @@ const footerLinks = [
                 </>
               ) : (
                 <>
-                  <Button href="#enroll" variant="primary" class="pulse-cta">
-                    Enroll now
-                  </Button>
-                  {/* Low-commitment second door: lesson 1 is a free trial on the LMS.
-                      Ghost, never yellow — the CTA colour stays with Enroll. */}
-                  {course.trialLesson && (
+                  {/* Gated on canEnrol: a yellow primary CTA that scrolls to a card with
+                      no enrolment path is worse than no CTA at all. */}
+                  {canEnrol && (
+                    <Button variant="primary" class="pulse-cta" href={primary.href} {...primary.attrs}>
+                      {primary.label}
+                    </Button>
+                  )}
+                  {/* Low-commitment second door. With no refund policy on the site, this
+                      IS the risk reducer on a paid course, so it says exactly what it is
+                      and how long it takes rather than "start a free trial", which reads
+                      like a subscription signup. Ghost, never yellow. */}
+                  {!isFree && course.trialLesson && (
                     <Button
                       href={course.trialLesson}
                       variant="ghost"
@@ -228,7 +457,12 @@ const footerLinks = [
                       rel="noopener noreferrer"
                       data-track={`${course.slug}-trial`}
                     >
-                      Start a free trial
+                      {course.trialLabel ?? "Watch lesson 1 free"}
+                    </Button>
+                  )}
+                  {isFree && course.curriculum && (
+                    <Button href="#curriculum" variant="ghost">
+                      See what's inside
                     </Button>
                   )}
                 </>
@@ -238,19 +472,10 @@ const footerLinks = [
         </div>
       </section>
 
-      <!-- FREE-WITH-FLAGSHIP cross-link (bonus courses only) -->
-      {
-        course.bonus && (
-          <a href="/" class="bonus-note">
-            <StatusDot tone="primary" />
-            <span>
-              {course.comingSoon ? "Coming soon — and " : "Also "}included{" "}
-              <strong>free</strong> when you enrol in DevOps: Zero to Hero
-            </span>
-            <span class="bonus-note-arrow" aria-hidden="true">→</span>
-          </a>
-        )
-      }
+      {/* The flagship cross-sell used to sit HERE, at position 2. On a page selling its
+          own course that reads as "you don't need to buy this", handed to the reader
+          before they know what the course contains or what it costs. It now lives below
+          the enrol card, reframed as an upgrade. */}
 
       <!-- AT A GLANCE — scannable facts strip -->
       {
@@ -265,6 +490,46 @@ const footerLinks = [
               ))}
             </dl>
           </section>
+        )
+      }
+
+      {/* WHAT YOU'LL BUILD — the artifacts, promoted out of the curriculum rail.
+          On a self-paced course these are the strongest thing there is to sell: a flat
+          list of 12 modules weights "Object-oriented Python (basics)" the same as
+          "build an agent that reads your logs". This block un-flattens that. */}
+      {
+        course.builds && course.builds.length > 0 && (
+          <Section
+            id="builds"
+            eyebrow="what you'll build"
+            title="What you'll have built by the end"
+          >
+            <p class="mb-9 max-w-2xl text-pretty text-muted">
+              Real, finished projects you keep and can show in an interview. Not
+              exercises that get thrown away.
+            </p>
+            <ul class="builds-grid" role="list">
+              {course.builds.map((b, i) => (
+                <li class="surface-card lift build-card">
+                  <span class="build-num font-mono" aria-hidden="true">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3 class="build-title">{b.title}</h3>
+                  <p class="build-desc text-pretty">{b.desc}</p>
+                  {b.tools && (
+                    <ul class="build-tools" role="list">
+                      {b.tools.map((t) => (
+                        <li>
+                          <ToolIcon name={t} class="text-[0.9rem] text-primary" />
+                          {t}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Section>
         )
       }
 
@@ -289,15 +554,66 @@ const footerLinks = [
       {
         course.curriculum && (
           <Section id="curriculum" eyebrow="curriculum" title="Topics we cover">
+            {/* No access-term claim here: "yours for 4 years" used to be hardcoded in
+                this shared template, which asserted it for every course including free
+                ones whose term nobody has confirmed. Access is stated per course in
+                `includes`, where it belongs (golden rule 1). */}
             <p class="mb-9 max-w-2xl text-pretty text-muted">
               {
-                singleRail
-                  ? `Every module below is recorded and waiting for you. Follow the path top to bottom, or jump straight to the topic you need. Yours for 4 years, including future updates.`
-                  : `The live weekend covers the flagship, hands-on topics. Everything else is recorded for self-study, yours for 4 years, including future updates.`
+                hasPhases
+                  ? isLiveSession
+                    ? `${phaseCount} phases, ${allModules.length} modules, covered live. Each phase builds on the one before it, and the heavier modules go deep rather than skimming.`
+                    : `${phaseCount} phases, ${allModules.length} modules. Start wherever you are and work down. Each phase builds on the one before it, and the heavier modules go deep rather than skimming.`
+                  : isLiveSession
+                    ? `Everything below is covered live. Come with your machine ready and build along.`
+                    : singleRail
+                      ? `Every module below is recorded and waiting for you. Follow the path top to bottom, or jump straight to the topic you need.`
+                      : `The live weekend covers the flagship, hands-on topics. Everything else is recorded for self-study.`
               }
             </p>
             {
-              singleRail ? (
+              hasPhases ? (
+                /* Phased syllabus: one rail per phase, stacked. Stacked and not columns
+                   on purpose — a phase list is a progression, and side-by-side columns
+                   would break the reading order that makes it a journey. */
+                <div class="cur-phases">
+                  {phaseGroups.map((g, gi) => (
+                    <div class="cur-phase">
+                      {g.name && <h3 class="cur-phase-h font-mono">{g.name}</h3>}
+                      <ol class="rail" role="list">
+                        {g.modules.map((m, i) => (
+                          <li class="stage">
+                            <span
+                              class:list={[
+                                "dot",
+                                gi === phaseGroups.length - 1 &&
+                                  i === g.modules.length - 1 &&
+                                  "pulse-dot",
+                              ]}
+                              aria-hidden="true"
+                            />
+                            <div class="surface-card lift cur-card">
+                              {/* Tag sits OUTSIDE the heading: inside, it concatenated
+                                  into the accessible name ("built-in toolsdeep dive"). */}
+                              <div class="cur-card-head">
+                                <h4>{m.module}</h4>
+                                {m.deepDive && (
+                                  <span class="cur-dd font-mono">deep dive</span>
+                                )}
+                              </div>
+                              {m.desc && (
+                                <p class="mt-1 text-pretty text-sm text-muted">
+                                  {m.desc}
+                                </p>
+                              )}
+                            </div>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  ))}
+                </div>
+              ) : singleRail ? (
                 /* Recorded course: one continuous rail, no live-vs-recorded split. */
                 <ol class="rail rail--single" role="list">
                   {allModules.map((m, i) => (
@@ -343,7 +659,11 @@ const footerLinks = [
                   </div>
                   <div class="cur-group">
                     <p class="cur-group-h">
-                      <span class="cur-badge">Recorded</span> self-study · 4 years access
+                      {/* No access term: the same hardcoded "4 years" was removed from
+                          the curriculum intro above for exactly this reason. The first
+                          live-cohort course added would otherwise publish an access
+                          claim nobody set. It belongs in `includes`, per course. */}
+                      <span class="cur-badge">Recorded</span> self-study
                     </p>
                     <ol class="rail" role="list">
                       {recordedModules.map((m) => (
@@ -366,6 +686,30 @@ const footerLinks = [
         )
       }
 
+      {/* MID-PAGE NUDGE — the curriculum is where desire peaks, and until now the next
+          chance to act was eight sections away (instructor, reviews, then the card).
+          Desktop had no CTA in the flow at all; only the sticky header carried one. */}
+      {
+        canEnrol && course.curriculum && (
+          <div class="nudge-wrap">
+            <div class="nudge">
+              <p class="nudge-copy">
+                {isFree
+                  ? "That's the whole syllabus, and it costs nothing to start."
+                  : "That's everything covered. Ready to build it?"}
+              </p>
+              <Button
+                class="shrink-0"
+                href={primary.href}
+                {...primary.attrs}
+              >
+                {primary.label}
+              </Button>
+            </div>
+          </div>
+        )
+      }
+
       <!-- INSTRUCTOR — shared component (universal across all pages, reads site.ts) -->
       <Instructor />
 
@@ -379,6 +723,40 @@ const footerLinks = [
             title="What learners say about TrainWithShubham"
           />
         ) : null
+      }
+
+      {/* OPEN-SOURCE REPO — moved to sit immediately BEFORE the price. On /python this
+          is the most course-specific proof on the page (752 real forks) and it used to
+          be the last thing before the footer, long after the buying decision. */}
+      {
+        course.repo && (
+          <Section eyebrow="open source" title="The code is yours to keep">
+            <div class="repo-callout surface-card grad-border">
+              <div class="repo-copy">
+                <p class="text-pretty text-muted">
+                  {course.selfPaced
+                    ? "Every script and project we build is open-source. Fork the repo, code along with the recordings, and keep building long after you finish."
+                    : "Every script and project we build is open-source. Fork the repo, follow along live, and keep building long after the cohort ends."}
+                </p>
+                {course.repoForks && (
+                  <p class="repo-forks font-mono">
+                    {course.repoForks} forks on GitHub
+                  </p>
+                )}
+              </div>
+              <Button
+                href={course.repo}
+                variant="ghost"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-track={`${course.slug}-repo`}
+                class="shrink-0"
+              >
+                View the repo →
+              </Button>
+            </div>
+          </Section>
+        )
       }
 
       <!-- ENROLL (live course) — or COMING SOON (teaser) -->
@@ -409,11 +787,19 @@ const footerLinks = [
               </div>
             </div>
           </Section>
-        ) : (
+        ) : !showEnrolCard ? null : (
           <Section
             id="enroll"
-            eyebrow="enroll"
-            title={course.selfPaced ? "Get instant access" : "Grab your seat"}
+            eyebrow={isFree ? "start free" : "enroll"}
+            title={
+              isFree && isLiveSession
+                ? "Save your spot, free"
+                : isFree
+                  ? "Start it free, right now"
+                  : course.selfPaced
+                    ? "Get instant access"
+                    : "Grab your seat"
+            }
           >
             <div class="enroll-card surface-card grad-border">
               {course.availability && (
@@ -469,12 +855,25 @@ const footerLinks = [
                     />
                   </svg>
                   <span>
-                    <span class="cohort-label">Live cohort</span>
+                    {/* "Live", not "Live cohort": a one-off session is not a cohort, and
+                        the label sits right beside the real date and time anyway. */}
+                    <span class="cohort-label">Live</span>
                     {course.schedule.dates} · {course.schedule.time}
                   </span>
                 </p>
               )}
-              {course.price && <RegionPrice price={course.price} />}
+              {/* `announce` lives HERE and nowhere else: this is the one mount beside an
+                  actual region control, so it is the only place "choose your region" is
+                  a true instruction. */}
+              {(course.price || isFree) && (
+                <RegionPrice
+                  variant="card"
+                  free={isFree}
+                  price={course.price}
+                  note={course.priceNote ?? (isFree ? freeNote : undefined)}
+                  announce
+                />
+              )}
               {course.includes && (
                 <ul class="mx-auto mt-7 flex w-fit flex-col gap-3 text-left" role="list">
                   {course.includes.map((item) => (
@@ -498,7 +897,39 @@ const footerLinks = [
                   ))}
                 </ul>
               )}
-              {course.price && course.checkout && (
+              {/* Free: one button, no region split (free is free everywhere), straight
+                  out to the LMS enrolment in a new tab so this page stays open. */}
+              {isFree && !enrolUrlPending && course.enrollUrl && (
+                <div class="mt-7 flex justify-center">
+                  <Button
+                    class="w-full sm:w-auto sm:min-w-[16rem]"
+                    href={course.enrollUrl}
+                    enroll
+                    data-enroll-kind="free"
+                    data-course={course.slug}
+                    {/* Accessible name must CONTAIN the visible label (WCAG 2.5.3), or
+                        voice control users saying "click Start free" get no match. */}
+                    aria-label="Start free (opens in a new tab)"
+                  >
+                    Start free
+                  </Button>
+                </div>
+              )}
+              {/* Placeholder enrolment link: render an INERT, obviously-unfinished block
+                  rather than a button that looks live and 404s. Not an <a> and not a
+                  Button, so it cannot be clicked or focused into a dead end. */}
+              {showDevNote && (
+                <p class="enrol-pending" role="note">
+                  <span class="enrol-pending-tag font-mono">TODO</span>
+                  Enrolment link not wired yet. Add this course's Learnyst free-enrolment
+                  URL as <code>enrollUrl</code> in <code>src/config/courses.ts</code>.
+                </p>
+              )}
+
+              {/* `!isFree` guard: free and paid are mutually exclusive by intent, but
+                  only by comment in the data. Without this a course that set both would
+                  render "Free" and a row of pay buttons directly under it. */}
+              {!isFree && course.price && course.checkout && (
                 <EnrollButtons
                   class="mt-7"
                   checkout={course.checkout}
@@ -508,21 +939,24 @@ const footerLinks = [
                   note
                 />
               )}
-              {course.trialLesson && (
+              {!isFree && course.trialLesson && (
                 <p class="trial-note">
-                  Not ready yet? <a
+                  Not sure yet? <a
                     href={course.trialLesson}
                     target="_blank"
                     rel="noopener noreferrer"
-                    data-track={`${course.slug}-trial`}>Start a free trial</a
-                  > and watch lesson 1 first.
+                    data-track={`${course.slug}-trial`}
+                    >{course.trialLabel ?? "Watch lesson 1 free"}</a
+                  > before you decide.
                 </p>
               )}
-              {course.price && course.checkout && (
+              {canEnrol && course.trust && course.trust.length > 0 && (
                 <p class="trust-row font-mono">
-                  <span><StatusDot tone="primary" /> Secure checkout</span>
-                  <span><StatusDot tone="primary" /> Instant access</span>
-                  <span><StatusDot tone="primary" /> 4 years + updates</span>
+                  {course.trust.map((t) => (
+                    <span>
+                      <StatusDot tone="primary" /> {t}
+                    </span>
+                  ))}
                 </p>
               )}
             </div>
@@ -530,7 +964,43 @@ const footerLinks = [
         )
       }
 
-      <!-- FAQ — its own section with a header (systematic, like every other section) -->
+      {/* UPGRADE TO THE FLAGSHIP — the old position-2 cross-link, moved here and
+          reframed. After the price it is an upsell; before it, it was an exit. For a
+          free course this is the page's whole monetisation beat, which is why it gets a
+          full card rather than the one-line note it used to be. */}
+      {
+        (course.bonus || isFree) && (
+          <Section>
+            {/* Card is a plain surface, NOT grad-border: that gradient hairline is
+                reserved for the anchor card (tokens.css §components), which on this page
+                is the enrol card. Three of them would stop it meaning anything. */}
+            <div class="upgrade-card surface-card">
+              <Eyebrow text="go further" class="upgrade-eyebrow" />
+              <h2 class="upgrade-title text-balance">
+                {course.bonus
+                  ? "This course is included free in the flagship"
+                  : "Ready for the full DevOps path?"}
+              </h2>
+              <p class="upgrade-copy text-pretty">
+                <strong class="text-text">DevOps: Zero to Hero</strong> is the{" "}
+                {site.programLength} live cohort: {site.liveHours} hours of live class
+                covering Linux, Docker, Kubernetes, Terraform, AWS, CI/CD, observability
+                and Agentic AI, ending in a capstone project, a verifiable credential and
+                job prep. {course.bonus ? "This course comes with it, free." : ""}
+              </p>
+              {/* The anchor wraps ONLY the CTA text; .upgrade-cta::after stretches the
+                  hit area over the whole card. Wrapping the card in the <a> instead made
+                  the accessible name the heading plus the entire paragraph, read out as
+                  one link. Same pattern CourseCard uses. */}
+              <a href="/" class="upgrade-cta">
+                See DevOps: Zero to Hero <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </Section>
+        )
+      }
+
+      <!-- FAQ — last, where objections belong once the offer has been made -->
       {
         course.faq && (
           <Section id="faq" eyebrow="faq" title="Frequently asked questions">
@@ -558,52 +1028,18 @@ const footerLinks = [
           </Section>
         )
       }
-
-      <!-- OPEN-SOURCE REPO CALLOUT — after pricing (a closing reassurance beat) -->
-      {
-        course.repo && (
-          <Section eyebrow="open source" title="The code is yours to keep">
-            <div class="repo-callout surface-card grad-border">
-              <div class="repo-copy">
-                <p class="text-pretty text-muted">
-                  {course.selfPaced
-                    ? "Every script and project we build is open-source. Fork the repo, code along with the recordings, and keep building long after you finish."
-                    : "Every script and project we build is open-source. Fork the repo, follow along live, and keep building long after the cohort ends."}
-                </p>
-                {course.repoForks && (
-                  <p class="repo-forks font-mono">
-                    {course.repoForks} forks on GitHub
-                  </p>
-                )}
-              </div>
-              <Button
-                href={course.repo}
-                variant="ghost"
-                target="_blank"
-                rel="noopener noreferrer"
-                data-track={`${course.slug}-repo`}
-                class="shrink-0"
-              >
-                View the repo →
-              </Button>
-            </div>
-          </Section>
-        )
-      }
     </main>
 
     <Footer jumpLinks={footerLinks} />
 
-    <!-- mobile sticky enroll bar (codehelp pattern) — live courses only (needs price) -->
+    <!-- mobile sticky enroll bar — any enrollable course (paid price or free) -->
     {
-      course.price && course.checkout && (
+      canEnrol && (
         <div class="sticky-enroll">
-          <span class="se-price">
-            <span class="se-amt se-india">{course.price.india.now}</span>
-            <span class="se-dot" aria-hidden="true">·</span>
-            <span class="se-amt se-world">{course.price.world.now}</span>
-          </span>
-          <Button href="#enroll" class="px-4 py-2 text-sm">Enroll now</Button>
+          <RegionPrice variant="bar" free={isFree} price={course.price} />
+          <Button class="px-4 py-2 text-sm" href={primary.href} {...primary.attrs}>
+            {primary.label}
+          </Button>
         </div>
       )
     }
@@ -680,9 +1116,13 @@ const footerLinks = [
   }
 
   /* --- course poster (hero visual, right below the title) --- */
+  /* Capped tighter than it looks like it wants to be: the poster sits between the
+     headline and the price + CTA cluster, so every pixel it gains pushes the buy action
+     towards the fold on a 900px-tall laptop. 38rem keeps it a real visual anchor while
+     leaving the CTA comfortably in view. */
   .poster {
-    max-width: 44rem;
-    margin: 2rem auto 0;
+    max-width: 38rem;
+    margin: 1.5rem auto 0;
     border-radius: var(--radius-card);
     overflow: hidden;
     aspect-ratio: 16 / 9;
@@ -767,34 +1207,193 @@ const footerLinks = [
     border-radius: var(--radius-pill);
   }
 
-  /* --- free-with-flagship cross-link --- */
-  .bonus-note {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    max-width: var(--container-content);
-    margin: 0 auto;
-    padding: 0.8rem 1.5rem;
-    font-size: 0.9rem;
+  /* --- hero: size line + price --- */
+  .hero-volume {
+    margin-top: 1rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
     color: var(--color-muted);
-    transition: color 0.15s;
   }
-  .bonus-note strong {
+  .hero-price {
+    margin-top: 1.5rem;
+  }
+  .hero-when {
+    margin-top: 1.25rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
     color: var(--color-primary);
-    font-weight: 600;
   }
-  .bonus-note-arrow {
+  .hero-countdown {
+    margin-top: 1rem;
+  }
+
+  /* --- what you'll build --- */
+  .builds-grid {
+    display: grid;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 640px) {
+    .builds-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .build-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: 100%;
+    padding: 1.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+  }
+  .build-num {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
     color: var(--color-primary);
-    transition: transform 0.15s;
   }
-  .bonus-note:hover {
+  .build-title {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 500;
     color: var(--color-text);
   }
-  @media (prefers-reduced-motion: no-preference) {
-    .bonus-note:hover .bonus-note-arrow {
-      transform: translateX(3px);
+  .build-desc {
+    flex: 1;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+  }
+  .build-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.35rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .build-tools li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.15rem 0.55rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--color-muted);
+  }
+
+  /* Unfinished-state marker. Amber --signal (never the yellow CTA), dashed border, and a
+     literal "TODO" tag so it reads as scaffolding in a screenshot, not as a design. */
+  .enrol-pending {
+    /* block, not flex: the message mixes text nodes with inline <code>, and flex would
+       turn every text run into its own item, shredding the sentence into gapped chunks. */
+    display: block;
+    margin-top: 1.75rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px dashed color-mix(in srgb, var(--color-signal) 55%, transparent);
+    border-radius: var(--radius-card);
+    background: color-mix(in srgb, var(--color-signal) 8%, transparent);
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    text-align: center;
+  }
+  .enrol-pending-tag {
+    display: inline-block;
+    margin-right: 0.4rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--color-signal) 22%, transparent);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--color-signal);
+  }
+  .enrol-pending code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--color-text);
+  }
+
+  /* --- mid-page nudge (after the curriculum) --- */
+  .nudge-wrap {
+    max-width: var(--container-content);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  .nudge {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem 1.5rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    text-align: center;
+  }
+  .nudge-copy {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--color-text);
+  }
+
+  /* --- upgrade to the flagship (below the enrol card) --- */
+  .upgrade-card {
+    position: relative; /* containing block for the stretched CTA hit area */
+    max-width: 44rem;
+    margin: 0 auto;
+    padding: 2rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    text-align: center;
+  }
+  @media (min-width: 640px) {
+    .upgrade-card {
+      padding: 2.5rem;
     }
+  }
+  /* Eyebrow.astro already styles the label; it only needs centering here, so the
+     component's muted-text-with-purple-❯ treatment stays consistent with every other
+     section eyebrow on the page. */
+  .upgrade-eyebrow {
+    text-align: center;
+  }
+  .upgrade-title {
+    margin-top: 0.75rem;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+  }
+  .upgrade-copy {
+    margin: 1rem auto 0;
+    max-width: 34rem;
+    font-size: 0.95rem;
+    color: var(--color-muted);
+  }
+  .upgrade-cta {
+    display: inline-block;
+    margin-top: 1.5rem;
+    font-weight: 500;
+    color: var(--color-primary);
+  }
+  /* Stretched hit area: the whole card is clickable, but the accessible name stays just
+     the CTA text. */
+  .upgrade-cta::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-card);
+  }
+  .upgrade-card:hover .upgrade-cta {
+    text-decoration: underline;
+  }
+  .upgrade-cta:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+    border-radius: 4px;
   }
 
   /* --- at a glance (facts strip under the hero) --- */
@@ -803,23 +1402,23 @@ const footerLinks = [
     margin: 0 auto;
     padding: clamp(0.5rem, 2vw, 1rem) 1.5rem;
   }
+  /* Flex, not a fixed column count. This was `repeat(6, 1fr)` at 900px+, which only
+     looked right for a course with exactly six facts: five filled columns 1-5 and left
+     an empty sixth, so the whole strip read as shifted left under a centred hero. The
+     number of facts is per-course data, so the layout has to centre whatever it is
+     given. */
   .glance-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 0.75rem;
     margin: 0;
   }
-  @media (min-width: 560px) {
-    .glance-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  @media (min-width: 900px) {
-    .glance-grid {
-      grid-template-columns: repeat(6, 1fr);
-    }
-  }
   .glance-cell {
+    /* Grow to share the row evenly, but capped so a short row (a course with four facts)
+       doesn't stretch into a few very wide slabs. Basis keeps two per row at 380px. */
+    flex: 1 1 9rem;
+    max-width: 13rem;
     padding: 0.85rem 1rem;
     border: 1px solid var(--color-line);
     border-radius: var(--radius-card);
@@ -963,7 +1562,42 @@ const footerLinks = [
     background: var(--color-surface);
     padding: 0.9rem 1.1rem;
   }
-  .cur-card h3 {
+  /* --- phased curriculum (one rail per phase, stacked) --- */
+  .cur-phases {
+    display: flex;
+    flex-direction: column;
+    gap: 2.75rem;
+  }
+  .cur-phase-h {
+    margin: 0 0 1rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+    color: var(--color-primary);
+  }
+  .cur-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  /* Substance marker on the heavier modules. Muted, not amber: --signal means urgency
+     on this site, and a syllabus label is not urgent. */
+  .cur-dd {
+    padding: 0.1rem 0.4rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  .cur-card h3,
+  .cur-card h4 {
     font-size: 1rem;
   }
 
@@ -1092,33 +1726,8 @@ const footerLinks = [
     background: color-mix(in srgb, var(--color-ink) 92%, transparent);
     backdrop-filter: blur(12px);
   }
-  .se-price {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.4rem;
-    font-family: var(--font-display);
-  }
-  /* BOTH currencies stay visible (golden rule 6) — region emphasis, never a hide/swap:
-     the detected region's figure is the bold anchor, the other stays smaller/muted.
-     Mirrors RegionPrice's emphasis pattern; India is the default anchor when unset. */
-  .se-amt {
-    font-weight: 700;
-  }
-  .se-india,
-  :global(html[data-region-guess="world"]) .se-world {
-    font-size: 1.05rem;
-    color: var(--color-text);
-  }
-  .se-world,
-  :global(html[data-region-guess="world"]) .se-india {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--color-muted);
-  }
-  .se-dot {
-    font-weight: 400;
-    color: var(--color-muted);
-  }
+  /* The bar's figure is RegionPrice variant="bar" now, so the region-emphasis rules
+     live in that component instead of being duplicated here. */
   /* Desktop has the hero + enroll CTAs in view; the sticky bar is a mobile aid only. */
   @media (min-width: 720px) {
     .sticky-enroll {

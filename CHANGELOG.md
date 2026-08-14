@@ -6,6 +6,241 @@ records *what* changed and *why* so future sessions have context.
 
 ---
 
+## 2026-08-14 — Video teaser, phased curriculum, real /claude-code content
+
+Prompted by a comparison against kubecraft.dev/linux, a competing free Linux course page.
+Their page beats ours on proof volume (2,582 Trustpilot reviews vs our 260 Google), a
+video teaser, and a much sharper instructor origin story. Ours wins on substance: they
+show no curriculum at all, and their stated runtime contradicts itself (16 hours in one
+place, "a full 8-hour course" in another). The response is to keep our substance and
+close the two gaps that actually matter.
+
+**`VideoTeaser.astro` — the one sanctioned second JS island.** A click-to-load YouTube
+facade: local poster plus a play button, and nothing loads from YouTube until the visitor
+clicks. No third-party request, no cookie, no LCP cost on load, and a fixed 16:9 box so
+the player swap causes zero layout shift. It ships as a real link, so with JS blocked the
+teaser still plays, it just opens in a new tab. Uses `youtube-nocookie.com`, and is
+tree-shaken entirely on pages with no video. On a course with a video the teaser TAKES
+the hero poster's slot rather than stacking below it, since two large visuals would only
+push the price and CTA toward the fold. This deliberately breaks "the Countdown is the
+only island", so CLAUDE.md and ARCHITECTURE.md §5 both now record the exception and the
+bar a future island would have to clear. Owner decision: linking out to YouTube is a real
+conversion leak, because it hands the viewer a sidebar full of competitors.
+
+**Phased curriculum.** `curriculum` entries gain optional `phase` and `deepDive`. When a
+phase is present the rail groups by CONSECUTIVE runs (so source order is display order and
+two same-named phases can never silently merge) and renders one stacked rail per phase.
+Stacked, not columns: a phase list is a progression, and side-by-side would break the
+reading order that makes it a journey. Phase headings are `h3` and modules `h4`, keeping
+the outline correct.
+
+**/claude-code now has its real content**: 13 modules across three named phases (zero to
+comfortable, comfortable to productive, productive to advanced), five marked deep dive, a
+tech strip, six grounded FAQ answers, and a headline that claims the real arc
+("from first prompt to multi-agent workflows") rather than the entry point. The meta
+description is now specific, which retires an earlier review finding about asserting a
+syllabus the repo called unconfirmed.
+
+**/claude-code is a LIVE SESSION, not a recorded course.** Corrected before launch: the
+page had been built as "free course · self-paced" and stated, in five separate places,
+that it was fully recorded with instant access on enrolment. It is a single live session
+on **Saturday 16 Aug 2026, 09:00 IST**. Every one of those claims was false and is gone:
+the badge, the format and start facts, the includes list, the trust row, the curriculum
+intro, and an FAQ answer that literally read "Fully recorded. Every module is already
+there." The hero now carries the date, time and a **real countdown** to the session start
+(honest scarcity under golden rule 6: a real event at a real time, and the Countdown flips
+itself to a calm ended state). New `formatLabel` field, because a one-off session is
+neither self-paced nor an N-day cohort and the derived badge would mis-describe it either
+way. JSON-LD gains a real `startDate`.
+
+**➡️ AFTER 16 AUG:** recordings are expected to follow once the session ends, but that is
+deliberately **not** stated anywhere on the page — announcing it up front removes the
+reason to attend live (owner's call). Once the session is done, flip the entry back to
+`selfPaced` with an `availability` line, drop `batchStartISO`/`schedule`/`formatLabel`,
+and restore recorded framing in `includes`, `trust`, `atAGlance` and the FAQ. The countdown
+removes itself when `batchStartISO` goes.
+
+**/claude-code is out of draft.** Its Learnyst enrolment URL
+(`/learn/claude-code`) is wired, which releases all seven draft gates at once: indexed,
+in the sitemap, a card on `/courses`, six CTAs, and a zero-price JSON-LD offer. Its
+`title` also changed to **"Claude Code: Zero To Hero"** to match the course's real name on
+Learnyst — someone clicking Start free should land on a page titled what they just read.
+Real 1280×720 poster shipped. `/linux` remains a draft.
+
+**Poster pipeline fixed.** `generate-posters.mjs` now normalises the source JPG to
+1280×720 as well as emitting the WebP variants. Art arrives from design tools at full
+size, and the JPG is the `<img>` fallback: claude-code.jpg came in at 4096×2302 and
+1401 KB, which would have been the LCP image for every non-WebP visitor. Now 96 KB, in
+line with the other posters.
+
+Also: the curriculum intro copy hardcoded "yours for 4 years, including future updates" in
+the shared template, asserting an access term for every course including free ones whose
+term nobody has confirmed. Removed; access is stated per course in `includes`. And the
+hero size line now derives phase count alongside module count, so the at-a-glance strip
+dropped its hand-typed "13, in 3 phases" cell rather than risk drifting from it.
+
+## 2026-08-14 — Two free course pages: /claude-code and /linux
+
+Both courses are recorded and live on Learnyst. The pages are built on the shared
+`CourseLanding` template, so they inherit the whole conversion rebuild below for free.
+Each is a `courses.ts` entry plus a three-line page file.
+
+**What free changes on the page:** hero badge "free course · self-paced", a big **Free**
+in place of the dual-currency price, one "Start free" CTA with no region split (free is
+free everywhere), a trust row of No payment / Instant access / Certificate on completion,
+and the flagship upgrade card doing the monetisation work below the enrol card. Free
+signups still forward UTM into Learnyst, and fire `enroll_click` with `kind: "free"` plus
+Meta `Lead` rather than `InitiateCheckout`. JSON-LD emits `isAccessibleForFree` with a
+zero Offer at `category: "Free"`, which is real search leverage for two brand-new pages
+with no backlinks. `/courses` shows an amber **Free** pill.
+
+**Placeholders cannot ship (golden rule 7).** The Learnyst enrolment URLs are not wired
+yet, so both carry `TODO_*_FREE_ENROL_URL`. A first pass only stopped the placeholder
+reaching an `href`, which was not enough: these are real routes, so the build still
+published a live-looking yellow "Start free" CTA that scrolled to a card containing
+internal repo instructions, listed in the sitemap for Google to crawl. Now a free course
+with an unwired URL is a **draft** (`isDraftCourse`, `courses.ts`) and is gated everywhere
+it would reach the public:
+
+- **no catalog card** — `/courses` omits it, so nothing links into a dead end
+- **no sitemap entry** — `astro.config.mjs` filters `draftSlugs`
+- **`noindex,nofollow`** — new `noindex` prop on `BaseLayout`
+- **no CTA** — header, hero and footer `#enroll` links all gate on `canEnrol`
+- **no enrol section at all in a production build** — it would otherwise headline "Start
+  it free, right now" above no control
+- **no JSON-LD offer** — an `InStock` offer with an enrol URL is a machine-readable
+  promise that a searcher can act there
+- **the TODO note renders in `astro dev` only** (`import.meta.env.DEV`), because it is a
+  message to whoever maintains this repo, not to a visitor
+
+Verified in the production build: zero `TODO_` strings, zero draft routes in the sitemap,
+`noindex` on both, no enrol section, no offers. Verified in dev: both pages render in full
+with the TODO note, so they stay reviewable on localhost.
+
+**What was deliberately NOT written:** no curriculum, no module list, no hours, no lesson
+count, no FAQ. Inventing those is fabricated proof (golden rule 4), so the sections simply
+don't render until the real data arrives, at which point they drop into existing fields.
+Access term is omitted for the same reason (unknown for free courses); the certificate IS
+claimed because it is confirmed. Free learners are **not** promised Discord: `site.ts` now
+scopes that perk to paid enrolments only.
+
+**Accents:** Claude Code uses the clay `#d97757`, verified 6.2:1 on `--ink` so it is
+text-safe, nominative use for the tool being taught and not an endorsement. Linux keeps
+brand purple: green belongs to `/agentic-ai`, blue to `/python`, and Tux yellow is off
+limits because yellow is the Enroll CTA sitewide. (Poster since shipped for /claude-code;
+/linux still renders the template's branded placeholder frame.)
+
+**Also from the review of this phase:**
+- `/python`'s trial button said "Watch lesson 1 free (25 min)", which contradicted a
+  *verified* note in the same file recording that Learnyst gates the preview behind a
+  "Start a free trial" button. Now "Start the free trial (25 min)". The runtime stays: it
+  is real (25m 33s, from that same note) and a named time cost converts better than an
+  unquantified "trial".
+- The `/linux` meta description enumerated "files, processes, permissions, networking and
+  shell scripting" while the entry directly below declared the syllabus a TODO. Both free
+  descriptions were rewritten to stop asserting module content that isn't confirmed.
+- `aria-label="Start this course free…"` did not contain its own visible label "Start
+  free", breaking WCAG 2.5.3, so voice control could not target it.
+- `.enrol-pending` used flex, which split its sentence into separately-wrapping chunks
+  because the message mixes text nodes with inline `<code>`.
+- `volume.projects` was documented but never read; it now takes precedence over the count
+  derived from `builds`.
+- The hero price was gated on `canEnrol`, which hid "Free" on a course whose link wasn't
+  wired. What a course costs is a fact about the course, so it is gated on having a price.
+- The announced price string produced a double full stop when a note already ended in one.
+
+Verified: 6 pages build, **0 JS bundles**, both routes in the sitemap, free JSON-LD
+correct, one `<h1>` per page, `Free` pills render on `/courses`.
+
+## 2026-08-14 — Course-page conversion rebuild + free-course foundations
+
+`/python` was built with the flagship cohort's page structure on a ₹1,999 impulse
+product: price eight sections down, a category-name h1, the strongest proof (752 repo
+forks) after the FAQ, and the flagship cross-sell at position 2 where it read as an exit.
+Fixed in the SHARED template, so the two free course pages coming next inherit all of it.
+
+**New order** (hero → glance → what you'll build → tech → curriculum → nudge →
+instructor → reviews → repo → enrol → upgrade → FAQ):
+- **Hero** now carries the promise, the size and the price. `heroHeadline` gives the h1
+  an outcome while `<title>` / meta / JSON-LD keep the product name for search. A volume
+  line ("12 modules · 4 projects") is DERIVED from `curriculum.length` and `builds.length`
+  so it can never disagree with the page; `volume.hours`/`.lessons` render only once real.
+- **"What you'll build"** (new): the four real artifacts (FastAPI DevOps API, local
+  log-analysis agent, boto3/CDK automation, argparse CLIs) lifted out of a flat 12-item
+  rail where they were weighted the same as "Object-oriented Python (basics)".
+- **Mid-page nudge** (new) right after the curriculum. Desktop previously had no CTA in
+  the flow at all between the hero and the enrol card.
+- **Repo callout moved** from after the FAQ to immediately before the price.
+- **Flagship cross-sell moved** from position 2 to below the enrol card and rebuilt as a
+  real upgrade card. Before the offer it was a reason to leave; after it, it's an upsell.
+- Poster capped at 38rem so it stops pushing the CTA cluster toward the fold.
+
+**Pricing honesty:** dropped the permanent ₹4,999 / $49 strike-through. A standing
+"60% off" with no reason and no end date reads as a fake anchor. `CoursePrice.list` is now
+optional. The homepage bonus strip switched to the `now` price ("Normally ₹1,999"), so it
+can't overstate a bonus the course page sells for less.
+
+**Risk reversal** (no refund policy exists): the trial is now the explicit risk reducer.
+"Start a free trial" became "Watch lesson 1 free (25 min)" via a new `trialLabel`, weighted
+in the hero and restated under the pay buttons.
+
+**Free-course support** (data model ready, pages next): `free` + `enrollUrl` on `Course`
+give a single no-region CTA; `RegionPrice` gained a `free` mode; `data-enroll-kind="free"`
+makes Meta fire `Lead` instead of `InitiateCheckout` and adds a `kind` param to the GA4
+`enroll_click`, so a ₹0 signup and a ₹14,999 purchase stop averaging into one number;
+JSON-LD emits `isAccessibleForFree` + a zero Offer with `category: "Free"`.
+
+**Refactor:** the region-adaptive price existed in four places (deferred review item #5).
+The three inside `CourseLanding` are now one `RegionPrice` with `hero`/`card`/`bar`
+variants. `Pricing.astro` on the homepage was deliberately left alone: it is live and
+converting, and folding it in adds risk for no gain.
+
+**Fixes:** `CourseLanding` fell back to `/og-image.png`, which does not exist (only
+`og-image.svg`), so any future course without its own poster shipped a 404 social card.
+Also added `scripts/generate-posters.mjs` (sharp) to make the `.webp` + `-640.webp` poster
+variants reproducible.
+
+**Content:** Discord added to the `/python` includes (paid courses get it now), plus four
+FAQ entries covering support, machine setup, expensing, and whether this is the same
+Python that's bundled in Zero to Hero.
+
+**Fixed from the code review of this diff:**
+- **SR price was announced 3×.** Unifying the price into one component meant its
+  `sr-only` breakdown shipped on all three mounts, twice telling a listener to "choose
+  your region" where no region control exists. Added an `announce` prop, set on the enrol
+  card only. The announcing mount now also carries `priceNote`, since every visible copy
+  is `aria-hidden` as a duplicate.
+- **Product claims were hardcoded in the shared template.** "one-time · 4 years of
+  access" and the trust row were asserted for every course by `CourseLanding`. Moved to
+  `priceNote` / `trust` in `courses.ts` (golden rule 1) — a future course with a
+  different access term would have silently inherited a false one.
+- **Stale `sizes` hint.** Capping the poster at 38rem left `sizes="…720px"`, so DPR-1
+  desktop kept fetching the 1280w WebP for a 608px slot, on the LCP element. Now 608px.
+- **`hasList` required both currencies**, so a course setting `list` on one side only
+  would silently drop it. Now handled per currency.
+- **Upgrade card** wrapped an h2 plus a 60-word paragraph in one `<a>`, making the whole
+  block a single link name. Anchor now wraps only the CTA, with a stretched-link hit
+  area (the pattern `CourseCard` already uses). It also used a hand-rolled eyebrow and a
+  third `grad-border`; now uses `Eyebrow` and a plain surface, so the gradient hairline
+  still means "anchor card".
+- **`free` + `price` were mutually exclusive by comment only.** Added the `!isFree` guard
+  so a mis-set course can't render "Free" above a row of pay buttons.
+- `pick()` in `StructuredData` still annotated `list` as required; wired the `Free` pill
+  on `/courses` that `CatalogCard.free` had promised but nothing rendered.
+- Docs: README and ARCHITECTURE still pointed at `public/og-image.png`, the file this
+  diff proved does not exist.
+
+**Flagged, needs your confirmation:** the new Discord claim on `/python` is authorised but
+its delivery mechanism is not verified — `site.ts` now carries a scope note and a TODO.
+The "invoice for expensing" FAQ answer is copied from the flagship FAQ and inherits the
+same unverified assumption about Learnyst.
+
+Verified: build clean, **0 JS bundles**, one `<h1>` per page and no heading skips, JSON-LD
+valid (1999 INR / 19 USD, no aggregateRating), region flip confirmed under
+`TZ=America/New_York` in both new price consumers, SR price announced exactly once, no
+dangling refs to the removed CSS. Known gap: headless Chrome lays out at a ~500px minimum
+here, so 380px was verified by CSS review rather than screenshot.
+
 ## 2026-06-29 — Enrollment-easing UX: currency cue, mobile urgency, FAQ
 
 From a conversion-funnel audit; owner-selected scope:

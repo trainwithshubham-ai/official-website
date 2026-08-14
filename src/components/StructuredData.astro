@@ -9,7 +9,7 @@
 // 4.9/260 Google reviews are the DevOps business rating, not that course's.
 import { site, saleLive, activePrice } from "../config/site";
 import { faq } from "../content/data";
-import type { Course } from "../config/courses";
+import { isDraftCourse, type Course } from "../config/courses";
 
 interface Props {
   /** Same description string BaseLayout renders in <meta name="description">. */
@@ -34,7 +34,9 @@ const makeOffer = (
   validUntil?: string,
 ) => ({
   "@type": "Offer",
-  category: "Paid",
+  // Derived, not passed: a zero-price Offer that still declared itself "Paid" would
+  // contradict the isAccessibleForFree flag sitting beside it.
+  category: price === 0 ? "Free" : "Paid",
   priceCurrency,
   price,
   ...(validUntil ? { priceValidUntil: validUntil } : {}),
@@ -67,7 +69,9 @@ if (collection) {
   // --- Standalone course page ---
   // Advertise the price the page actually renders (the `now` price). No early-bird
   // window means no priceValidUntil — a standing offer with no expiry.
-  const pick = (p: { now: string; list: string }) => toNum(p.now);
+  // Only `now` is read, and `list` is optional on CoursePrice now — annotating it here
+  // would make course.price.india unassignable under astro check.
+  const pick = (p: { now: string }) => toNum(p.now);
   // Trailing slash to match BaseLayout's canonical (new URL(pathname) → "/python/").
   const url = `${site.domain}/${course.slug}/`;
   graph = [
@@ -88,16 +92,29 @@ if (collection) {
           url: site.social.linkedin.url,
         },
       },
-      // Offers only when the course is actually for sale (a coming-soon course has no
-      // price yet — emitting a price-less Offer would be invalid / dishonest).
-      ...(course.price
-        ? {
-            offers: [
-              makeOffer("INR", pick(course.price.india), `${url}#enroll`),
-              makeOffer("USD", pick(course.price.world), `${url}#enroll`),
-            ],
-          }
-        : {}),
+      // A free course says so explicitly. Google reads isAccessibleForFree + a zero
+      // Offer for free-course rich results, which is the one search advantage a brand
+      // new page with no backlinks actually has.
+      //
+      // Both are suppressed for a DRAFT course: `InStock` plus an offer URL is a
+      // machine-readable promise that a searcher can enrol at that anchor, and on a page
+      // whose enrolment link isn't wired that would route rich-result traffic into a
+      // dead end. (The page is also noindex, so this is belt and braces.)
+      ...(course.free && !isDraftCourse(course) ? { isAccessibleForFree: true } : {}),
+      // Offers only when the course is actually enrollable (a coming-soon course has no
+      // price and no free enrolment yet — a price-less Offer would be invalid).
+      ...(course.free
+        ? isDraftCourse(course)
+          ? {}
+          : { offers: [makeOffer("INR", 0, `${url}#enroll`)] }
+        : course.price
+          ? {
+              offers: [
+                makeOffer("INR", pick(course.price.india), `${url}#enroll`),
+                makeOffer("USD", pick(course.price.world), `${url}#enroll`),
+              ],
+            }
+          : {}),
     },
     ...(course.faq?.length
       ? [
