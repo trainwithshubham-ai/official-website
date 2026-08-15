@@ -83,17 +83,10 @@ const links = [
     <!-- gap tightens at 380px: logo + Courses + Log in + Enroll is exactly at the
          width budget there, and without this the two buttons wrap to two lines. -->
     <div class="ml-auto flex items-center gap-2 sm:gap-3">
-      <!-- wrap to hide on mobile: the Countdown's scoped display:inline-flex would
-           otherwise override a `hidden` utility placed directly on it.
-           While a sale is live the slim row below owns urgency, so this bare chip
-           (which would just repeat a second deadline) stands down. -->
-      {
-        !saleLive && (
-          <div class="hidden lg:block">
-            <Countdown variant="chip" />
-          </div>
-        )
-      }
+      {/* The desktop chip that used to sit here counted to `batchStartISO`, which went
+          permanently stale the day that cohort started — it rendered "batch is live"
+          rather than a timer. The next-session row below now carries urgency at EVERY
+          width, so there is nothing left for a second chip to say. */}
       <Button
         variant="ghost"
         href={site.lms.signIn}
@@ -146,11 +139,11 @@ const links = [
         </div>
       </div>
     ) : (
-      /* No sale: the desktop chip is hidden below lg, so phone users would otherwise
-         feel no urgency until Pricing. Carries the same next-class timer, which is
-         always true and never expires — unlike the old batch countdown, which went
-         permanently stale the day the cohort started. */
-      <div class="nav-urgency flex items-center justify-center gap-2 border-t border-line/60 px-4 py-1.5 lg:hidden">
+      /* No sale: the next-class timer is the header's only urgency element, at EVERY
+         width (it used to be lg:hidden, which left desktop with a stale batch chip
+         instead). It is always true and never expires — the schedule is computed from
+         site.session, so it rolls itself over each weekend with no commit. */
+      <div class="nav-urgency flex items-center justify-center gap-2 border-t border-line/60 px-4 py-1.5">
         <span class="nav-urgency-lbl font-mono text-[0.7rem] lowercase tracking-[0.06em] text-muted">
           ❯ next session in
         </span>

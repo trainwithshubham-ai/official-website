@@ -63,7 +63,14 @@ export const site = {
   // countdown expiring only flips the urgency copy to "sale ended" — the PRICE does
   // not revert on its own.
   sale: {
-    enabled: true,
+    // ENDED 15 Aug 2026, 23:59 IST. Turned off 16 Aug 2026.
+    // The other two steps were done in Learnyst at the same time (owner-confirmed):
+    // the AUGUST15 coupon was deactivated, and world priceId 280727 was dropped from
+    // $299 back to $249 so the page's standing $249 matches what checkout charges.
+    // India needed nothing — 281722 was already at the standing ₹19,999.
+    // Leave this block in place: flipping `enabled` back to true is how the next sale
+    // ships, and the three-step teardown above is the checklist for ending it.
+    enabled: false,
     name: "Independence Day sale",
     endsISO: "2026-08-15T23:59:59+05:30",
     price: {

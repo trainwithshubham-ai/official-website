@@ -6,6 +6,33 @@ records *what* changed and *why* so future sessions have context.
 
 ---
 
+## 2026-08-16 — Independence Day sale ended; one header timer at every width
+
+The sale ran out at 15 Aug 23:59 IST. Because the site is static, expiry alone only
+hid the *claim*: `:has([data-expired])` dropped the offer line and the sale chip, but the
+price and the coupon hint are build-time values, so the live page was still showing
+**₹14,999** and "Apply coupon AUGUST15" with an already-expired `priceValidUntil` in its
+JSON-LD. Fixed by the rebuild.
+
+`sale.enabled: false`. India returns to the standing **₹19,999**, which matches Learnyst
+`281722`. World stays **$249** on the page, and the owner dropped `280727` from $299 back
+to $249 and deactivated the coupon at the same time, so page and checkout agree in both
+regions. Verified in the build: no sale name, no coupon, no offer row, no
+`priceValidUntil`, JSON-LD offers now 19999 INR / 249 USD, and the pay-button SR labels
+read the standing prices.
+
+**Header timer unified.** Turning the sale off used to expose a gap: the next-session
+timer was `lg:hidden`, and desktop instead got a bare `<Countdown variant="chip" />` that
+defaulted to `batchStartISO` (25 Jul 2026, long past) and so rendered a stale "batch is
+live" chip rather than a timer. The stale chip is deleted and `.nav-urgency` now shows at
+every width, so the computed next-session countdown is the header's single urgency
+element. It rolls itself over each weekend from `site.session`, so it can never go stale.
+The change only touches `≥lg`, so sub-`lg` rendering is byte-identical.
+
+CLAUDE.md's key-facts block said "SALE LIVE" and is read at the start of every session;
+it now records that no sale is running, and carries the three-step teardown as general
+guidance for the next one rather than as Independence-Day specifics.
+
 ## 2026-08-14 — Video teaser, phased curriculum, real /claude-code content
 
 Prompted by a comparison against kubecraft.dev/linux, a competing free Linux course page.

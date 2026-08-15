@@ -213,26 +213,31 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
   discount (never "early bird"). Page leads with the India price; the world price
   lives in the SR breakdown + at checkout. Region pay buttons are price-free
   (flag / globe).
-- **SALE LIVE — Independence Day** (`site.sale`, ends **15 Aug 2026, 23:59 IST**):
-  ₹5,000 / $50 off → **₹14,999 · $249**, struck against ₹19,999 / $299. India is
-  anchored to the standing price (never ₹25,000) so "₹5,000 off" is literally true;
-  world is anchored to its list $299, so world's $249 equals the standing world price.
-  Components render the derived `activePrice` / `activeCheckout` from `site.ts`,
-  never `site.price` directly. The offer lives in a **slim row inside the sticky
-  header** (`Nav.astro`, `.nav-sale`) so it stays pinned instead of scrolling away;
-  it replaces the mobile-only `.nav-urgency` strip while the sale runs. On expiry
-  the countdown flips to "sale ended" and `:has([data-expired="true"])` drops the
-  now-false offer claim — the row keeps its height, so the sticky header never
-  shrinks under the reader. No seconds in that row (it's pinned; BRAND.md §9).
-  The discount is applied by **coupon `AUGUST15` at Learnyst checkout**, not by
-  repricing the product — so checkout shows ₹19,999 until the code is entered, and
-  the Pricing card MUST keep stating the code right above the pay buttons (it's in
-  the SR breakdown too). `sale.checkout` stays null. Learnyst pre-coupon amounts:
-  India `281722` = ₹19,999, world `280727` = **$299**.
-  **To end it — three steps:** (1) `sale.enabled:false` + push, (2) deactivate the
-  AUGUST15 coupon, (3) **drop world `280727` back to $249**. Miss step 3 and the page
-  (standing $249) contradicts checkout ($299). India needs no step 3 — `281722` is
-  already at the standing ₹19,999. The site is static: the price does NOT revert on
-  its own when the countdown runs out.
+- **NO SALE RUNNING.** `site.sale.enabled` is `false`. The page shows the standing
+  price (India ₹19,999, world $249) and there is no coupon, no offer row and no
+  `priceValidUntil` in the JSON-LD. The Independence Day sale ran to 15 Aug 2026
+  and was torn down on 16 Aug.
+- **To run the next sale:** fill in `site.sale` (name, `endsISO`, `price`, `off`,
+  `coupon`) and set `enabled: true`. Components render the derived `activePrice` /
+  `activeCheckout`, never `site.price` directly, so one flag moves every price on
+  the page and the buttons beside them together. The offer renders as a **slim row
+  inside the sticky header** (`Nav.astro`, `.nav-sale`), which replaces the
+  `.nav-urgency` next-session strip while a sale runs. No seconds in that row (it's
+  pinned; BRAND.md §9). Anchor India to the STANDING price, never ₹25,000, so an
+  "₹X off" claim is literally true.
+  - If the discount comes from a **coupon** rather than a repriced product, the
+    Pricing card MUST state the code right above the pay buttons (and in the SR
+    breakdown), or the page and the checkout will disagree.
+  - **Ending a sale is three steps, and the site is static so nothing reverts on its
+    own when the countdown expires:** (1) `sale.enabled:false` + push, (2) deactivate
+    the coupon in Learnyst, (3) **return any temporarily-raised Learnyst price to the
+    standing amount.** Step 3 is the one that bites: in Aug 2026 world `280727` had
+    been raised to $299 so the coupon could discount it to $249, and leaving it there
+    would have made the page ($249) contradict checkout ($299). India `281722` sits at
+    the standing ₹19,999 and needed nothing.
+  - On expiry the countdown flips to "sale ended" and `:has([data-expired="true"])`
+    drops the now-false offer claim while the row keeps its height, so the sticky
+    header never shrinks under the reader. That hides the CLAIM only — the price and
+    coupon hint are build-time values and need the rebuild in step 1.
 - Proof: 10,000+ engineers trained; 4.9 ★ · 260 Google reviews (real, seeded in
   reviews.json); YouTube 1.5L+, LinkedIn 1L+, Instagram 10k+
