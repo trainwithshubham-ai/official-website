@@ -8,12 +8,18 @@ those two files win over your instincts.
 
 ## Project
 
-A single-page, dark-theme, conversion-focused **sales page** for one product:
-**DevOps: Zero to Hero (AI Powered)** — a cohort batch that starts
-**26 Jul 2026**. The page's only job: convert a motivated learner — anyone from
-a complete beginner to a working engineer — into an enrolled student before the
-early-bird window closes (**3 Jul 2026, 23:59 IST**). The course is **zero to
-hero**: welcoming, no prior experience required.
+A dark-theme, conversion-focused **sales site**. The flagship product is
+**DevOps: Zero to Hero (AI Powered)**, a live cohort, sold on `/`. There are
+also standalone course pages (`/python`, `/claude-code`, `/linux`,
+`/agentic-ai`) and an index at `/courses` — see § Structure. The page's only
+job: convert a motivated learner — anyone from a complete beginner to a working
+engineer — into an enrolled student. The course is **zero to hero**: welcoming,
+no prior experience required.
+
+> **Dates and prices are NOT duplicated here.** They live in `src/config/site.ts`
+> and `src/config/courses.ts` (golden rule 1). The § Key facts block at the bottom
+> is a mirror for orientation only; when it and the config disagree, the config
+> wins and the mirror is stale.
 
 - Hosted on **GitHub Pages**, apex `trainwithshubham.ai`. Static. No backend.
 - Courses live on **Learnyst** (separate). This page only sells and links out.
@@ -73,10 +79,13 @@ npm run preview      # preview the build
    structural; use light `--primary` (#A78BFA) for text/icons and deep
    `--primary-deep` (#7C3AED) only for fills/gradients. Amber (`--signal`) is
    urgency. See BRAND.md §3. Don't introduce colors outside the palette.
-6. **Honest scarcity.** The early-bird countdown is real (ties to
-   `earlyBirdEndsISO`). When it expires, it flips to "early-bird ended · full
-   price live" — it does not reset or fake new urgency. No "X seats left" unless
-   it's literally true. The **daily bonus timer** (`Countdown mode="daily"`,
+6. **Honest scarcity.** Every countdown ties to a real moment and flips to a calm
+   ended state rather than resetting or inventing new urgency. `earlyBirdEndsISO`
+   no longer exists — early bird was retired. The header timer counts to the **next
+   live class**, computed from `site.session`, so it rolls itself over each weekend
+   and can never advertise a session that has passed. A course page with a
+   `batchStartISO` counts to that session start. No "X seats left" unless it's
+   literally true. The **daily bonus timer** (`Countdown mode="daily"`,
    `BonusBar`) is allowed because it is real: a genuinely repeatable bonus
    (`site.bonus`) with the timer counting to **tonight's midnight IST**, which
    then truly rolls to the next day — a real end-of-day deadline, NOT a fake
@@ -222,9 +231,12 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
   `activeCheckout`, never `site.price` directly, so one flag moves every price on
   the page and the buttons beside them together. The offer renders as a **slim row
   inside the sticky header** (`Nav.astro`, `.nav-sale`), which replaces the
-  `.nav-urgency` next-session strip while a sale runs. No seconds in that row (it's
-  pinned; BRAND.md §9). Anchor India to the STANDING price, never ₹25,000, so an
-  "₹X off" claim is literally true.
+  `.nav-urgency` next-session strip while a sale runs. Anchor India to the STANDING
+  price, never ₹25,000, so an "₹X off" claim is literally true.
+  - **Seconds in the pinned header:** the sale row omits them; the `.nav-urgency`
+    next-session row shows them, at Shubham's explicit request after this was argued
+    both ways. Keep it that way. It does mean a 1s DOM write runs for the whole visit,
+    since session mode never expires and so never hits `clearInterval`.
   - If the discount comes from a **coupon** rather than a repriced product, the
     Pricing card MUST state the code right above the pay buttons (and in the SR
     breakdown), or the page and the checkout will disagree.

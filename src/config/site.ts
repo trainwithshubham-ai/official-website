@@ -68,8 +68,13 @@ export const site = {
     // the AUGUST15 coupon was deactivated, and world priceId 280727 was dropped from
     // $299 back to $249 so the page's standing $249 matches what checkout charges.
     // India needed nothing — 281722 was already at the standing ₹19,999.
-    // Leave this block in place: flipping `enabled` back to true is how the next sale
-    // ships, and the three-step teardown above is the checklist for ending it.
+    // Leave this block in place: it is the template for the next sale, and the
+    // three-step teardown above is the checklist for ending it.
+    // DO NOT just flip `enabled: true` — every field below is stale. `endsISO` is in the
+    // past, `coupon` names a code that has been deactivated in Learnyst, and `price`
+    // holds amounts Learnyst will no longer charge. Flipping the flag alone would ship a
+    // sale row whose countdown is already expired, publish a past `priceValidUntil`, and
+    // advertise a dead coupon. Update name, endsISO, price, off and coupon FIRST.
     enabled: false,
     name: "Independence Day sale",
     endsISO: "2026-08-15T23:59:59+05:30",

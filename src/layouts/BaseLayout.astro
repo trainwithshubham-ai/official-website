@@ -154,8 +154,10 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
         /* course slug (multi-course funnel attribution); undefined on the DevOps page */
         var course = a.getAttribute("data-course") || undefined;
         /* "free" on a zero-cost course enrolment, absent on a paid checkout. Keeps the
-           two funnels separable in GA4 instead of averaging a ₹0 signup and a ₹14,999
-           purchase into one conversion number. */
+           two funnels separable in GA4 instead of averaging a ₹0 signup and a ₹19,999
+           purchase into one conversion number. (Astro does not strip comments from this
+           inline block, so any price named here ships on every page — keep it current or
+           a future "did we scrub the sale?" grep trips on it.) */
         var kind = a.getAttribute("data-enroll-kind") || "paid";
         if (typeof window.gtag === "function")
           window.gtag("event", "enroll_click", {

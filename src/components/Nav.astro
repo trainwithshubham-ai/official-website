@@ -143,11 +143,22 @@ const links = [
          width (it used to be lg:hidden, which left desktop with a stale batch chip
          instead). It is always true and never expires — the schedule is computed from
          site.session, so it rolls itself over each weekend with no commit. */
-      <div class="nav-urgency flex items-center justify-center gap-2 border-t border-line/60 px-4 py-1.5">
-        <span class="nav-urgency-lbl font-mono text-[0.7rem] lowercase tracking-[0.06em] text-muted">
+      <div class="nav-urgency flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-t border-line/60 px-4 py-1.5">
+        {/* aria-hidden: the digits beside it are aria-hidden too, so a screen reader
+            would otherwise hear "next session in" followed by nothing at all. The
+            Countdown's own sr-only sentence below carries the real information. */}
+        <span
+          aria-hidden="true"
+          class="nav-urgency-lbl font-mono text-[0.7rem] lowercase tracking-[0.06em] text-muted"
+        >
           ❯ next session in
         </span>
-        <Countdown variant="chip" mode="session" />
+        <Countdown
+          variant="chip"
+          mode="session"
+          announceDeadline
+          srLabel="Live classes run {date}."
+        />
       </div>
     )
   }
@@ -240,14 +251,20 @@ const links = [
     }
   }
 
-  /* Compact the chip so "batch starts in" + d/h/m fits at 380px. */
-  :global(.nav-urgency .cd-units) {
-    gap: 0.2rem;
-  }
-  :global(.nav-urgency .cd-num) {
-    font-size: 0.8rem;
-  }
-  :global(.nav-urgency .cd-lbl) {
-    font-size: 0.5rem;
+  /* Compact the chip so "next session in" + d/h/m/s fits on one line on a phone.
+     SCOPED TO SMALL SCREENS: this row used to be lg:hidden, so these rules could only
+     ever apply on mobile. Now that it renders at every width, leaving them unscoped
+     shrank the desktop timer to 12.8px digits with 8px unit labels while the chip's own
+     defaults (0.95rem / 0.6rem) went unused. Mirrors the .nav-sale compaction above. */
+  @media (max-width: 30rem) {
+    :global(.nav-urgency .cd-units) {
+      gap: 0.2rem;
+    }
+    :global(.nav-urgency .cd-num) {
+      font-size: 0.8rem;
+    }
+    :global(.nav-urgency .cd-lbl) {
+      font-size: 0.5rem;
+    }
   }
 </style>
