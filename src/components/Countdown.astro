@@ -25,7 +25,7 @@
 // The `marker` variant renders nothing: it exists purely so a container can key CSS
 // off a deadline it doesn't visibly display (e.g. the sale claim hiding itself when
 // the sale ends, while the visible timer next to it counts to the next class).
-import { site } from "../config/site";
+import { site, batchStarted } from "../config/site";
 
 interface Props {
   variant?: "full" | "chip" | "bonus" | "marker";
@@ -53,7 +53,13 @@ const {
   label = "batch starts in",
   endedText = "batch is live · enrolment open",
   announceDeadline = false,
-  srLabel = "The batch starts {date} IST.",
+  // Tense-aware DEFAULT, not a per-call-site ternary. Only Hero was fixed by hand
+  // originally, which left the stale present tense one `announceDeadline` away from
+  // shipping again from any other mount. Callers with their own deadline (a course
+  // session) still pass their own srLabel.
+  srLabel = batchStarted
+    ? "The batch started {date} IST. Enrolment is still open."
+    : "The batch starts {date} IST.",
   class: className = "",
 } = Astro.props;
 
@@ -72,6 +78,14 @@ const deadlineLabel =
         timeZone: "Asia/Kolkata",
       });
 
+// Resolve expiry at BUILD time for a fixed deadline that has already passed. Without
+// this the markup ships as data-expired="false", so the first paint shows the label plus
+// "-- days -- hrs" and only flips to the ended copy once the script runs. On a deadline
+// that is weeks past, that is a visible flash of something untrue. Rolling modes (daily,
+// session) never expire, so they are always false here and the script drives them.
+const expiredAtBuild =
+  mode === "fixed" && new Date(deadline).getTime() < Date.now();
+
 const units = [
   { key: "d", label: "days" },
   { key: "h", label: "hrs" },
@@ -87,7 +101,7 @@ const units = [
   data-deadline={mode === "fixed" ? deadline : undefined}
   data-session-days={mode === "session" ? site.session.days.join(",") : undefined}
   data-session-hour={mode === "session" ? String(site.session.hourIST) : undefined}
-  data-expired="false"
+  data-expired={expiredAtBuild ? "true" : "false"}
   hidden={variant === "marker"}
   aria-hidden={variant === "marker" ? "true" : undefined}
 >

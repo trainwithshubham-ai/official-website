@@ -7,7 +7,7 @@
 // standalone course page's graph instead (name/price/faq from courses.ts). Nothing is
 // fabricated (golden rule 4): a course page carries NO aggregateRating, because the
 // 4.9/260 Google reviews are the DevOps business rating, not that course's.
-import { site, saleLive, activePrice } from "../config/site";
+import { site, saleLive, activePrice, fillFaqTokens } from "../config/site";
 import { faq } from "../content/data";
 import { isDraftCourse, type Course } from "../config/courses";
 
@@ -138,18 +138,6 @@ if (collection) {
   const usdPrice = toNum(activePrice.world.now);
   const validUntil = saleLive ? site.sale.endsISO : undefined;
 
-  // Same token substitution FAQ.astro applies (no literal {classDays}… placeholders).
-  const batchStart = new Date(site.batchStartISO).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-  const fill = (s: string) =>
-    s
-      .replaceAll("{classDays}", site.classDays)
-      .replaceAll("{classTime}", site.classTime)
-      .replaceAll("{batchStart}", batchStart);
-
   const pricingUrl = `${home}#pricing`;
   graph = [
     organization,
@@ -186,7 +174,7 @@ if (collection) {
       mainEntity: faq.map((f) => ({
         "@type": "Question",
         name: f.q,
-        acceptedAnswer: { "@type": "Answer", text: fill(f.a) },
+        acceptedAnswer: { "@type": "Answer", text: fillFaqTokens(f.a) },
       })),
     },
   ];

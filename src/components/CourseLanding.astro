@@ -65,6 +65,12 @@ const phaseCount = new Set(phaseGroups.map((g) => g.name)).size;
 // A scheduled, non-self-paced course. Copy elsewhere defaults to "recorded and waiting
 // for you" / "work down at your own pace", which is exactly wrong for a live session.
 const isLiveSession = !course.selfPaced && !!course.batchStartISO;
+// Build-time, same caveat as site.ts `batchStarted`: a static build freezes this, so the
+// page needs a redeploy after the session runs (which it needs anyway, to swap the whole
+// page over to recorded framing).
+const sessionStarted =
+  !!course.batchStartISO &&
+  new Date(course.batchStartISO).getTime() < Date.now();
 
 // WebP siblings of the poster (generated next to the .jpg in /public/posters).
 // The <picture> below falls back to the .jpg, so a course whose WebP is missing
@@ -408,7 +414,14 @@ const footerLinks = [
                 label="live session starts in"
                 endedText="this session has started"
                 announceDeadline
-                srLabel="The live session starts {date} IST."
+                {/* Past tense once the session has run, matching the visible copy. Left
+                    present tense, a screen reader would still hear "the live session
+                    starts..." after it had already happened. */}
+                srLabel={
+                  sessionStarted
+                    ? "The live session ran on {date} IST."
+                    : "The live session starts {date} IST."
+                }
               />
             )
           }

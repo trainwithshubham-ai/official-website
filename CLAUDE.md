@@ -213,7 +213,8 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
 
 ## Key facts (mirror of `site.ts` — edit there, not here)
 
-- Product: DevOps: Zero to Hero (AI Powered) · cohort batch · starts 25 Jul 2026
+- Product: DevOps: Zero to Hero (AI Powered) · cohort batch · **started 26 Jul 2026**,
+  enrolment still open into the running batch
   · open to all levels (beginners welcome, no prior experience required)
 - No early-bird window — the offer has ended. There is NO countdown-to-price and
   NO price flip; the Countdown now counts down to the **batch start** (`batchStartISO`).
@@ -222,6 +223,18 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
   discount (never "early bird"). Page leads with the India price; the world price
   lives in the SR breakdown + at checkout. Region pay buttons are price-free
   (flag / globe).
+- **Changing the batch date — checklist.** `batchStartISO` is the only field to edit;
+  the hero line, both countdowns, the FAQ and the JSON-LD `startDate` all derive from
+  it. But `batchStarted` (site.ts) is evaluated **at build time and then frozen**,
+  because this is a static site and the deploy workflow only runs on push. So:
+  1. Set the new `batchStartISO` and push. The page reads "Starts <date>" and the
+     countdowns tick.
+  2. **Redeploy on the batch start day** (empty commit, or run the workflow manually).
+     Without it the Countdown island flips itself client-side to "batch is live" while
+     the hero, the screen-reader sentence and the FAQ still say "starts" — the page
+     contradicting its own timer.
+  A `schedule:` cron on `deploy.yml` would remove step 2; it is deliberately not there
+  yet, so the manual step stands.
 - **NO SALE RUNNING.** `site.sale.enabled` is `false`. The page shows the standing
   price (India ₹19,999, world $249) and there is no coupon, no offer row and no
   `priceValidUntil` in the JSON-LD. The Independence Day sale ran to 15 Aug 2026

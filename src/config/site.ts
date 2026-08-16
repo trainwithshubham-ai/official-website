@@ -9,7 +9,7 @@ export const site = {
   tagline: "Happy Learning", // warm sign-off (footer / instructor / closing CTA)
 
   // --- batch ---
-  batchStartISO: "2026-07-25T19:00:00+05:30",
+  batchStartISO: "2026-07-26T19:00:00+05:30",
   classDays: "Sat & Sun",
   classTime: "7–10 PM IST",
   // Machine-readable mirror of classDays/classTime, used by the "next live session"
@@ -22,7 +22,7 @@ export const site = {
   },
   // Live-schedule facts authored from the ops sheet (references only — the sheet
   // is NEVER embedded/fetched; golden rule 8). Update here if the batch changes.
-  programLength: "3-month", // 25 Jul → late Oct 2026
+  programLength: "3-month", // 26 Jul → late Oct 2026
   liveHours: "150+", // hours of live instruction across the batch (sheet total: 151)
 
   // --- daily bonus (honest "evergreen") ---
@@ -206,6 +206,52 @@ export const site = {
 // change in the block above and can never leave a displayed price out of step with
 // the button beside it. (Course pages pass their own price/checkout explicitly, so
 // the DevOps sale can't leak onto /python.)
+// Has the cohort already begun? Enrolment stays open into a running batch, so the page
+// has to say "batch started 26 July" rather than "starts 26 July" — advertising a past
+// date in the future tense is the kind of thing a reader notices and stops trusting.
+//
+// ⚠️ EVALUATED AT BUILD TIME AND THEN FROZEN. This is a static site and the deploy
+// workflow only runs on push, so this does NOT flip by itself when the date arrives.
+// Set a future batch date, push, and on the start day the Countdown island will flip
+// itself client-side to "batch is live" while Hero, the sr-only sentence and the FAQ all
+// still say "starts" — the page contradicting its own timer, which is the exact bug this
+// exists to prevent. **Redeploy on the batch start day** (an empty push or a
+// workflow_dispatch run is enough). See the cohort-change checklist in CLAUDE.md.
+export const batchStarted: boolean =
+  new Date(site.batchStartISO).getTime() < Date.now();
+
+// Resolves the tokens faq.json is allowed to use. Lives HERE, next to the values it
+// substitutes, because two places render those answers: FAQ.astro (the visible copy) and
+// StructuredData.astro (the FAQPage JSON-LD). They used to keep separate replace chains,
+// so adding a token to one shipped a literal "{batchVerb}" in the other. One resolver
+// means that can't happen again.
+export const fillFaqTokens = (s: string): string => {
+  const out = s
+    .replaceAll("{classDays}", site.classDays)
+    .replaceAll("{classTime}", site.classTime)
+    .replaceAll("{batchVerb}", batchStarted ? "started" : "starts")
+    .replaceAll(
+      "{batchStart}",
+      new Date(site.batchStartISO).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+    );
+  // Fail the build on a token that didn't resolve. A typo like {batchverb} would
+  // otherwise ship the literal braces to the visible FAQ AND into the FAQPage JSON-LD
+  // with a green build. Sharing one resolver stops the two renderers DIVERGING; it does
+  // nothing about a misspelled token, which is what this catches.
+  const unresolved = out.match(/\{[a-zA-Z]+\}/);
+  if (unresolved) {
+    throw new Error(
+      `Unresolved FAQ token ${unresolved[0]} in: "${s}". ` +
+        `Known tokens: {classDays} {classTime} {batchStart} {batchVerb}.`,
+    );
+  }
+  return out;
+};
+
 export const saleLive: boolean = site.sale.enabled;
 export const activePrice = saleLive ? site.sale.price : site.price;
 export const activeCheckout =

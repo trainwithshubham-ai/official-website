@@ -9,7 +9,7 @@
   },
   {
     "q": "What are the class days and timings?",
-    "a": "Live classes run on weekends — {classDays}, {classTime}. The batch starts {batchStart}, and recordings are available if you ever miss one."
+    "a": "Live classes run on weekends — {classDays}, {classTime}. The batch {batchVerb} {batchStart}, and recordings are available if you ever miss one."
   },
   {
     "q": "Is it live or self-paced?",

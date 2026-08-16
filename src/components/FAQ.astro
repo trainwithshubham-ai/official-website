@@ -1,22 +1,12 @@
 ---
 // FAQ — native <details>/<summary> accordion, ZERO JS (ARCHITECTURE.md §4.12).
 // Data: faq.json (validated via content/data). Answers may use {classDays},
-// {classTime}, {batchStart} tokens, resolved from site.ts so the schedule stays
-// single-source (golden rule 1) and can't drift.
+// {classTime}, {batchStart} and {batchVerb} tokens. They are resolved by
+// `fillFaqTokens` in site.ts — shared with StructuredData.astro, which renders the same
+// answers into the FAQPage JSON-LD, so the two can never resolve a different token set.
 import Section from "./primitives/Section.astro";
 import { faq } from "../content/data";
-import { site } from "../config/site";
-
-const batchStart = new Date(site.batchStartISO).toLocaleDateString("en-IN", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-const fill = (s: string) =>
-  s
-    .replaceAll("{classDays}", site.classDays)
-    .replaceAll("{classTime}", site.classTime)
-    .replaceAll("{batchStart}", batchStart);
+import { fillFaqTokens } from "../config/site";
 ---
 
 <Section id="faq" eyebrow="faq" title="Questions, answered">
@@ -37,7 +27,7 @@ const fill = (s: string) =>
                 />
               </svg>
             </summary>
-            <p class="answer text-pretty text-muted">{fill(item.a)}</p>
+            <p class="answer text-pretty text-muted">{fillFaqTokens(item.a)}</p>
           </details>
         </li>
       ))
