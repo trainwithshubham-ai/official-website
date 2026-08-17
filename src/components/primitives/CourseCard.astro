@@ -5,6 +5,7 @@
 // (as="h3") so the two card treatments can't drift. Accent via themeVars (single
 // source). CTA/tag text is accent-coloured — never --cta yellow (Enroll/Pay only).
 import { themeVars, type CourseTheme } from "../../config/courses";
+import { posterWebpSources } from "../../lib/poster";
 
 interface Props {
   href: string;
@@ -16,6 +17,8 @@ interface Props {
   theme?: CourseTheme;
 }
 const { href, poster, title, as: Heading = "h2", ctaLabel, theme } = Astro.props;
+// null when the WebP siblings are not on disk, so the <img> below is the whole story.
+const webp = posterWebpSources(poster);
 ---
 
 <a
@@ -26,15 +29,27 @@ const { href, poster, title, as: Heading = "h2", ctaLabel, theme } = Astro.props
   {
     poster && (
       <div class="aspect-[16/9] overflow-hidden border-b border-line bg-surface-2">
-        <img
-          src={poster}
-          alt={`${title} — course poster`}
-          width="1280"
-          height="720"
-          loading="lazy"
-          decoding="async"
-          class="size-full object-cover transition-transform duration-300 motion-safe:group-hover:scale-[1.03]"
-        />
+        {/* WebP with a 640w variant, same as the course-page hero. /courses is five cards
+            deep, so serving the raw JPGs meant ~500KB of posters for a grid whose slots
+            are a few hundred px wide. The .jpg stays as the fallback. */}
+        <picture>
+          {webp && (
+            <source
+              type="image/webp"
+              srcset={`${webp.webp640} 640w, ${webp.webp} 1280w`}
+              sizes="(max-width: 640px) 100vw, 360px"
+            />
+          )}
+          <img
+            src={poster}
+            alt={`${title} — course poster`}
+            width="1280"
+            height="720"
+            loading="lazy"
+            decoding="async"
+            class="size-full object-cover transition-transform duration-300 motion-safe:group-hover:scale-[1.03]"
+          />
+        </picture>
       </div>
     )
   }

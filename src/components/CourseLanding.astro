@@ -20,10 +20,13 @@ import Instructor from "./Instructor.astro";
 import Reviews from "./Reviews.astro";
 import Footer from "./Footer.astro";
 import { site } from "../config/site";
+import { posterWebpSources } from "../lib/poster";
+import { tools } from "../content/data";
 import {
   themeVars,
   isDraftCourse,
   isPlaceholder,
+  catalog,
   type Course,
 } from "../config/courses";
 
@@ -33,6 +36,11 @@ interface Props {
 const { course } = Astro.props;
 
 const themeStyle = themeVars(course.theme);
+
+// The flagship's poster for the upgrade card, read from `catalog` rather than hardcoded
+// so it stays the same image /courses shows.
+const flagshipPoster = catalog.find((c) => c.flagship)?.poster;
+const flagshipWebp = posterWebpSources(flagshipPoster);
 
 // Split the topic syllabus into the two groups (stable order preserved). A course
 // with no live modules (a recorded one) renders as a single rail instead — see below.
@@ -61,6 +69,17 @@ for (const m of allModules) {
 // count would exceed the real number of phases — and this figure is published in the hero
 // size line and the curriculum intro.
 const phaseCount = new Set(phaseGroups.map((g) => g.name)).size;
+// Only promise "the heavier modules go deep" when modules are actually marked as such.
+// /linux has no deepDive flags, so the claim would be describing markers that aren't
+// on the page.
+const hasDeepDives = allModules.some((m) => m.deepDive);
+// The grouping noun follows the labels rather than being hardcoded: /claude-code names
+// its groups "Phase 1 · …" and /linux names them "Session 1 · …", so a fixed "phases"
+// made the hero and the curriculum intro disagree with each other and with the rail.
+const phaseNoun =
+  (phaseGroups[0]?.name ?? "").trim().split(/[\s·]/)[0].toLowerCase() === "session"
+    ? "sessions"
+    : "phases";
 
 // A scheduled, non-self-paced course. Copy elsewhere defaults to "recorded and waiting
 // for you" / "work down at your own pace", which is exactly wrong for a live session.
@@ -72,11 +91,14 @@ const sessionStarted =
   !!course.batchStartISO &&
   new Date(course.batchStartISO).getTime() < Date.now();
 
-// WebP siblings of the poster (generated next to the .jpg in /public/posters).
-// The <picture> below falls back to the .jpg, so a course whose WebP is missing
-// still renders — it just doesn't get the smaller file.
-const posterWebp = course.poster?.replace(/\.(jpg|jpeg|png)$/i, ".webp");
-const posterWebp640 = course.poster?.replace(/\.(jpg|jpeg|png)$/i, "-640.webp");
+// WebP siblings of the poster, CHECKED against disk at build time. A blind
+// `.replace(".jpg", ".webp")` was wrong here in a way that only shows up in production: a
+// <source> whose file 404s does NOT fall back to the <img> beside it, and this poster is
+// the eager/fetchpriority=high LCP element of the page. A course added with a JPG-only
+// poster would render a broken hero. See src/lib/poster.ts.
+const heroWebp = posterWebpSources(course.poster);
+const posterWebp = heroWebp?.webp;
+const posterWebp640 = heroWebp?.webp640;
 
 // Hero eyebrow/pill label — the course's states, in order of precedence.
 const isFree = !!course.free;
@@ -172,9 +194,11 @@ const projectCount = course.volume?.projects ?? buildCount;
 const volumeBits = [
   moduleCount ? `${moduleCount} modules` : null,
   // Derived too, so the phase count can never disagree with the rails below it.
-  hasPhases ? `${phaseCount} phases` : null,
+  hasPhases ? `${phaseCount} ${phaseNoun}` : null,
   course.volume?.lessons ? `${course.volume.lessons} lessons` : null,
-  course.volume?.hours ? `${course.volume.hours} of video` : null,
+  // The field is `hours`, so the value is the number and the unit belongs here. Reading
+  // it as a bare string produced "8 of video".
+  course.volume?.hours ? `${course.volume.hours} hours of video` : null,
   projectCount ? `${projectCount} projects` : null,
 ].filter(Boolean);
 
@@ -332,6 +356,7 @@ const footerLinks = [
                    the instructor photo). A 1280w JPG into a ~360px slot cost ~600ms
                    of LCP on mobile. */
                 <picture>
+                  {posterWebp && (
                   <source
                     type="image/webp"
                     srcset={`${posterWebp640} 640w, ${posterWebp} 1280w`}
@@ -340,6 +365,7 @@ const footerLinks = [
                         DPR-1 desktop, on the page's LCP element. */}
                     sizes="(max-width: 640px) 100vw, 608px"
                   />
+                  )}
                   <img
                     src={course.poster}
                     alt={`${course.title} — course poster`}
@@ -365,6 +391,20 @@ const footerLinks = [
               )
             }
           </figure>
+          {
+            hasVideo && (
+              <p class="poster-out font-mono">
+                <a
+                  href={`https://www.youtube.com/watch?v=${course.video!.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Watch the teaser on YouTube (opens in a new tab)"
+                >
+                  Watch on YouTube
+                </a>
+              </p>
+            )
+          }
 
           {/* Price ABOVE THE FOLD. On a low-ticket course the number is the pitch, and
               burying it until the enrol card makes the reader work for the one fact most
@@ -579,8 +619,8 @@ const footerLinks = [
               {
                 hasPhases
                   ? isLiveSession
-                    ? `${phaseCount} phases, ${allModules.length} modules, covered live. Each phase builds on the one before it, and the heavier modules go deep rather than skimming.`
-                    : `${phaseCount} phases, ${allModules.length} modules. Start wherever you are and work down. Each phase builds on the one before it, and the heavier modules go deep rather than skimming.`
+                    ? `${phaseCount} ${phaseNoun}, ${allModules.length} modules, covered live. Each one builds on the one before it${hasDeepDives ? ", and the heavier modules go deep rather than skimming" : ""}.`
+                    : `${phaseCount} ${phaseNoun}, ${allModules.length} modules. Start wherever you are and work down. Each one builds on the one before it${hasDeepDives ? ", and the heavier modules go deep rather than skimming" : ""}.`
                   : isLiveSession
                     ? `Everything below is covered live. Come with your machine ready and build along.`
                     : singleRail
@@ -623,6 +663,19 @@ const footerLinks = [
                                   {m.desc}
                                 </p>
                               )}
+                              {m.tags && m.tags.length > 0 && (
+                                <ul class="mod-tags" role="list">
+                                  {m.tags.map((t) => (
+                                    <li>
+                                      <ToolIcon
+                                        name={t}
+                                        class="text-[0.85rem] text-primary"
+                                      />
+                                      {t}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
                             </div>
                           </li>
                         ))}
@@ -631,7 +684,15 @@ const footerLinks = [
                   ))}
                 </div>
               ) : singleRail ? (
-                /* Recorded course: one continuous rail, no live-vs-recorded split. */
+                /* Recorded course: one continuous rail, no live-vs-recorded split.
+                   NOTE: this card body is repeated in all four rails below/above. It is
+                   not extracted into a shared <ModuleCard> because `.cur-card`,
+                   `.cur-card-head`, `.cur-dd` and `.mod-tags` are THIS file's SCOPED
+                   styles — Astro adds its data-astro-cid only to elements in this
+                   component, so moving the markup out strips every card of its border,
+                   background and padding. Extracting it means moving the CSS with it.
+                   Until then: a new module field has to be added in all four places, and
+                   `tags` and `deepDive` were previously live in only one of them. */
                 <ol class="rail rail--single" role="list">
                   {allModules.map((m, i) => (
                     <li class="stage">
@@ -640,9 +701,24 @@ const footerLinks = [
                         aria-hidden="true"
                       />
                       <div class="surface-card lift cur-card">
-                        <h3>{m.module}</h3>
+                        <div class="cur-card-head">
+                          <h3>{m.module}</h3>
+                          {m.deepDive && (
+                            <span class="cur-dd font-mono">deep dive</span>
+                          )}
+                        </div>
                         {m.desc && (
                           <p class="mt-1 text-pretty text-sm text-muted">{m.desc}</p>
+                        )}
+                        {m.tags && m.tags.length > 0 && (
+                          <ul class="mod-tags" role="list">
+                            {m.tags.map((t) => (
+                              <li>
+                                <ToolIcon name={t} class="text-[0.85rem] text-primary" />
+                                {t}
+                              </li>
+                            ))}
+                          </ul>
                         )}
                       </div>
                     </li>
@@ -665,9 +741,27 @@ const footerLinks = [
                             aria-hidden="true"
                           />
                           <div class="surface-card lift cur-card">
-                            <h3>{m.module}</h3>
+                            <div class="cur-card-head">
+                              <h3>{m.module}</h3>
+                              {m.deepDive && (
+                                <span class="cur-dd font-mono">deep dive</span>
+                              )}
+                            </div>
                             {m.desc && (
                               <p class="mt-1 text-pretty text-sm text-muted">{m.desc}</p>
+                            )}
+                            {m.tags && m.tags.length > 0 && (
+                              <ul class="mod-tags" role="list">
+                                {m.tags.map((t) => (
+                                  <li>
+                                    <ToolIcon
+                                      name={t}
+                                      class="text-[0.85rem] text-primary"
+                                    />
+                                    {t}
+                                  </li>
+                                ))}
+                              </ul>
                             )}
                           </div>
                         </li>
@@ -687,9 +781,27 @@ const footerLinks = [
                         <li class="stage">
                           <span class="dot dot--muted" aria-hidden="true" />
                           <div class="surface-card lift cur-card">
-                            <h3>{m.module}</h3>
+                            <div class="cur-card-head">
+                              <h3>{m.module}</h3>
+                              {m.deepDive && (
+                                <span class="cur-dd font-mono">deep dive</span>
+                              )}
+                            </div>
                             {m.desc && (
                               <p class="mt-1 text-pretty text-sm text-muted">{m.desc}</p>
+                            )}
+                            {m.tags && m.tags.length > 0 && (
+                              <ul class="mod-tags" role="list">
+                                {m.tags.map((t) => (
+                                  <li>
+                                    <ToolIcon
+                                      name={t}
+                                      class="text-[0.85rem] text-primary"
+                                    />
+                                    {t}
+                                  </li>
+                                ))}
+                              </ul>
                             )}
                           </div>
                         </li>
@@ -728,7 +840,7 @@ const footerLinks = [
       }
 
       <!-- INSTRUCTOR — shared component (universal across all pages, reads site.ts) -->
-      <Instructor />
+      <Instructor compact={isFree} />
 
       <!-- PROOF — real learner testimonials, right before the price. The heading says
            "about TrainWithShubham" on purpose: these people took Shubham's courses,
@@ -992,19 +1104,57 @@ const footerLinks = [
                 reserved for the anchor card (tokens.css §components), which on this page
                 is the enrol card. Three of them would stop it meaning anything. */}
             <div class="upgrade-card surface-card">
+              {/* The flagship's own poster. This block is the monetisation beat on a free
+                  page, and it was competing with poster-led course cards while being pure
+                  text. Path comes from `catalog` so it can't drift from /courses. */}
+              {flagshipPoster && (
+                <div class="upgrade-poster">
+                  <picture>
+                    {flagshipWebp && (
+                      <source
+                        type="image/webp"
+                        srcset={`${flagshipWebp.webp640} 640w, ${flagshipWebp.webp} 1280w`}
+                        sizes="(max-width: 640px) 100vw, 704px"
+                      />
+                    )}
+                    <img
+                      src={flagshipPoster}
+                      alt=""
+                      width="1280"
+                      height="720"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
+                </div>
+              )}
               <Eyebrow text="go further" class="upgrade-eyebrow" />
               <h2 class="upgrade-title text-balance">
                 {course.bonus
                   ? "This course is included free in the flagship"
                   : "Ready for the full DevOps path?"}
               </h2>
+              {/* The tool list used to be prose: "…covering Linux, Docker, Kubernetes,
+                  Terraform, AWS, CI/CD, observability and Agentic AI…" — 200+ characters
+                  of comma-separated nouns. Logos say it faster and look like a product.
+                  Sourced from tools.json, the flagship's own tool list, in full: a
+                  slice(0, 9) here silently dropped Prometheus, Grafana, ArgoCD, Helm and
+                  Python, so the row stopped just short of the observability and GitOps
+                  evidence it exists to show. */}
               <p class="upgrade-copy text-pretty">
                 <strong class="text-text">DevOps: Zero to Hero</strong> is the{" "}
-                {site.programLength} live cohort: {site.liveHours} hours of live class
-                covering Linux, Docker, Kubernetes, Terraform, AWS, CI/CD, observability
-                and Agentic AI, ending in a capstone project, a verifiable credential and
-                job prep. {course.bonus ? "This course comes with it, free." : ""}
+                {site.programLength} live cohort. {site.liveHours} hours of live class,
+                a capstone, and a verifiable credential.
+                {course.bonus ? " This course comes with it, free." : ""}
               </p>
+              <ul class="upgrade-tools" role="list" aria-label="What the flagship covers">
+                {tools.map((t) => (
+                  <li>
+                    <ToolIcon name={t} class="text-[1.1rem]" />
+                    <span class="sr-only">{t}</span>
+                  </li>
+                ))}
+              </ul>
               {/* The anchor wraps ONLY the CTA text; .upgrade-cta::after stretches the
                   hit area over the whole card. Wrapping the card in the <a> instead made
                   the accessible name the heading plus the entire paragraph, read out as
@@ -1144,6 +1294,23 @@ const footerLinks = [
     overflow: hidden;
     aspect-ratio: 16 / 9;
   }
+  /* Permanent escape from the embed (see the figure above). Quiet by design: it is
+     insurance, not a competing CTA, and it must never pull clicks off the page. */
+  .poster-out {
+    margin: 0.6rem auto 0;
+    max-width: 38rem;
+    text-align: right;
+    font-size: 0.72rem;
+    color: var(--color-muted);
+  }
+  .poster-out a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .poster-out a:hover {
+    color: var(--color-text);
+  }
   .poster img {
     width: 100%;
     height: 100%;
@@ -1182,12 +1349,15 @@ const footerLinks = [
     padding: 0 1rem;
     line-height: 1.1;
   }
-  /* subtle poster hover (motion-safe; disabled under reduced-motion globally) */
+  /* Subtle poster hover (motion-safe; disabled under reduced-motion globally).
+     Scoped with :not(:has(.vt)) so it can't fight VideoTeaser's own thumb zoom when a
+     teaser occupies this slot — both targeted the same <img> at equal specificity, so
+     the winner was decided by stylesheet order rather than intent. */
   @media (prefers-reduced-motion: no-preference) {
-    .poster img {
+    .poster:not(:has(.vt)) img {
       transition: transform 0.4s ease;
     }
-    .poster:hover img {
+    .poster:not(:has(.vt)):hover img {
       transform: scale(1.03);
     }
   }
@@ -1377,6 +1547,38 @@ const footerLinks = [
   /* Eyebrow.astro already styles the label; it only needs centering here, so the
      component's muted-text-with-purple-❯ treatment stays consistent with every other
      section eyebrow on the page. */
+  /* Poster sits above the copy, full card width, matching CourseCard's shape so the
+     upsell reads as a real course card rather than a text block. Negative margins pull
+     it flush to the card edge, under the padding. */
+  .upgrade-poster {
+    margin: -2rem -2rem 1.5rem;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-bottom: 1px solid var(--color-line);
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    background: var(--color-surface-2);
+  }
+  @media (min-width: 640px) {
+    .upgrade-poster {
+      margin: -2.5rem -2.5rem 1.75rem;
+    }
+  }
+  .upgrade-poster picture,
+  .upgrade-poster img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .upgrade-poster img {
+      transition: transform 0.3s ease;
+    }
+    .upgrade-card:hover .upgrade-poster img {
+      transform: scale(1.03);
+    }
+  }
+
   .upgrade-eyebrow {
     text-align: center;
   }
@@ -1390,6 +1592,26 @@ const footerLinks = [
     font-size: 0.95rem;
     color: var(--color-muted);
   }
+  /* Logo row under the upsell copy. Muted by default so it reads as texture, lifting to
+     full colour on hover — the card is one big link, so the whole row responds. */
+  .upgrade-tools {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.9rem 1.1rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--color-muted);
+    transition: color 0.2s ease;
+  }
+  .upgrade-card:hover .upgrade-tools {
+    color: var(--color-primary);
+  }
+  .upgrade-tools li {
+    display: inline-flex;
+  }
+
   .upgrade-cta {
     display: inline-block;
     margin-top: 1.5rem;
@@ -1593,6 +1815,28 @@ const footerLinks = [
     text-transform: lowercase;
     color: var(--color-primary);
   }
+  /* Chips under a module title. Same mono-pill language as the tech strip and the
+     curriculum tags on the homepage, so a reader scans them the same way. */
+  .mod-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0.55rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .mod-tags li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.12rem 0.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    color: var(--color-muted);
+  }
+
   .cur-card-head {
     display: flex;
     flex-wrap: wrap;

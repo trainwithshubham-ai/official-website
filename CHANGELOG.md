@@ -6,6 +6,60 @@ records *what* changed and *why* so future sessions have context.
 
 ---
 
+## 2026-08-17 — /linux goes live; first real VideoTeaser in production
+
+`/linux` leaves draft: real Learnyst enrolment URL, real 1280×720 poster, the full
+13-module syllabus, tech chips and five FAQ answers. Setting `enrollUrl` released all
+seven draft gates at once — `index,follow`, sitemap entry, catalog card, five CTAs, a
+zero-price JSON-LD offer with `isAccessibleForFree`, and the dev-only TODO note stops
+rendering.
+
+**First production use of the click-to-load teaser.** Video `kwFIkpZfHHI`
+("Linux Full Course | Intro") takes the hero slot in place of a static poster, with the
+poster as its thumbnail via the eager + `fetchpriority` + WebP-srcset path, because the
+facade is the LCP element. Nothing loads from youtube.com until someone presses play,
+verified: zero `<iframe>` in the shipped HTML. Real runtime is **99 seconds**, so the play
+button says "under 2 min" rather than "2 min" — naming a time cost only works if the
+number is true.
+
+**The syllabus arrived in two passes, and the second corrected the first.** An initial
+four-topic summary produced a page claiming **systemd** and **LVM** in both the meta
+description and the tech chips. Neither appears as a module in the full syllabus, so both
+are gone. The page now carries all 13 modules grouped into the three sessions they are
+taught in, and the meta description names only modules that exist.
+
+**Then simplified, on owner direction: less text, more value, more icons.** One-line
+module descriptions were replaced by **tool chips** (a new `tags` field on curriculum
+entries, rendered with a `ToolIcon` where one is vendored and as plain text otherwise).
+Three scannable chips carry the same "what's actually in it" signal as a sentence at a
+fraction of the reading cost. Real runtime (**8 hours**) now feeds both the hero size line
+and an at-a-glance "Length" row.
+
+**The DevOps upsell card gained the flagship poster** on every course page. It was the
+monetisation beat on a free page while being pure text, competing against poster-led cards
+everywhere else. Path comes from `catalog`, so it cannot drift from `/courses`.
+
+Phase names are three distinct strings ("Session 1 · fundamentals", "Session 2 ·
+fundamentals", "Session 3 · advanced"). `phaseCount` counts DISTINCT names, not the
+consecutive runs the rails are grouped by, so two phases sharing a name would render two
+rails and print "2". Do not "simplify" it back to `phaseGroups.length`: a name appearing
+non-consecutively would then be counted twice and the hero would over-count.
+
+**A silent-breakage trap closed.** A `<source>` whose file 404s does NOT fall back to the
+`<img>` beside it — the browser renders broken. `src/lib/poster.ts` now checks the WebP
+siblings exist on disk at build time and omits the `<source>` when they don't. Proved by
+temporarily removing `linux.webp`: `/courses` dropped to four sources and the Linux card
+still rendered its JPG. (First attempt resolved the path from `import.meta.url`, which
+Astro bundles into `dist/.prerender/`, so every check silently failed and dropped every
+`<source>` on the site.)
+
+Also: the curriculum intro no longer promises "the heavier modules go deep" unless modules
+are actually marked `deepDive`; the teaser's YouTube escape hatch now appears only when
+the embed fails to load, because showing it unconditionally put a link over YouTube's own
+fullscreen control; and the upgrade poster's `sizes` tracks the card width.
+
+Still no access-term claim and no Discord claim, consistent with `/claude-code`.
+
 ## 2026-08-17 — /claude-code: live session becomes a recorded course
 
 The session ran on Sunday 16 Aug at 09:00 IST. With the recording confirmed available,

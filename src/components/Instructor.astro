@@ -4,6 +4,16 @@
 import Section from "./primitives/Section.astro";
 import { site } from "../config/site";
 
+interface Props {
+  /** Course pages: show the short bio only. The full three-paragraph brand story earns
+   *  its space on the homepage, where the reader is deciding about TrainWithShubham. On a
+   *  course page they are deciding about the course, and the bio is the single largest
+   *  block of text between the syllabus and the enrol card. The card beside it already
+   *  carries the proof (10,000+ trained, 9+ yrs, socials). */
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+
 const socials = [
   { ...site.social.youtube, name: "YouTube" },
   { ...site.social.linkedin, name: "LinkedIn" },
@@ -23,17 +33,19 @@ const focusAreas = ["DevOps", "Cloud", "Python", "Agentic AI"];
         and today I work as a <span class="text-text">Developer Advocate at
         Temporal</span> while teaching DevOps, Cloud and AI to engineers everywhere.
       </p>
+      {!compact && (
+        <p>
+          I started <span class="text-text">TrainWithShubham</span> with one goal — to
+          help you start and grow your IT career, whatever your background. More than{" "}
+          <span class="text-text">{site.studentsTrained}</span> engineers have learned
+          with us through live cohorts, hands-on courses, and a community that shows up
+          every day. Many have gone on to jobs at top companies.
+        </p>
+      )}
       <p>
-        I started <span class="text-text">TrainWithShubham</span> with one goal — to
-        help you start and grow your IT career, whatever your background. More than{" "}
-        <span class="text-text">{site.studentsTrained}</span> engineers have learned
-        with us through live cohorts, hands-on courses, and a community that shows up
-        every day. Many have gone on to jobs at top companies.
-      </p>
-      <p>
-        The way I teach is simple: real tools, real systems, and no boring slides.
-        You learn by building, with AI in your workflow all the way through. Come in
-        curious and ready to build. {site.tagline}
+        {compact
+          ? `Real tools, real systems, no boring slides. You learn by building. ${site.tagline}`
+          : "The way I teach is simple: real tools, real systems, and no boring slides. You learn by building, with AI in your workflow all the way through. Come in curious and ready to build. " + site.tagline}
       </p>
     </div>
 

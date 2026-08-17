@@ -146,6 +146,11 @@ export interface Course {
     desc?: string;
     phase?: string;
     deepDive?: boolean;
+    /** Tool/topic chips under the module title, rendered with a ToolIcon where one is
+     *  vendored and as plain text otherwise. Prefer these over `desc` on a free page:
+     *  three scannable chips carry the same "here is what's actually in it" signal as a
+     *  sentence, at a fraction of the reading cost. */
+    tags?: string[];
   }[];
   /** Optional cohort start (ISO). */
   batchStartISO?: string;
@@ -161,12 +166,11 @@ export const courses = {
     ogImage: "/posters/python.jpg",
     ogImageWidth: 1280,
     ogImageHeight: 720,
-    // The h1. Keeps both search keywords ("Python", "DevOps") while stating the outcome,
-    // because <title>, the meta description and the JSON-LD name all carry the plain
-    // product name already.
-    heroHeadline: "Python for DevOps: automate AWS, logs and pipelines",
+    // No heroHeadline: the h1 is the course name, matching /linux and /claude-code. The
+    // outcome it used to carry ("automate AWS, logs and pipelines") moved into the
+    // subhead, so the name lands at full display size instead of trailing a colon.
     tagline:
-      "Stop doing the same ops work by hand. Build the scripts, tools and agents that do it for you.",
+      "Stop doing the same ops work by hand. Automate AWS, logs and pipelines instead.",
     description:
       "A recorded, self-paced Python course for DevOps. From your first scripts to automating AWS with boto3 and building an internal API with FastAPI. Start today.",
     // Recorded course, no cohort. The live batch has run; the recordings are the product.
@@ -257,70 +261,38 @@ export const courses = {
     // Scannable facts under the hero (concise; the full copy lives in the sections below).
     atAGlance: [
       { label: "Format", value: "Recorded, self-paced" },
+      { label: "Length", value: "10+ hours" },
       { label: "Start", value: "Instantly, on enrolment" },
       { label: "Level", value: "Beginner-friendly" },
       { label: "Language", value: "English" },
       { label: "Access", value: "4 years + updates" },
       { label: "Certificate", value: "On completion" },
     ],
+    // Runtime as Shubham gave it: "more than 10 hours". Stated as a floor rather than a
+    // made-up exact figure (golden rule 4). Feeds the hero size line and courseWorkload.
+    // The "10+ hours" in atAGlance above is hand-typed and must change with it.
+    volume: { hours: "10+" },
     // Topic-based syllabus (derived from the python-for-devops repo, curated — golden
     // rule 8, the repo is a reference, never embedded). Every module is recorded:
     // watch straight through or jump to the topic you need.
     // Ordered as a path you can follow top to bottom: language first, then files and
     // APIs, then automation, then AWS, then the two builds and interview prep.
+    // Chips, not sentences, same treatment as /linux and /claude-code. What actually
+    // sells (the log-analysis agent, the FastAPI capstone) already lives in `builds`
+    // below, so the descriptions here were repeating it at length.
     curriculum: [
-      {
-        module: "Python foundations for DevOps",
-        mode: "recorded",
-        desc: "Setup, the syntax that actually matters, and your first automation scripts.",
-      },
-      {
-        module: "Python fundamentals deep-dive",
-        mode: "recorded",
-        desc: "Strengthen the core at your own pace before you automate anything real.",
-      },
-      { module: "Object-oriented Python (basics)", mode: "recorded" },
-      {
-        module: "File handling & log analysis",
-        mode: "recorded",
-        desc: "Parse logs, count errors and warnings, filter by keyword.",
-      },
-      {
-        module: "Working with APIs & JSON (requests)",
-        mode: "recorded",
-        desc: "Call real APIs, parse JSON, and keep secrets in env vars.",
-      },
-      {
-        module: "Automating system tasks with Python",
-        mode: "recorded",
-        desc: "Script real system and ops tasks, including system health with psutil, the way DevOps engineers do.",
-      },
-      {
-        module: "CLI tools with argparse",
-        mode: "recorded",
-        desc: "Turn your scripts into real command-line tools.",
-      },
-      {
-        module: "AWS automation with Python (boto3 + CDK)",
-        mode: "recorded",
-        desc: "Automate AWS with boto3, plus a first taste of infra-as-code with CDK.",
-      },
-      {
-        module: "DevOps API with FastAPI (capstone)",
-        mode: "recorded",
-        desc: "Build and serve an internal DevOps utilities API end to end.",
-      },
-      {
-        module: "Local log-analysis agent, full build",
-        mode: "recorded",
-        desc: "Build an agent that reads logs and suggests fixes, using LangGraph, LangChain and Ollama. Runs on your machine, no API keys.",
-      },
-      { module: "DevOps thinking & problem-solving", mode: "recorded" },
-      {
-        module: "Capstone completion + interview prep (STAR)",
-        mode: "recorded",
-        desc: "Finish your project and learn to present it in interviews.",
-      },
+      { module: "Python foundations for DevOps", mode: "recorded", tags: ["Python", "Setup"] },
+      { module: "Python fundamentals deep-dive", mode: "recorded", tags: ["Python"] },
+      { module: "Object-oriented Python (basics)", mode: "recorded", tags: ["Python", "OOP"] },
+      { module: "File handling and log analysis", mode: "recorded", tags: ["Logs", "Parsing"] },
+      { module: "Working with APIs and JSON", mode: "recorded", tags: ["requests", "JSON", "APIs"] },
+      { module: "Automating system tasks with Python", mode: "recorded", tags: ["psutil", "Linux"] },
+      { module: "CLI tools with argparse", mode: "recorded", tags: ["argparse", "CLI"] },
+      { module: "AWS automation with Python", mode: "recorded", tags: ["boto3", "AWS", "AWS CDK"] },
+      { module: "DevOps API with FastAPI (capstone)", mode: "recorded", tags: ["FastAPI", "APIs"] },
+      { module: "Local log-analysis agent, full build", mode: "recorded", tags: ["LangChain", "LangGraph", "Ollama"] },
+      { module: "DevOps thinking and problem-solving", mode: "recorded", tags: ["Python"] },
+      { module: "Capstone completion and interview prep", mode: "recorded", tags: ["Capstone", "Interviews"] },
     ],
     faq: [
       {
@@ -391,12 +363,10 @@ export const courses = {
     // a mismatch between the sales page and the checkout is the same class of trust
     // wobble as a price that doesn't match.
     title: "Claude Code: Zero To Hero",
-    // The syllabus goes well past "code with an AI in your terminal" — subagents, MCP,
-    // CI/CD, IaC, enterprise — so the headline claims the whole arc rather than the
-    // entry point. Keeps "Claude Code" and "DevOps" as the search keywords.
-    heroHeadline: "Claude Code for DevOps: from first prompt to multi-agent workflows",
+    // No heroHeadline: the h1 is the course name, which also matches Learnyst exactly.
+    // The arc it used to carry moved into the subhead.
     tagline:
-      "Install it, learn to drive it properly, then put it to work in your pipelines, your cloud and your codebase. Free, recorded, start today.",
+      "From your first prompt to multi-agent DevOps workflows. 4 hours, free, start today.",
     // Kept under ~160 chars: Google truncates past that, and the first version ran to
     // 270, so the half that actually sold the course never got shown.
     description:
@@ -434,8 +404,8 @@ export const courses = {
     atAGlance: [
       { label: "Price", value: "Free" },
       { label: "Format", value: "Recorded, self-paced" },
-      { label: "Start", value: "Instantly, on enrolment" },
       { label: "Level", value: "Starts from zero" },
+      { label: "Length", value: "4 hours" },
       // No "Modules" cell: the hero size line already derives "13 modules · 3 phases"
       // from the curriculum, and a hand-typed copy here could drift from it.
       { label: "Certificate", value: "On completion" },
@@ -461,71 +431,84 @@ export const courses = {
         phase: "Phase 1 · zero to comfortable",
         mode: "recorded",
         module: "Welcome to the era of agentic coding",
+        tags: ["LLMs", "Agents", "Claude"],
       },
       {
         phase: "Phase 1 · zero to comfortable",
         mode: "recorded",
         module: "Prompt engineering for agentic work",
+        tags: ["Prompting", "Context"],
       },
       {
         phase: "Phase 1 · zero to comfortable",
         mode: "recorded",
         module: "Installing Claude Code everywhere",
+        tags: ["macOS", "Windows", "Linux"],
       },
       {
         phase: "Phase 2 · comfortable to productive",
         mode: "recorded",
         module: "The agentic loop and built-in tools",
+        tags: ["Bash", "Grep", "Context window"],
         deepDive: true,
       },
       {
         phase: "Phase 2 · comfortable to productive",
         mode: "recorded",
         module: "Permissions, memory and configuration",
+        tags: ["CLAUDE.md", "settings.json"],
         deepDive: true,
       },
       {
         phase: "Phase 2 · comfortable to productive",
         mode: "recorded",
         module: "Planning and executing a real project",
+        tags: ["Plan mode", "Monorepo"],
       },
       {
         phase: "Phase 2 · comfortable to productive",
         mode: "recorded",
         module: "Skills, commands and hooks",
+        tags: ["SKILL.md", "Hooks", "Slash commands"],
         deepDive: true,
       },
       {
         phase: "Phase 2 · comfortable to productive",
         mode: "recorded",
         module: "The plugin ecosystem",
+        tags: ["Plugins", "Marketplace", "Security"],
       },
       {
         phase: "Phase 2 · comfortable to productive",
         mode: "recorded",
         module: "MCP",
+        tags: ["MCP", "Tool search", "Channels"],
         deepDive: true,
       },
       {
         phase: "Phase 3 · productive to advanced",
         mode: "recorded",
         module: "Subagents and orchestration at scale",
+        tags: ["Subagents", "Worktrees", "Agent teams"],
         deepDive: true,
       },
       {
         phase: "Phase 3 · productive to advanced",
         mode: "recorded",
         module: "Claude Code across every surface",
+        tags: ["Desktop", "Mobile", "Slack", "Chrome"],
       },
       {
         phase: "Phase 3 · productive to advanced",
         mode: "recorded",
         module: "CI/CD, code review and security",
+        tags: ["GitHub Actions", "GitLab CI", "Security"],
       },
       {
         phase: "Phase 3 · productive to advanced",
         mode: "recorded",
         module: "Infrastructure, cloud and enterprise",
+        tags: ["Terraform", "AWS", "Bedrock"],
       },
     ],
     // Only answers grounded in the syllabus or in confirmed facts. No access term (not
@@ -534,7 +517,7 @@ export const courses = {
     faq: [
       {
         q: "Is it really free?",
-        a: "Yes. No card, no payment, nothing to cancel. You sign in to the course platform and start watching.",
+        a: "Yes. No card, no payment, nothing to cancel.",
       },
       {
         q: "Do I need to know AI or agents already?",
@@ -558,11 +541,12 @@ export const courses = {
       },
       {
         q: "Do I get a certificate?",
-        a: "Yes. Complete the course and you get a certificate of completion you can add to your LinkedIn and your resume.",
+        a: "Yes, on completion. Add it to your LinkedIn and your resume.",
       },
     ],
-    // TODO: `volume` — total runtime and lesson count. The hero size line already shows
-    // "13 modules" (derived from the curriculum above); add hours when you have them.
+    // Real runtime. Feeds the hero size line and courseWorkload. The "4 hours" in the
+    // tagline and in atAGlance below are hand-typed and must be changed with it.
+    volume: { hours: "4" },
     // Claude's clay accent. Verified 6.2:1 on --ink (#0A0E12), so it is text-safe.
     // Nominative use to denote the tool the course teaches, same basis as ToolIcon; this
     // is not an endorsement by Anthropic. The Enroll CTA on this page stays yellow.
@@ -576,14 +560,20 @@ export const courses = {
   linux: {
     slug: "linux",
     title: "Linux for DevOps",
-    heroHeadline: "Get properly comfortable on the Linux command line",
+    // No heroHeadline: "Linux for DevOps" IS the promise and the search term, so the h1
+    // is the course name and the subhead carries the outcome. Shorter, and the name lands
+    // at full display size instead of trailing a colon.
     tagline:
-      "The command-line skills every DevOps job assumes you already have. Free, recorded, start today.",
-    // Deliberately does NOT enumerate modules: the syllabus is a TODO below, and listing
-    // topics here would assert content this file says is unconfirmed (golden rule 4).
-    // Rewrite this with the real topics once the curriculum lands.
+      "The command-line skills every DevOps job assumes you already have. 8 hours, free, start today.",
+    // Names only what the detailed syllabus actually contains. An earlier version said
+    // "systemd" and "LVM", carried over from a four-topic summary; neither appears as a
+    // module in the full syllabus, so both are gone.
     description:
-      "A free, recorded Linux course for DevOps. Get properly comfortable on the command line, taught the way you actually use it on a server. Start today.",
+      "Free, recorded Linux course for DevOps and SRE. 13 modules: OS foundations, VMs, file system, permissions, shell scripting, networking and SSH. Start today.",
+    poster: "/posters/linux.jpg",
+    ogImage: "/posters/linux.jpg",
+    ogImageWidth: 1280,
+    ogImageHeight: 720,
     free: true,
     selfPaced: true,
     availability: "Available now. Start the moment you enrol.",
@@ -591,13 +581,19 @@ export const courses = {
     // imply these people took THIS course (golden rule 4). They still do real work here:
     // a free signup is a trust decision too, and it warms the flagship upsell below.
     reviews: 3,
-    // TODO: replace with the real Learnyst free-enrolment URL (see note above).
-    enrollUrl: "TODO_LINUX_FREE_ENROL_URL",
-    // TODO: replace `id` with the real YouTube video ID (the bare id, e.g. dQw4w9WgXcQ,
-    // not the full watch URL) and set the real `duration`. Until then the hero falls back
-    // to the poster, exactly as it did before — a placeholder id never reaches an iframe.
-    // The teaser uses `poster` as its thumbnail, so the poster art matters more now.
-    video: { id: "TODO_LINUX_TEASER_VIDEO_ID", duration: "TODO" },
+    // The Learnyst course page, where a logged-out visitor enrols. Setting this takes the
+    // page out of draft, so it gains CTAs, a catalog card, a sitemap entry, an index
+    // directive and a zero-price JSON-LD offer all at once.
+    enrollUrl: "https://courses.trainwithshubham.ai/learn/linux",
+    // "Linux Full Course | Intro" on the English channel. Real runtime is 99 seconds;
+    // labelled "under 2 min" instead of "2 min", which would overstate it, and the point
+    // of naming the time cost is that it is genuinely small.
+    // (Careful with wording in comments here: Tailwind v4 scans source files for class
+    // candidates and does NOT skip comments, so a bare utility name written in prose
+    // emits a real, unused CSS rule into every page on the site. Avoid writing bare
+    // utility words like the border-radius one in these comments.)
+    // The teaser replaces the hero poster and uses `poster` above as its thumbnail.
+    video: { id: "kwFIkpZfHHI", duration: "under 2 min" },
     includes: [
       "Fully recorded. Watch anytime, rewind anything",
       "Taught by Shubham, start to finish",
@@ -608,10 +604,140 @@ export const courses = {
     atAGlance: [
       { label: "Price", value: "Free" },
       { label: "Format", value: "Recorded, self-paced" },
-      { label: "Start", value: "Instantly, on enrolment" },
+      // Level is stated explicitly here because the poster art reads "Advanced Linux"
+      // while the syllabus starts from what Linux is. The scannable strip is exactly
+      // where someone checks whether a course is above them.
+      { label: "Level", value: "Starts from scratch" },
+      { label: "Length", value: "8 hours" },
       { label: "Certificate", value: "On completion" },
     ],
-    // TODO: poster art + curriculum + volume + faq (see the note on claude-code above).
+    // Tools and surfaces the syllabus covers. Names without a vendored ToolIcon render as
+    // plain text, so conceptual entries are fine.
+    techStack: [
+      "Linux",
+      "Bash",
+      "Vim",
+      "VirtualBox",
+      "Ubuntu",
+      "SSH",
+      "cron",
+      "iptables",
+    ],
+    // Chips, not sentences. Owner direction: less text, more value, more icons. Three
+    // scannable chips carry the same "what's actually in it" signal as a one-line
+    // description at a fraction of the reading cost, and they render with a real logo
+    // wherever one is vendored in ToolIcon.
+    curriculum: [
+      {
+        phase: "Session 1 · fundamentals",
+        mode: "recorded",
+        module: "Foundations of Linux and the OS",
+        tags: ["Linux", "Kernel", "System calls"],
+      },
+      {
+        phase: "Session 1 · fundamentals",
+        mode: "recorded",
+        module: "Virtualization and Linux VMs",
+        tags: ["VirtualBox", "Ubuntu", "Hypervisors"],
+      },
+      {
+        phase: "Session 1 · fundamentals",
+        mode: "recorded",
+        module: "Exploring the Linux file system",
+        tags: ["/etc", "/var", "umask"],
+      },
+      {
+        phase: "Session 1 · fundamentals",
+        mode: "recorded",
+        module: "Managing software on Linux",
+        tags: ["APT", "YUM", "Repositories"],
+      },
+      {
+        phase: "Session 2 · fundamentals",
+        mode: "recorded",
+        module: "Text editors: Nano and Vim",
+        tags: ["Nano", "Vim"],
+      },
+      {
+        phase: "Session 2 · fundamentals",
+        mode: "recorded",
+        module: "User and permission management",
+        tags: ["chmod", "sudoers", "/etc/passwd"],
+      },
+      {
+        phase: "Session 2 · fundamentals",
+        mode: "recorded",
+        module: "Mastering the command line",
+        tags: ["grep", "Pipes", "Wildcards"],
+      },
+      {
+        phase: "Session 3 · advanced",
+        mode: "recorded",
+        module: "Introduction to shell scripting",
+        tags: ["Bash", "Loops", "cron"],
+      },
+      {
+        phase: "Session 3 · advanced",
+        mode: "recorded",
+        module: "Environment variables",
+        tags: ["Linux", "Deployment"],
+      },
+      {
+        phase: "Session 3 · advanced",
+        mode: "recorded",
+        module: "Introduction to networking",
+        tags: ["LAN", "Routers", "Gateways"],
+      },
+      {
+        phase: "Session 3 · advanced",
+        mode: "recorded",
+        module: "IP addressing",
+        tags: ["Subnetting", "CIDR"],
+      },
+      {
+        phase: "Session 3 · advanced",
+        mode: "recorded",
+        module: "Essential networking commands",
+        tags: ["ping", "curl", "tcpdump", "iptables"],
+      },
+      {
+        phase: "Session 3 · advanced",
+        mode: "recorded",
+        module: "Secure Shell (SSH)",
+        tags: ["SSH", "Key auth", "Automation"],
+      },
+    ],
+    // Grounded in the syllabus and in confirmed facts only. No access-term claim (owner
+    // instruction) and no community claim (free learners don't get the Discord).
+    faq: [
+      {
+        q: "Is it really free?",
+        a: "Yes. No card, no payment, nothing to cancel.",
+      },
+      {
+        q: "Is it live or recorded?",
+        a: "Fully recorded. Start the moment you enrol, go at your own speed.",
+      },
+      {
+        q: "Do I need any Linux experience?",
+        a: "None. Module 1 starts from what an operating system actually is.",
+      },
+      {
+        q: "Do I need a Linux machine?",
+        // VirtualBox is x86-only in practice: on Apple Silicon it is a developer preview
+      // that will not boot the x86-64 Ubuntu guests this course uses, and that is every
+      // Mac sold since Nov 2020. This answer also goes into the FAQPage JSON-LD, so an
+      // unqualified "macOS works fine" is a compatibility promise the course cannot keep.
+      a: "No. Session 1 sets you up with a Linux VM. Windows and Intel Macs use VirtualBox; on an Apple Silicon Mac use UTM or Multipass, which give you the same Ubuntu to work in.",
+      },
+      {
+        q: "Do I get a certificate?",
+        a: "Yes, on completion. Add it to your LinkedIn and your resume.",
+      },
+    ],
+    // Real runtime, supplied by the owner. Feeds the hero size line and the at-a-glance
+    // strip. Module and phase counts stay DERIVED from the curriculum above.
+    volume: { hours: "8" },
     // No `theme`: Linux keeps the brand purple. Green belongs to /agentic-ai, blue to
     // /python, and Tux yellow is off limits because yellow is the Enroll CTA sitewide.
   },
