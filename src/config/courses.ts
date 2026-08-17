@@ -396,27 +396,23 @@ export const courses = {
     // entry point. Keeps "Claude Code" and "DevOps" as the search keywords.
     heroHeadline: "Claude Code for DevOps: from first prompt to multi-agent workflows",
     tagline:
-      "Install it, learn to drive it properly, then put it to work in your pipelines, your cloud and your codebase. Free, and live on 16 August.",
+      "Install it, learn to drive it properly, then put it to work in your pipelines, your cloud and your codebase. Free, recorded, start today.",
     // Kept under ~160 chars: Google truncates past that, and the first version ran to
     // 270, so the half that actually sold the course never got shown.
     description:
-      "Free live Claude Code session for DevOps, Cloud, SRE and Platform engineers. 16 August, 9 AM IST. 13 modules, three phases, first prompt to multi-agent work.",
+      "Free, recorded Claude Code course for DevOps, Cloud, SRE and Platform engineers. 13 modules across three phases, from your first prompt to multi-agent workflows.",
     poster: "/posters/claude-code.jpg",
     ogImage: "/posters/claude-code.jpg",
     ogImageWidth: 1280,
     ogImageHeight: 720,
     free: true,
-    // LIVE, not self-paced. A single session on 16 Aug 2026, 09:00 IST.
-    // NOTE (14 Aug 2026): recordings are expected to follow once the live session ends,
-    // but that is deliberately NOT stated anywhere on the page yet — announcing it up
-    // front removes the reason to show up live. Owner's call; revisit after 16 Aug and
-    // flip this entry to selfPaced with an availability line at that point.
-    batchStartISO: "2026-08-16T09:00:00+05:30",
-    // 16 Aug 2026 is a SUNDAY (verified against the calendar). The day name here is
-    // hand-written while batchStartISO above is the machine-readable truth, so they can
-    // drift — check them against each other whenever either changes.
-    schedule: { dates: "Sunday 16 August 2026", time: "9:00 AM IST" },
-    formatLabel: "free live session",
+    // Ran live on Sunday 16 Aug 2026, 09:00 IST; flipped to recorded on 17 Aug once the
+    // recording was confirmed available. The live-only fields (batchStartISO, schedule,
+    // formatLabel) are GONE rather than commented out, which is what removes the hero
+    // countdown, the date line and the "free live session" badge — they are all
+    // conditional on those fields existing.
+    selfPaced: true,
+    availability: "Available now. Start the moment you enrol.",
     // Real learner testimonials. Rendered under "about TrainWithShubham", so they never
     // imply these people took THIS course (golden rule 4). They still do real work here:
     // a free signup is a trust decision too, and it warms the flagship upsell below.
@@ -426,21 +422,19 @@ export const courses = {
     // takes the page OUT of draft: it gains CTAs, a catalog card, a sitemap entry, an
     // index directive and a zero-price JSON-LD offer, all at once.
     enrollUrl: "https://courses.trainwithshubham.ai/learn/claude-code",
-    // Real, confirmed facts only. Access term is unknown for free courses, so it is
-    // absent rather than guessed at.
-    // Live framing throughout. "Fully recorded / watch anytime / instant access" was all
-    // false for a scheduled session and had to go.
+    // Real, confirmed facts only. NO access-term claim anywhere: how long free learners
+    // keep access is still unconfirmed, and the owner's instruction is not to state it.
     includes: [
-      "Live with Shubham on 16 August",
+      "Fully recorded. Watch anytime, rewind anything",
       "13 modules across three phases, start to finish",
       "Certificate of completion",
       "Free. No card, no payment",
     ],
-    trust: ["No payment", "Live on 16 August", "Certificate on completion"],
+    trust: ["No payment", "Instant access", "Certificate on completion"],
     atAGlance: [
       { label: "Price", value: "Free" },
-      { label: "Format", value: "Live session" },
-      { label: "When", value: "16 Aug, 9 AM IST" },
+      { label: "Format", value: "Recorded, self-paced" },
+      { label: "Start", value: "Instantly, on enrolment" },
       { label: "Level", value: "Starts from zero" },
       // No "Modules" cell: the hero size line already derives "13 modules · 3 phases"
       // from the curriculum, and a hand-typed copy here could drift from it.
@@ -555,12 +549,12 @@ export const courses = {
         a: "Past the basics. Five modules are marked deep dive, including the agentic loop and built-in tools, permissions and configuration, skills and hooks, MCP, and multi-agent orchestration with subagents and worktrees.",
       },
       {
-        // Answers the format question without touching what happens afterwards. The
-        // recordings plan is deliberately unannounced for now (see the note on
-        // batchStartISO above), and saying nothing is honest; claiming "live only" would
-        // not be. Revisit this answer after 16 Aug.
-        q: "When is it and how do I join?",
-        a: "It runs live on Sunday 16 August 2026 at 9:00 AM IST. Enrol now, and you'll get the joining details on the course platform.",
+        q: "Is it live or recorded?",
+        a: "Fully recorded. Every module is already there, so you start the moment you enrol and go at your own speed. Rewind anything, as often as you want.",
+      },
+      {
+        q: "When do I get access?",
+        a: "Straight away. Sign in to the course platform and you can start watching the same minute.",
       },
       {
         q: "What should I have ready?",

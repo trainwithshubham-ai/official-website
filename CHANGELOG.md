@@ -6,6 +6,29 @@ records *what* changed and *why* so future sessions have context.
 
 ---
 
+## 2026-08-17 — /claude-code: live session becomes a recorded course
+
+The session ran on Sunday 16 Aug at 09:00 IST. With the recording confirmed available,
+the page flips to recorded self-paced.
+
+The live-only fields (`batchStartISO`, `schedule`, `formatLabel`) were **removed rather
+than commented out**, which is what deletes the hero countdown, the date line and the
+"free live session" badge — each is conditional on its field existing. `selfPaced` plus an
+`availability` line replace them, and the template does the rest on its own: `isLiveSession`
+goes false, so the curriculum intro, the free price note ("Sign in and start") and the enrol
+heading ("Start it free, right now") all revert without being touched. Only per-course copy
+in `courses.ts` was hand edited: tagline, meta description, includes, trust, atAGlance and
+two FAQ answers.
+
+Verified in the build: all ten live-framing strings gone ("free live session", "Live with
+Shubham", "Save your spot", "join us live", "covered live", "16 August", "live session
+starts in" and the rest), zero countdown mounts on the page, and the JSON-LD no longer
+advertises a past `startDate` while claiming `InStock` — the CourseInstance is now just an
+online course with a free offer.
+
+Still no access-term claim anywhere, per the owner: how long free learners keep access is
+unconfirmed on Learnyst, so both free pages say nothing about it rather than guessing.
+
 ## 2026-08-16 — Independence Day sale ended; one header timer at every width
 
 The sale ran out at 15 Aug 23:59 IST. Because the site is static, expiry alone only
