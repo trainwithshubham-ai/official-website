@@ -94,7 +94,7 @@ syllabus the repo called unconfirmed.
 **/claude-code is a LIVE SESSION, not a recorded course.** Corrected before launch: the
 page had been built as "free course · self-paced" and stated, in five separate places,
 that it was fully recorded with instant access on enrolment. It is a single live session
-on **Saturday 16 Aug 2026, 09:00 IST**. Every one of those claims was false and is gone:
+on **Sunday 16 Aug 2026, 09:00 IST**. Every one of those claims was false and is gone:
 the badge, the format and start facts, the includes list, the trust row, the curriculum
 intro, and an FAQ answer that literally read "Fully recorded. Every module is already
 there." The hero now carries the date, time and a **real countdown** to the session start

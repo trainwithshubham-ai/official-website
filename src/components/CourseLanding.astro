@@ -394,14 +394,18 @@ const footerLinks = [
               CTA so urgency and action are adjacent. Honest scarcity (golden rule 6):
               a real session at a real time, never a reset. The Countdown flips itself to
               a calm ended state on its own, so nothing here goes stale mid-morning. */}
-          {/* No "live ·" prefix on the date: the badge above already says "free live
-              session" and the countdown label below says "live session starts in".
-              Three mentions in one column reads as padding. */}
+          {/* The "live ·" prefix is CONDITIONAL, not simply absent. When isLiveSession
+              holds, the badge and the countdown label below both already say "live", so a
+              third mention in the same column is padding. When a course sets `schedule`
+              WITHOUT a batchStartISO there is no badge and no countdown, so a bare date
+              would carry no context at all and the prefix is the only thing supplying
+              it. */}
           {
             course.schedule && (
               <p class="hero-when font-mono">
-                <span aria-hidden="true">❯</span> {course.schedule.dates} ·{" "}
-                {course.schedule.time}
+                <span aria-hidden="true">❯</span>{" "}
+                {!isLiveSession && "live · "}
+                {course.schedule.dates} · {course.schedule.time}
               </p>
             )
           }

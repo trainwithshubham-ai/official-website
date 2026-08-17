@@ -400,7 +400,7 @@ export const courses = {
     // Kept under ~160 chars: Google truncates past that, and the first version ran to
     // 270, so the half that actually sold the course never got shown.
     description:
-      "Free, recorded Claude Code course for DevOps, Cloud, SRE and Platform engineers. 13 modules across three phases, from your first prompt to multi-agent workflows.",
+      "Free, recorded Claude Code course for DevOps, Cloud, SRE and Platform engineers. 13 modules, three phases, from your first prompt to multi-agent workflows.",
     poster: "/posters/claude-code.jpg",
     ogImage: "/posters/claude-code.jpg",
     ogImageWidth: 1280,
@@ -551,10 +551,6 @@ export const courses = {
       {
         q: "Is it live or recorded?",
         a: "Fully recorded. Every module is already there, so you start the moment you enrol and go at your own speed. Rewind anything, as often as you want.",
-      },
-      {
-        q: "When do I get access?",
-        a: "Straight away. Sign in to the course platform and you can start watching the same minute.",
       },
       {
         q: "What should I have ready?",
