@@ -39,7 +39,7 @@ export const site = {
   },
 
   // --- sale (a REAL time-boxed offer; golden rule 6) ---
-  // Independence Day sale: ₹5,000 / $50 off the standing price, ending on the date
+  // Teachers' Day sale: ₹5,000 / $50 off the standing price, ending on the date
   // below. `list` anchors to the STANDING price (₹19,999 / $249) — NOT the ₹25,000
   // original — so "₹5,000 off" is literally true and the page can't imply a bigger
   // discount than is being given.
@@ -49,45 +49,33 @@ export const site = {
   // so the page MUST state the code wherever it states the sale price — otherwise the
   // number on the page and the number at checkout disagree (golden rule 6).
   //
-  // Learnyst pre-coupon amounts during the sale: India 281722 = ₹19,999 (→ ₹14,999),
-  // world 280727 = $299 (→ $249).
+  // Learnyst pre-coupon amounts during this sale: India 281722 = ₹19,999 (→ ₹14,999),
+  // world 280727 = $249 (→ $199). Both priceIds sit at the STANDING price, so nothing
+  // was temporarily raised and nothing has to be lowered again afterwards.
   //
-  // ENDING IT — THREE steps, all required:
+  // ENDING IT — two steps this time, both required:
   //   1. set enabled:false and push;
-  //   2. deactivate the AUGUST15 coupon in Learnyst;
-  //   3. drop world priceId 280727 back to $249.
-  // Step 3 is easy to forget and it BITES: with the sale off, the page falls back to
-  // the standing `price` below ($249 world) while checkout would still be at $299 —
-  // the page and the checkout would disagree. (India needs no equivalent step: 281722
-  // is already ₹19,999, which IS the standing price.) The site is static, so the
-  // countdown expiring only flips the urgency copy to "sale ended" — the PRICE does
-  // not revert on its own.
+  //   2. deactivate the OFFER5000 coupon in Learnyst.
+  // (The August sale had a third step — dropping a temporarily-raised world price back
+  // down. Not needed here: neither priceId was moved. If you DO raise a price for a
+  // future sale, that third step comes back and it bites.)
+  // The site is static, so the countdown expiring only flips the urgency copy to
+  // "sale ended" — the PRICE does not revert on its own.
   sale: {
-    // ENDED 15 Aug 2026, 23:59 IST. Turned off 16 Aug 2026.
-    // The other two steps were done in Learnyst at the same time (owner-confirmed):
-    // the AUGUST15 coupon was deactivated, and world priceId 280727 was dropped from
-    // $299 back to $249 so the page's standing $249 matches what checkout charges.
-    // India needed nothing — 281722 was already at the standing ₹19,999.
-    // Leave this block in place: it is the template for the next sale, and the
-    // three-step teardown above is the checklist for ending it.
-    // DO NOT just flip `enabled: true` — every field below is stale. `endsISO` is in the
-    // past, `coupon` names a code that has been deactivated in Learnyst, and `price`
-    // holds amounts Learnyst will no longer charge. Flipping the flag alone would ship a
-    // sale row whose countdown is already expired, publish a past `priceValidUntil`, and
-    // advertise a dead coupon. Update name, endsISO, price, off and coupon FIRST.
-    enabled: false,
-    name: "Independence Day sale",
-    endsISO: "2026-08-15T23:59:59+05:30",
+    // LIVE. Ends 7 Sep 2026, 23:59 IST. Coupon OFFER5000 must be active in Learnyst
+    // for both priceIds (India ₹5,000 off, world $50 off) for the whole window.
+    // When it ends, follow the two-step teardown above; do not just let it expire.
+    enabled: true,
+    name: "Teachers' Day sale",
+    endsISO: "2026-09-07T23:59:59+05:30",
     price: {
       india: { now: "₹14,999", list: "₹19,999" },
-      // $299 (not a round $300) — it's the real list price already in `price` below,
-      // and it keeps "$50 off" exact rather than an approximation.
-      world: { now: "$249", list: "$299" },
+      world: { now: "$199", list: "$249" },
     },
     off: { india: "₹5,000 off", world: "$50 off" },
     // Entered by the learner at Learnyst checkout. Set to null if a future sale is
     // done by repricing the product instead — the hint then disappears on its own.
-    coupon: "AUGUST15",
+    coupon: "OFFER5000",
     // null → reuse `checkout` below. A coupon-based sale needs no separate links,
     // since the discount happens inside checkout. Replace with
     // { india: "...", world: "..." } only if you mint separate sale priceIds.

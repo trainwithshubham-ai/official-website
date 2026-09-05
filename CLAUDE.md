@@ -235,10 +235,14 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
      contradicting its own timer.
   A `schedule:` cron on `deploy.yml` would remove step 2; it is deliberately not there
   yet, so the manual step stands.
-- **NO SALE RUNNING.** `site.sale.enabled` is `false`. The page shows the standing
-  price (India ₹19,999, world $249) and there is no coupon, no offer row and no
-  `priceValidUntil` in the JSON-LD. The Independence Day sale ran to 15 Aug 2026
-  and was torn down on 16 Aug.
+- **SALE LIVE — Teachers' Day.** `site.sale.enabled` is `true`. India ₹19,999 →
+  **₹14,999** (₹5,000 off), world $249 → **$199** ($50 off), applied by coupon
+  **OFFER5000** at Learnyst checkout. Ends **7 Sep 2026, 23:59 IST**; the JSON-LD
+  carries that as `priceValidUntil`. Both Learnyst priceIds stay at the standing
+  price (India 281722 ₹19,999, world 280727 $249) — nothing was raised, so the
+  teardown is only TWO steps: (1) `sale.enabled:false` + push, (2) deactivate
+  OFFER5000 in Learnyst. The earlier Independence Day sale ran to 15 Aug 2026 and
+  was torn down on 16 Aug.
 - **To run the next sale:** fill in `site.sale` (name, `endsISO`, `price`, `off`,
   `coupon`) and set `enabled: true`. Components render the derived `activePrice` /
   `activeCheckout`, never `site.price` directly, so one flag moves every price on
