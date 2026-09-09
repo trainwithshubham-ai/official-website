@@ -62,10 +62,9 @@ export const site = {
   // The site is static, so the countdown expiring only flips the urgency copy to
   // "sale ended" — the PRICE does not revert on its own.
   sale: {
-    // LIVE. Ends 7 Sep 2026, 23:59 IST. Coupon OFFER5000 must be active in Learnyst
-    // for both priceIds (India ₹5,000 off, world $50 off) for the whole window.
-    // When it ends, follow the two-step teardown above; do not just let it expire.
-    enabled: true,
+    // ENDED 7 Sep 2026, 23:59 IST. Torn down 9 Sep: enabled:false + push (step 1).
+    // Step 2 (deactivate OFFER5000 coupon in Learnyst) is manual — do it in Learnyst.
+    enabled: false,
     name: "Teachers' Day sale",
     endsISO: "2026-09-07T23:59:59+05:30",
     price: {
