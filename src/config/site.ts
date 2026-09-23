@@ -182,6 +182,12 @@ export const site = {
   },
 
   contactEmail: "trainwithshubham.ai@gmail.com",
+  // Low-friction secondary CTA (alongside Enroll, never replacing it) — a real
+  // number, not a placeholder. Opens WhatsApp in a new tab; no message
+  // prefill, so it reads as "talk to a human" rather than a scripted funnel.
+  contact: {
+    whatsapp: "https://wa.me/918151956340",
+  },
 
   // --- analytics ---
   ga4Id: "G-H313D578QS",

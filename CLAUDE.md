@@ -60,6 +60,7 @@ npm run preview      # preview the build
 1. **Single source of truth.** Every price, date, deadline, URL, count, and email
    lives in `src/config/site.ts`. **Never hardcode these in a component.** If you
    need a volatile value, import it from `site.ts`. If it's missing, add it there.
+   Detail + mechanical backstop: `.claude/rules/no-hardcode.md`.
 2. **No backend, no database, no client framework.** Don't reach for React/Vue.
    Astro components are static HTML. Interactivity budget is the countdown plus
    the VideoTeaser facade, and nothing else (see ARCHITECTURE.md §5, which also
@@ -69,6 +70,7 @@ npm run preview      # preview the build
    (`reviews` via its content collection; the rest via `src/content/data.ts`,
    which components import instead of the raw JSON — a malformed edit fails the
    build). Components map over data; they don't carry hardcoded copy lists.
+   Detail: `.claude/rules/content-schema.md`.
 4. **Never fabricate proof.** Do not invent reviews, student names, companies,
    salary numbers, or stats. Use only real values: `10,000+` trained, the real
    social counts, and the **real Google reviews seeded in `reviews.json`**
@@ -130,6 +132,24 @@ npm run preview      # preview the build
   component reads only `site.ts` and its own JSON file. No cross-component
   coupling.
 - `src/pages/index.astro` — thin; stacks sections in IA order (ARCHITECTURE.md §4).
+
+## Claude Code project structure
+
+- `AGENTS.md` — thin pointer to this file, for any non-Claude tool that reads
+  the AGENTS.md convention.
+- `.claude/settings.json` — committed, shared: permissions allowlist + the
+  `PreToolUse` hook below. `.claude/settings.local.json` is gitignored and for
+  personal overrides only.
+- `.claude/hooks/validate-no-hardcode.sh` — advisory `PreToolUse` hook that
+  warns (doesn't block) when a component/layout/page edit looks like it's
+  introducing a hardcoded price, date, or URL. Mechanizes golden rule 1.
+- `.claude/rules/` — path-scoped detail behind golden rules 1 and 3
+  (`no-hardcode.md`, `content-schema.md`).
+- `.claude/agents/code-reviewer.md` — project-scoped review-only subagent that
+  checks a diff against CLAUDE.md/BRAND.md/ARCHITECTURE.md, not just
+  correctness. Use it for the per-section review pass (see § Build order).
+- No `.mcp.json` (no external integrations to wire) and no project-local
+  `.claude/skills/` — this project uses the global skills in § Skills below.
 
 ## Build order
 

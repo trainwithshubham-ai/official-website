@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx -y skills find astro)",
+      "Bash(grep *)",
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(gh run *)",
+      "Bash(git checkout *)",
+      "Workflow(code-review)",
+      "Bash(curl *)",
+      "Bash(git *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/validate-no-hardcode.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

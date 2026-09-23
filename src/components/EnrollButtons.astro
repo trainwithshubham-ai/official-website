@@ -9,7 +9,7 @@
 // never hides or swaps a price. Checkouts open in a new tab so a wrong click is
 // recoverable. Both buttons are `data-enroll`: BaseLayout forwards UTM (+ src),
 // preserves ?priceId, and fires enroll_click with the data-region.
-import { activePrice, activeCheckout } from "../config/site";
+import { site, activePrice, activeCheckout } from "../config/site";
 import type { CoursePrice, CourseCheckout } from "../config/courses";
 import Button from "./primitives/Button.astro";
 import FlagIndia from "./primitives/FlagIndia.astro";
@@ -71,6 +71,15 @@ const q = priceQualifier ? ` ${priceQualifier}` : "";
     </Button>
   </div>
 
+  {/* Low-commitment alternative for a visitor who isn't ready to pay yet —
+      plain text link, never a Button/variant, so it can't compete with the
+      yellow Enroll CTAs for attention or clicks (golden rule 5, BRAND.md §3). */}
+  <p class="chat-link">
+    <a href={site.contact.whatsapp} target="_blank" rel="noopener noreferrer">
+      Have questions? Chat with us on WhatsApp
+    </a>
+  </p>
+
   {
     note && (
       <p class="geo-note">
@@ -125,6 +134,20 @@ const q = priceQualifier ? ` ${priceQualifier}` : "";
      change the height (zero CLS). We toggle `visibility`, not `display`, to keep
      them all in layout. Keyed on html[data-region-guess]; base shows when the
      region is unknown (no JS). */
+  .chat-link {
+    margin-top: 0.75rem;
+    text-align: center;
+    font-size: 0.85rem;
+  }
+  .chat-link a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  .chat-link a:hover {
+    color: var(--color-primary-deep);
+  }
+
   .geo-note {
     margin-top: 0.85rem;
     display: grid;

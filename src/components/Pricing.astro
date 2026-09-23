@@ -71,20 +71,20 @@ const priceSr = `${saleSr}Price: ${activePrice.india.now} for India (originally 
          IP — flag set pre-paint on <html>) is the big anchor; the other stays
          visible but smaller. Both always shown — emphasis, never a hide/swap
          (golden rule 6). India is the default anchor when region is unknown. -->
-    <div aria-hidden="true">
-      <div
-        class="mt-3 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1"
-      >
-        <span class="text-lg text-muted">from</span>
+    <div aria-hidden="true" class="price-compare mt-3">
+      {/* Each currency's now/was pair sits together, so the discount reads as
+          "this price, was this price" per currency rather than two separate
+          amount rows and a combined strikethrough line underneath — clearer
+          at a glance (still both regions always visible, golden rule 6). */}
+      <div class="price-row">
         <span class="price-amt amt-india">{activePrice.india.now}</span>
-        <span class="price-sep">·</span>
-        <span class="price-amt amt-world">{activePrice.world.now}</span>
+        <s class="price-was">{activePrice.india.list}</s>
       </div>
-      <p class="mt-2 text-sm text-muted">
-        {saleLive ? "was" : "originally"} <s>{activePrice.india.list}</s>
-        <span> / </span>
-        <s>{activePrice.world.list}</s>
-      </p>
+      <span class="price-sep">·</span>
+      <div class="price-row">
+        <span class="price-amt amt-world">{activePrice.world.now}</span>
+        <s class="price-was">{activePrice.world.list}</s>
+      </div>
     </div>
     <p class="sr-only">{priceSr}</p>
 
@@ -231,10 +231,31 @@ const priceSr = `${saleSr}Price: ${activePrice.india.now} for India (originally 
      set pre-paint in BaseLayout — timezone, never IP) is the big anchor; the other
      stays visible but smaller. Emphasis only — both always shown (golden rule 6).
      India is the default anchor when the region is unknown (attr unset). Because
-     the flag is set before first paint, there's no ₹→$ flip/flash on load. */
+     the flag is set before first paint, there's no ₹→$ flip/flash on load.
+     Each currency's now/was pair is grouped in its own .price-row so the discount
+     reads per-currency instead of as two amounts over one combined strikethrough
+     line — a small comparison-table read rather than a single inline strike. */
+  .price-compare {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.6rem 0.9rem;
+  }
+  .price-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+  }
   .price-amt {
     font-family: var(--font-display);
     line-height: 1.1;
+  }
+  .price-was {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-muted);
   }
   /* ANCHOR (big) — the visitor's OWN currency: India by default, the world price
      when the region flag flips. Defined once, applied to whichever span is the
@@ -254,6 +275,7 @@ const priceSr = `${saleSr}Price: ${activePrice.india.now} for India (originally 
     color: var(--color-muted);
   }
   .price-sep {
+    align-self: center;
     font-family: var(--font-display);
     font-size: 1.5rem;
     font-weight: 300;
