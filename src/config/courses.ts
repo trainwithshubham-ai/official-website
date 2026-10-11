@@ -158,6 +158,17 @@ export interface Course {
   theme?: { primary: string; primaryDeep: string; accent: string };
 }
 
+// Hoisted so the FAQ answers can read them: a price typed into a sentence is a second copy
+// that drifts from `price` the next time Learnyst changes (golden rule 1).
+const claudeCodePrice: CoursePrice = {
+  india: { now: "₹499" },
+  world: { now: "$10" },
+};
+const linuxPrice: CoursePrice = {
+  india: { now: "₹999" },
+  world: { now: "$19" },
+};
+
 export const courses = {
   python: {
     slug: "python",
@@ -180,11 +191,13 @@ export const courses = {
     reviews: 3,
     // Also bundled free with the flagship DevOps enrolment.
     bonus: true,
-    // No `list`: the course costs ₹1,999, full stop. It used to carry a permanent
-    // ₹4,999 strike-through with no reason and no end date, which reads as a fake anchor
-    // to exactly the sceptical technical reader this site is written for.
+    // No `list`: the course costs ₹2,999, full stop. Learnyst shows a ₹4,999 list price
+    // beside it, but a permanent strike-through with no reason and no end date reads as a
+    // fake anchor to exactly the sceptical technical reader this site is written for.
+    // ₹2,999 / priceId 285234 verified against Learnyst on 11 Oct 2026; the site had said
+    // ₹1,999, which checkout did not honour.
     price: {
-      india: { now: "₹1,999" },
+      india: { now: "₹2,999" },
       world: { now: "$19" },
     },
     checkout: {
@@ -349,63 +362,68 @@ export const courses = {
     },
   },
 
-  // --- FREE COURSES -------------------------------------------------------------------
-  // Both are recorded and live on Learnyst. Everything below that is REAL is filled in;
-  // everything that would be a guess is a TODO instead of an invention (golden rule 4).
-  // Deliberately NOT `bonus: true` — a bonus is a paid course bundled free with the
-  // flagship, and these cost nothing to begin with, so the badge would be meaningless.
-  // Free learners do NOT get the Discord (site.ts community scope note), so no course
-  // here claims it.
+  // --- LOW-PRICE RECORDED COURSES -----------------------------------------------------
+  // /claude-code and /linux started free and became paid on 11 Oct 2026. Prices and
+  // priceIds were read from Learnyst's own pricing query for each product (one-time plan,
+  // 365-day relative validity), so the page and checkout agree (golden rule 1).
+  // Each has a second, USD priceId for the world button (supplied by the owner, so it does
+  // not show in the anonymous pricing query). Deliberately NOT `bonus: true`: they aren't
+  // bundled with the flagship.
+  // Paid learners get the Discord (site.ts community scope note).
   "claude-code": {
     slug: "claude-code",
     // Matches the course's real name on Learnyst ("Claude Code: Zero To Hero"). A visitor
-    // who clicks Start free should land on a page whose title is the one they just read;
+    // who clicks Enroll now should land on a page whose title is the one they just read;
     // a mismatch between the sales page and the checkout is the same class of trust
     // wobble as a price that doesn't match.
     title: "Claude Code: Zero To Hero",
     // No heroHeadline: the h1 is the course name, which also matches Learnyst exactly.
     // The arc it used to carry moved into the subhead.
     tagline:
-      "From your first prompt to multi-agent DevOps workflows. 4 hours, free, start today.",
+      "From your first prompt to multi-agent DevOps workflows. 4 hours, recorded, start today.",
     // Kept under ~160 chars: Google truncates past that, and the first version ran to
     // 270, so the half that actually sold the course never got shown.
     description:
-      "Free, recorded Claude Code course for DevOps, Cloud, SRE and Platform engineers. 13 modules, three phases, from your first prompt to multi-agent workflows.",
+      "Recorded Claude Code course for DevOps, Cloud, SRE and Platform engineers. 13 modules, three phases, from your first prompt to multi-agent workflows.",
     poster: "/posters/claude-code.jpg",
     ogImage: "/posters/claude-code.jpg",
     ogImageWidth: 1280,
     ogImageHeight: 720,
-    free: true,
-    // Ran live on Sunday 16 Aug 2026, 09:00 IST; flipped to recorded on 17 Aug once the
-    // recording was confirmed available. The live-only fields (batchStartISO, schedule,
-    // formatLabel) are GONE rather than commented out, which is what removes the hero
-    // countdown, the date line and the "free live session" badge — they are all
-    // conditional on those fields existing.
+    // Ran live (free) on Sunday 16 Aug 2026, 09:00 IST; flipped to recorded on 17 Aug and
+    // to paid on 11 Oct. The live-only fields (batchStartISO, schedule, formatLabel) are
+    // GONE rather than commented out, which is what removes the hero countdown, the date
+    // line and the live-session badge — they are all conditional on those fields existing.
     selfPaced: true,
     availability: "Available now. Start the moment you enrol.",
     // Real learner testimonials. Rendered under "about TrainWithShubham", so they never
-    // imply these people took THIS course (golden rule 4). They still do real work here:
-    // a free signup is a trust decision too, and it warms the flagship upsell below.
+    // imply these people took THIS course (golden rule 4).
     reviews: 3,
-    // The Learnyst course page, where a logged-out visitor enrols. Not a fast-checkout
-    // link like the paid courses use — there is no payment step to skip. Setting this
-    // takes the page OUT of draft: it gains CTAs, a catalog card, a sitemap entry, an
-    // index directive and a zero-price JSON-LD offer, all at once.
-    enrollUrl: "https://courses.trainwithshubham.ai/learn/claude-code",
-    // Real, confirmed facts only. NO access-term claim anywhere: how long free learners
-    // keep access is still unconfirmed, and the owner's instruction is not to state it.
+    // Learnyst product 291427, "One Time Payment Plan": ₹499 selling price against a ₹999
+    // list. No `list` here, same call as /python: a permanent strike-through with no end
+    // date reads as a fake anchor to this audience. Add `list: "₹999"` if you want it.
+    price: claudeCodePrice,
+    checkout: {
+      india:
+        "https://courses.trainwithshubham.ai/learn/fast-checkout/291427?priceId=323570",
+      world:
+        "https://courses.trainwithshubham.ai/learn/fast-checkout/291427?priceId=323571",
+    },
+    // Real, confirmed facts only. The 1-year term is the product's 365-day validity
+    // as Learnyst reports it. Discord goes to any paid enrolment (site.ts).
     includes: [
       "Fully recorded. Watch anytime, rewind anything",
       "13 modules across three phases, start to finish",
+      "1 year of access",
+      "Private learner community on Discord",
       "Certificate of completion",
-      "Free. No card, no payment",
     ],
-    trust: ["No payment", "Instant access", "Certificate on completion"],
+    priceNote: "one-time · 1 year of access",
+    trust: ["Secure checkout", "Instant access", "Certificate on completion"],
     atAGlance: [
-      { label: "Price", value: "Free" },
       { label: "Format", value: "Recorded, self-paced" },
       { label: "Level", value: "Starts from zero" },
       { label: "Length", value: "4 hours" },
+      { label: "Access", value: "1 year" },
       // No "Modules" cell: the hero size line already derives "13 modules · 3 phases"
       // from the curriculum, and a hand-typed copy here could drift from it.
       { label: "Certificate", value: "On completion" },
@@ -423,7 +441,7 @@ export const courses = {
       "AWS",
       "Slack",
     ],
-    // Module titles only, no sub-topics: this is a free course and the page's job is a
+    // Module titles only, no sub-topics: this is a low-price course and the page's job is a
     // fast, confident yes, not an evaluation exercise. The three phases carry the
     // progression story, which is the thing a flat list of thirteen would lose.
     curriculum: [
@@ -511,13 +529,19 @@ export const courses = {
         tags: ["Terraform", "AWS", "Bedrock"],
       },
     ],
-    // Only answers grounded in the syllabus or in confirmed facts. No access term (not
-    // confirmed for free courses) and no community claim (free learners don't get the
-    // Discord — see the scope note in site.ts).
+    // Only answers grounded in the syllabus or in confirmed facts.
     faq: [
       {
-        q: "Is it really free?",
-        a: "Yes. No card, no payment, nothing to cancel.",
+        q: "How much does it cost?",
+        a: `${claudeCodePrice.india.now}, one time. No subscription and nothing to cancel. Outside India it's ${claudeCodePrice.world.now}, one time.`,
+      },
+      {
+        q: "How long do I get access?",
+        a: "1 year from the day you enrol. That's plenty for a four-hour course, and you can rewatch any module as often as you like.",
+      },
+      {
+        q: "What if I get stuck?",
+        a: "You get into the private Discord with your enrolment. Ask there and you'll get help from me and from other learners working through the same material.",
       },
       {
         q: "Do I need to know AI or agents already?",
@@ -545,7 +569,7 @@ export const courses = {
       },
     ],
     // Real runtime. Feeds the hero size line and courseWorkload. The "4 hours" in the
-    // tagline and in atAGlance below are hand-typed and must be changed with it.
+    // tagline and in atAGlance above are hand-typed and must be changed with it.
     volume: { hours: "4" },
     // Claude's clay accent. Verified 6.2:1 on --ink (#0A0E12), so it is text-safe.
     // Nominative use to denote the tool the course teaches, same basis as ToolIcon; this
@@ -564,27 +588,30 @@ export const courses = {
     // is the course name and the subhead carries the outcome. Shorter, and the name lands
     // at full display size instead of trailing a colon.
     tagline:
-      "The command-line skills every DevOps job assumes you already have. 8 hours, free, start today.",
+      "The command-line skills every DevOps job assumes you already have. 8 hours, recorded, start today.",
     // Names only what the detailed syllabus actually contains. An earlier version said
     // "systemd" and "LVM", carried over from a four-topic summary; neither appears as a
     // module in the full syllabus, so both are gone.
     description:
-      "Free, recorded Linux course for DevOps and SRE. 13 modules: OS foundations, VMs, file system, permissions, shell scripting, networking and SSH. Start today.",
+      "Recorded Linux course for DevOps and SRE. 13 modules: OS foundations, VMs, file system, permissions, shell scripting, networking and SSH. Start today.",
     poster: "/posters/linux.jpg",
     ogImage: "/posters/linux.jpg",
     ogImageWidth: 1280,
     ogImageHeight: 720,
-    free: true,
     selfPaced: true,
     availability: "Available now. Start the moment you enrol.",
     // Real learner testimonials. Rendered under "about TrainWithShubham", so they never
-    // imply these people took THIS course (golden rule 4). They still do real work here:
-    // a free signup is a trust decision too, and it warms the flagship upsell below.
+    // imply these people took THIS course (golden rule 4).
     reviews: 3,
-    // The Learnyst course page, where a logged-out visitor enrols. Setting this takes the
-    // page out of draft, so it gains CTAs, a catalog card, a sitemap entry, an index
-    // directive and a zero-price JSON-LD offer all at once.
-    enrollUrl: "https://courses.trainwithshubham.ai/learn/linux",
+    // Learnyst product 291928, "One Time Payment Plan": ₹999 selling price against a
+    // ₹1,299 list. No `list`, same call as /python (see /claude-code above).
+    price: linuxPrice,
+    checkout: {
+      india:
+        "https://courses.trainwithshubham.ai/learn/fast-checkout/291928?priceId=323568",
+      world:
+        "https://courses.trainwithshubham.ai/learn/fast-checkout/291928?priceId=323569",
+    },
     // "Linux Full Course | Intro" on the English channel. Real runtime is 99 seconds;
     // labelled "under 2 min" instead of "2 min", which would overstate it, and the point
     // of naming the time cost is that it is genuinely small.
@@ -597,18 +624,20 @@ export const courses = {
     includes: [
       "Fully recorded. Watch anytime, rewind anything",
       "Taught by Shubham, start to finish",
+      "1 year of access",
+      "Private learner community on Discord",
       "Certificate of completion",
-      "Free. No card, no payment",
     ],
-    trust: ["No payment", "Instant access", "Certificate on completion"],
+    priceNote: "one-time · 1 year of access",
+    trust: ["Secure checkout", "Instant access", "Certificate on completion"],
     atAGlance: [
-      { label: "Price", value: "Free" },
       { label: "Format", value: "Recorded, self-paced" },
       // Level is stated explicitly here because the poster art reads "Advanced Linux"
       // while the syllabus starts from what Linux is. The scannable strip is exactly
       // where someone checks whether a course is above them.
       { label: "Level", value: "Starts from scratch" },
       { label: "Length", value: "8 hours" },
+      { label: "Access", value: "1 year" },
       { label: "Certificate", value: "On completion" },
     ],
     // Tools and surfaces the syllabus covers. Names without a vendored ToolIcon render as
@@ -707,12 +736,19 @@ export const courses = {
         tags: ["SSH", "Key auth", "Automation"],
       },
     ],
-    // Grounded in the syllabus and in confirmed facts only. No access-term claim (owner
-    // instruction) and no community claim (free learners don't get the Discord).
+    // Grounded in the syllabus and in confirmed facts only.
     faq: [
       {
-        q: "Is it really free?",
-        a: "Yes. No card, no payment, nothing to cancel.",
+        q: "How much does it cost?",
+        a: `${linuxPrice.india.now}, one time. No subscription and nothing to cancel. Outside India it's ${linuxPrice.world.now}, one time.`,
+      },
+      {
+        q: "How long do I get access?",
+        a: "1 year from the day you enrol. You can rewatch any module as often as you like.",
+      },
+      {
+        q: "What if I get stuck?",
+        a: "You get into the private Discord with your enrolment. Ask there and you'll get help from me and from other learners working through the same material.",
       },
       {
         q: "Is it live or recorded?",
@@ -863,7 +899,7 @@ export const flagshipBonuses: BonusCourse[] = Object.values(courses)
     href: `/${c.slug}`,
     title: c.title,
     // "Normally ₹X" = the price a visitor would ACTUALLY pay for this course today
-    // (`now`), not an older list figure. If the course page charges ₹1,999, claiming the
+    // (`now`), not an older list figure. If the course page charges ₹2,999, claiming the
     // bonus is worth ₹4,999 overstates it — and the two pages would contradict each
     // other one click apart (golden rule 4).
     value: c.price?.india.now,

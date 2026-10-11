@@ -255,7 +255,7 @@ no cross-talk.**
     reset (golden rule 6). The script ticks all `[data-countdown]` nodes from one
     `setInterval`; daily nodes never "expire."
 - **`VideoTeaser.astro`** is the ONE sanctioned exception (owner decision, 14 Aug 2026).
-  A free course page lives or dies on "show me the teaching before I sign up", and the
+  A course page lives or dies on "show me the teaching before I sign up", and the
   alternative — linking out to YouTube — hands the viewer a sidebar full of competitors
   at the moment we are trying to convert them. It is a **click-to-load facade**: a local
   poster image plus a play button, and *nothing* loads from YouTube until the visitor

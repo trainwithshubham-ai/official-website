@@ -255,14 +255,16 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
      contradicting its own timer.
   A `schedule:` cron on `deploy.yml` would remove step 2; it is deliberately not there
   yet, so the manual step stands.
-- **SALE LIVE — Teachers' Day.** `site.sale.enabled` is `true`. India ₹19,999 →
-  **₹14,999** (₹5,000 off), world $249 → **$199** ($50 off), applied by coupon
-  **OFFER5000** at Learnyst checkout. Ends **7 Sep 2026, 23:59 IST**; the JSON-LD
-  carries that as `priceValidUntil`. Both Learnyst priceIds stay at the standing
-  price (India 281722 ₹19,999, world 280727 $249) — nothing was raised, so the
-  teardown is only TWO steps: (1) `sale.enabled:false` + push, (2) deactivate
-  OFFER5000 in Learnyst. The earlier Independence Day sale ran to 15 Aug 2026 and
-  was torn down on 16 Aug.
+- **NO SALE RUNNING.** `site.sale.enabled` is `false`. The Teachers' Day sale (₹14,999 /
+  $199 via coupon **OFFER5000**) ended **7 Sep 2026, 23:59 IST** and was torn down on
+  9 Sep (`enabled:false`, commit d292ea0). Prices are back to the standing ₹19,999 / $249
+  (Learnyst priceIds India 281722, world 280727, never moved). The one manual step left
+  from that teardown is deactivating OFFER5000 in Learnyst; the repo can't tell whether
+  that was done. The earlier Independence Day sale ran to 15 Aug 2026 and was torn down
+  on 16 Aug.
+- **Standalone course prices** live in `src/config/courses.ts`, not here. Checked against
+  Learnyst on 11 Oct 2026: Python ₹2,999 / $19, Claude Code ₹499 / $10, Linux ₹999 /
+  $19. Before changing any price, read Learnyst's `showProductPricings` and match it.
 - **To run the next sale:** fill in `site.sale` (name, `endsISO`, `price`, `off`,
   `coupon`) and set `enabled: true`. Components render the derived `activePrice` /
   `activeCheckout`, never `site.price` directly, so one flag moves every price on

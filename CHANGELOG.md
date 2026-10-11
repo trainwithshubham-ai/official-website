@@ -6,6 +6,35 @@ records *what* changed and *why* so future sessions have context.
 
 ---
 
+## 2026-10-11 — /claude-code and /linux become paid
+
+Both courses were free recorded pages; they are now one-time purchases. Prices and
+priceIds come from Learnyst (product pricing query for India, owner-supplied USD ids):
+
+- `/claude-code` (product 291427): ₹499 (priceId 323570), $10 (priceId 323571)
+- `/linux` (product 291928): ₹999 (priceId 323568), $19 (priceId 323569)
+
+In `courses.ts` the `free` flag and `enrollUrl` were dropped and `price`, `checkout`,
+`priceNote` and `trust` added, so the shared template flips on its own: "Enroll now"
+instead of "Start free", region pay buttons, paid JSON-LD offers (INR and USD), no
+`isAccessibleForFree`. Hand-edited copy: taglines, meta descriptions, `includes`,
+at-a-glance (Price row out, Access row in) and the FAQ ("Is it really free?" replaced
+by cost, access and "what if I get stuck").
+
+Access is stated as **1 year**, the product's 365-day relative validity in Learnyst. The
+old "never state a free-course access term" rule no longer applies. Discord is claimed
+because any paid enrolment gets the invite (site.ts community scope).
+
+Scan result: no other page hard-coded "free" for these two. The catalog, sitemap, the
+`/courses` Free pill and structured data all derive from `courses.ts`. Posters carry no
+price text. Only comments changed elsewhere (page headers, ARCHITECTURE.md, VideoTeaser).
+
+`/python` fixed in the same pass: the site said ₹1,999 while Learnyst charges ₹2,999
+(list ₹4,999) for priceId 285234. Site now shows ₹2,999; USD stays $19 (priceId 285227,
+confirmed by the owner). The homepage bonus strip derives from it, so it now reads
+"Normally ₹2,999". Flagship (₹19,999 / priceId 281722) was checked against Learnyst and
+already matches.
+
 ## 2026-08-17 — /linux goes live; first real VideoTeaser in production
 
 `/linux` leaves draft: real Learnyst enrolment URL, real 1280×720 poster, the full

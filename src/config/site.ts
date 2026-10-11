@@ -140,9 +140,9 @@ export const site = {
   // link) and the ebook bonus. So the Discord "join" path is Enroll, not a link.
   //
   // SCOPE (changed 14 Aug 2026): "students" means ANY PAID enrolment, not just the
-  // flagship. /python's `includes` and FAQ promise Discord access to a ₹1,999 buyer, and
-  // the owner confirmed the invite reaches non-flagship buyers. Free-course learners are
-  // NOT included, so no free course page claims it.
+  // flagship. /python's `includes` and FAQ promise Discord access to a ₹2,999 buyer, and
+  // the owner confirmed the invite reaches non-flagship buyers. Learners on a free course
+  // (none today) would NOT be included, so a free course page must not claim it.
   community: {
     challenge: {
       name: "#90DaysOfDevOps",
