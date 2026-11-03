@@ -1,29 +1,12 @@
 ---
 // Hero — the above-the-fold conversion core (ARCHITECTURE.md §4.2).
-// Badge · H1 · subhead · animated pipeline · batch date · Countdown · dual CTA.
+// Badge · H1 · subhead · animated pipeline · self-paced facts · dual CTA.
 // Depth: dual ambient glow (primary + amber) over a faint pipeline grid (BRAND.md
 // §5 evolution). The animated pipeline is the one bold motion moment (§2).
-import { site, batchStarted } from "../config/site";
+import { site } from "../config/site";
 import Button from "./primitives/Button.astro";
-import Countdown from "./Countdown.astro";
 import StatusDot from "./primitives/StatusDot.astro";
 import PipelineAnim from "./PipelineAnim.astro";
-
-const batchDate = new Date(site.batchStartISO).toLocaleDateString("en-IN", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
-
-// Class days/time are TODO placeholders in site.ts — only show once real.
-const daysReady = !site.classDays.startsWith("TODO");
-const timeReady = !site.classTime.startsWith("TODO");
-const scheduleBits = [
-  // Tense follows the date, not a hardcoded word (see `batchStarted` in site.ts).
-  `${batchStarted ? "Batch started" : "Starts"} ${batchDate}`,
-  daysReady ? site.classDays : null,
-  timeReady ? site.classTime : null,
-].filter(Boolean);
 ---
 
 <section id="top" class="relative overflow-hidden">
@@ -47,7 +30,7 @@ const scheduleBits = [
       class="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-line bg-surface/70 px-3.5 py-1.5 font-mono text-xs text-muted"
     >
       <StatusDot tone="primary" />
-      DevOps - Zero To Hero [Live]
+      DevOps - Zero To Hero [Self-paced]
     </span>
 
     <h1 class="max-w-4xl text-balance">
@@ -55,20 +38,17 @@ const scheduleBits = [
     </h1>
 
     <p class="max-w-2xl text-pretty text-lg text-muted">
-      Start from the fundamentals and go all the way to shipping real systems —
-      pipelines, Kubernetes, Terraform and observability, with AI in your
-      workflow. No prior experience required.
+      From the fundamentals to shipping real systems, with AI in your workflow.
+      No prior experience required.
     </p>
 
     <PipelineAnim />
 
-    <p class="font-mono text-sm text-primary">
-      {scheduleBits.join(" · ")}
+    <p class="flex flex-wrap justify-center gap-x-3 gap-y-1 font-mono text-sm text-primary">
+      <span class="whitespace-nowrap">Start today</span>
+      <span class="whitespace-nowrap">{site.videoHours} hrs recorded</span>
+      <span class="whitespace-nowrap">{site.access} access</span>
     </p>
-
-    {/* srLabel is tense-aware in Countdown's own defaults now, so this mount doesn't
-        override it. */}
-    <Countdown variant="full" announceDeadline class="items-center" />
 
     <div class="mt-2 flex flex-col items-center gap-4 sm:flex-row">
       <Button href="#pricing">Enroll now</Button>

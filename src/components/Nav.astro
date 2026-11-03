@@ -1,8 +1,8 @@
 ---
 // Nav — sticky, quiet, conversion-forward. Logo + jump links + a compact
-// Countdown chip + a ghost Log-in button (out to the Learnyst LMS) + the yellow
-// Enroll CTA. JS-free: a persistent translucent backdrop reads as "floating"
-// without a scroll listener (interactivity budget = the countdown only).
+// ghost Log-in button (out to the Learnyst LMS) + the yellow Enroll CTA. While a sale
+// runs, a slim sale row sits inside the header. JS-free: a persistent translucent
+// backdrop reads as "floating" without a scroll listener.
 // Nav row = Courses (a route) + the on-page anchors (md+ only). Right = Log in +
 // Enroll. Collapses to logo + Courses + Log in + Enroll at 380px.
 import { site, saleLive } from "../config/site";
@@ -83,10 +83,6 @@ const links = [
     <!-- gap tightens at 380px: logo + Courses + Log in + Enroll is exactly at the
          width budget there, and without this the two buttons wrap to two lines. -->
     <div class="ml-auto flex items-center gap-2 sm:gap-3">
-      {/* The desktop chip that used to sit here counted to `batchStartISO`, which went
-          permanently stale the day that cohort started — it rendered "batch is live"
-          rather than a timer. The next-session row below now carries urgency at EVERY
-          width, so there is nothing left for a second chip to say. */}
       <Button
         variant="ghost"
         href={site.lms.signIn}
@@ -126,41 +122,10 @@ const links = [
           <span class="nav-sale-ends"> · ends {saleEndsShort}</span>
         </p>
         {/* Invisible: the sale's real deadline, so the claim above can drop itself
-            when the sale ends. The visible timer beside it counts to the next class,
-            which never expires and so can't carry that signal. */}
+            when the sale ends. */}
         <Countdown variant="marker" deadline={site.sale.endsISO} />
-        {/* Labelled, or a bare row of digits next to a sale would read as the sale's
-            own deadline. Must be a <div>, not a <p>: Countdown's root is a <div>, and
-            the parser auto-closes <p> before it — which silently split the label and
-            the digits onto two flex lines. */}
-        <div class="nav-sale-next">
-          <span class="nav-sale-next-lbl font-mono">❯ next session in</span>
-          <Countdown variant="chip" mode="session" class="nav-sale-cd" />
-        </div>
       </div>
-    ) : (
-      /* No sale: the next-class timer is the header's only urgency element, at EVERY
-         width (it used to be lg:hidden, which left desktop with a stale batch chip
-         instead). It is always true and never expires — the schedule is computed from
-         site.session, so it rolls itself over each weekend with no commit. */
-      <div class="nav-urgency flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-t border-line/60 px-4 py-1.5">
-        {/* aria-hidden: the digits beside it are aria-hidden too, so a screen reader
-            would otherwise hear "next session in" followed by nothing at all. The
-            Countdown's own sr-only sentence below carries the real information. */}
-        <span
-          aria-hidden="true"
-          class="nav-urgency-lbl font-mono text-[0.7rem] lowercase tracking-[0.06em] text-muted"
-        >
-          ❯ next session in
-        </span>
-        <Countdown
-          variant="chip"
-          mode="session"
-          announceDeadline
-          srLabel="Live classes run {date}."
-        />
-      </div>
-    )
+    ) : null
   }
 </header>
 
@@ -205,27 +170,14 @@ const links = [
   .nav-sale-ends {
     white-space: nowrap;
   }
-  .nav-sale-next {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  .nav-sale-next-lbl {
-    font-size: 0.7rem;
-    letter-spacing: 0.06em;
-    color: var(--color-muted);
-    white-space: nowrap;
-  }
   /* Honest expiry WITHOUT a sticky-header height change: the Countdown flips itself
      to "sale ended", and the now-false offer claim is dropped. The row survives, so
      nothing jumps under the reader. */
   .nav-sale:has([data-expired="true"]) .nav-sale-claim {
     display: none;
   }
-  /* Phones: drop the redundant end date (the timer says the same thing, and Pricing
-     states it in full), and shrink the digits so the label + all four units still
-     share ONE line. Without this, seconds push the row to three lines and the sticky
-     header eats a third of a 380px viewport. */
+  /* Phones: drop the end date (Pricing states it in full) so the row stays short and
+     the sticky header doesn't eat a third of a 380px viewport. */
   @media (max-width: 30rem) {
     .nav-sale {
       gap: 0.1rem 0.45rem;
@@ -233,38 +185,6 @@ const links = [
     }
     .nav-sale-ends {
       display: none;
-    }
-    .nav-sale-next {
-      gap: 0.3rem;
-    }
-    :global(.nav-sale-cd .cd-units) {
-      gap: 0.15rem;
-    }
-    :global(.nav-sale-cd .cd-unit) {
-      padding: 0.2rem 0.2rem;
-    }
-    :global(.nav-sale-cd .cd-num) {
-      font-size: 0.75rem;
-    }
-    :global(.nav-sale-cd .cd-lbl) {
-      font-size: 0.45rem;
-    }
-  }
-
-  /* Compact the chip so "next session in" + d/h/m/s fits on one line on a phone.
-     SCOPED TO SMALL SCREENS: this row used to be lg:hidden, so these rules could only
-     ever apply on mobile. Now that it renders at every width, leaving them unscoped
-     shrank the desktop timer to 12.8px digits with 8px unit labels while the chip's own
-     defaults (0.95rem / 0.6rem) went unused. Mirrors the .nav-sale compaction above. */
-  @media (max-width: 30rem) {
-    :global(.nav-urgency .cd-units) {
-      gap: 0.2rem;
-    }
-    :global(.nav-urgency .cd-num) {
-      font-size: 0.8rem;
-    }
-    :global(.nav-urgency .cd-lbl) {
-      font-size: 0.5rem;
     }
   }
 </style>

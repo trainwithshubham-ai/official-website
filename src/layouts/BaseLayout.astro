@@ -4,6 +4,7 @@
 import { site } from "../config/site";
 import StructuredData from "../components/StructuredData.astro";
 import type { Course } from "../config/courses";
+import { publicCourses } from "../lib/markdown";
 import "../styles/tokens.css";
 
 // Self-hosted fonts (BRAND.md §4) — only the weights AND subsets we use.
@@ -42,7 +43,7 @@ interface Props {
 
 const {
   title = `${site.product} — ${site.brand}`,
-  description = "DevOps: Zero to Hero — AI-powered live classes. From fundamentals to production: Docker, Kubernetes, Terraform, AWS, CI/CD, observability and Agentic AI.",
+  description = "DevOps: Zero to Hero, a self-paced AI-powered course. From fundamentals to production: Docker, Kubernetes, Terraform, AWS, CI/CD, observability and Agentic AI.",
   // Default social card = the real, on-brand DevOps course poster (1280×720),
   // consistent with how course pages use their posters. (The old /og-image.png was a
   // stale teal-palette card with a wrong price/date.)
@@ -57,6 +58,16 @@ const {
 
 const canonical = new URL(Astro.url.pathname, site.domain).href;
 const ogImage = new URL(image, site.domain).href;
+
+// Markdown twin for agents (llms.txt family, src/lib/markdown.ts): only for routes that
+// really have one, so no <link> ever points at a 404.
+const mdPaths: Record<string, string> = {
+  "/": "/index.md",
+  "/courses/": "/courses.md",
+  ...Object.fromEntries(publicCourses.map((c) => [`/${c.slug}/`, `/${c.slug}.md`])),
+};
+const mdHref = noindex ? undefined : mdPaths[Astro.url.pathname];
+const twitterEnabled = !site.twitterHandle.startsWith("TODO");
 
 // Analytics only render when real IDs are wired (placeholders start with "TODO").
 const ga4Enabled = !site.ga4Id.startsWith("TODO");
@@ -75,10 +86,15 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
       content={noindex ? "noindex,nofollow" : "index,follow"}
     />
     <link rel="canonical" href={canonical} />
+    {mdHref && <link rel="alternate" type="text/markdown" href={mdHref} title="Markdown version" />}
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
     <meta name="theme-color" content="#0A0E12" />
 
     <!-- favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!-- preload the LCP headline font (Space Grotesk 700) -->
     <link rel="preload" href={sg700} as="font" type="font/woff2" crossorigin />
@@ -89,7 +105,7 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale" content="en_IN" />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content={String(imageWidth)} />
     <meta property="og:image:height" content={String(imageHeight)} />
@@ -97,6 +113,7 @@ const pixelEnabled = !site.metaPixelId.startsWith("TODO");
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
+    {twitterEnabled && <meta name="twitter:site" content={site.twitterHandle} />}
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />

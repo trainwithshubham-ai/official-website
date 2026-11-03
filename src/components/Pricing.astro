@@ -1,7 +1,7 @@
 ---
 // Pricing — the conversion core (ARCHITECTURE.md §4.10).
-// Transparent dual pricing (India / US, no IP geo-switch — golden rule 6), a
-// "batch starts in" Countdown, inclusions, and the Enroll CTA. Renders `activePrice`
+// Transparent dual pricing (India / US, no IP geo-switch — golden rule 6),
+// inclusions, and the Enroll CTA. Renders `activePrice`
 // (site.ts) — the standing price normally, the sale price while site.sale is live —
 // so the amount shown and the amount the button charges can never drift apart.
 import { site, saleLive, activePrice } from "../config/site";
@@ -38,13 +38,12 @@ const saleSr = saleLive
 const priceSr = `${saleSr}Price: ${activePrice.india.now} for India (originally ${activePrice.india.list}), ${activePrice.world.now} for the rest of the world (originally ${activePrice.world.list}). Choose your region to pay.`;
 ---
 
-<Section id="pricing" eyebrow="pricing" title="Enrol now — secure your seat">
+<Section id="pricing" eyebrow="pricing" title="Start today">
   <div
     class="pricing-card surface-card grad-border mx-auto w-full max-w-xl rounded-[var(--radius-card)] p-8 text-center sm:p-10"
   >
-    {/* Sale chip — amber (urgency), never yellow (golden rule 5). The visible timer
-        below now counts to the next class, so the sale states its deadline in words.
-        The invisible marker keeps the honest-expiry behaviour: when the sale really
+    {/* Sale chip — amber (urgency), never yellow (golden rule 5). The sale states its
+        deadline in words. The invisible marker keeps the honest-expiry behaviour: when the sale really
         ends it flips [data-expired] and the CSS drops these now-false lines. */}
     {
       saleLive && (
@@ -88,19 +87,15 @@ const priceSr = `${saleSr}Price: ${activePrice.india.now} for India (originally 
     </div>
     <p class="sr-only">{priceSr}</p>
 
-    <div class="mt-6 flex justify-center">
-      <Countdown variant="full" class="items-center" />
-    </div>
-
     <!-- inclusions -->
     <!-- list block is centered (mx-auto w-fit) for box symmetry, but items stay
          left-aligned so the checkmarks form a clean column -->
-    <ul class="mx-auto mt-8 flex w-fit flex-col gap-3 text-left">
+    <ul class="incl-grid mt-8 grid gap-2 text-left sm:grid-cols-2" role="list">
       {
         inclusions.map((item) => (
-          <li class="flex items-start gap-3">
+          <li class="flex items-center gap-2.5 rounded-xl border border-line bg-ink/60 px-3 py-2.5 text-sm">
             <svg
-              class="mt-0.5 size-5 shrink-0 text-primary"
+              class="size-4 shrink-0 text-primary"
               viewBox="0 0 20 20"
               fill="none"
               aria-hidden="true"
@@ -119,7 +114,7 @@ const priceSr = `${saleSr}Price: ${activePrice.india.now} for India (originally 
       }
     </ul>
 
-    <!-- daily bonus (real, repeatable; honest end-of-day IST timer) -->
+    <!-- bundled free courses callout (no timer) -->
     <BonusBar class="mt-8" />
 
     <!-- CTA — one button per region (transparent, learner picks; golden rule 6).

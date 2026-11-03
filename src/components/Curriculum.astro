@@ -9,27 +9,20 @@ import Button from "./primitives/Button.astro";
 import { curriculum } from "../content/data";
 import { site } from "../config/site";
 
-// Subtle live-format cues, authored from the class schedule (golden rule 8 — the
-// ops sheet is a reference, never embedded). Keeps the curriculum honest about
-// what the batch actually is: live, weekend-friendly, ~3 months, 150+ hours.
-const liveMeta = [
-  `${site.classDays} · ${site.classTime}`,
-  `${site.programLength} program`,
-  `${site.liveHours} hours of live class`,
-];
+// Self-paced format cues, from site.ts so they can't drift from the Hero or Pricing.
+const meta = [`${site.videoHours} hours recorded`, `${site.access} access`, "Start anytime"];
 ---
 
 <Section id="curriculum" eyebrow="curriculum" title="From code to production">
   <p class="mb-5 max-w-2xl text-pretty text-muted">
-    Every module is a stage in the pipeline — from your first line of code to
-    shipping in production. Expand any stage to see what you'll build.
+    Each module is a stage in the pipeline. Open one to see what you'll build.
   </p>
 
-  <ul class="live-meta" role="list" aria-label="Live class format">
-    <li class="live-badge">
-      <span class="text-primary" aria-hidden="true">❯</span> live cohort
+  <ul class="format-meta" role="list" aria-label="Course format">
+    <li class="format-badge">
+      <span class="text-primary" aria-hidden="true">❯</span> self-paced
     </li>
-    {liveMeta.map((m) => <li>{m}</li>)}
+    {meta.map((m) => <li>{m}</li>)}
   </ul>
 
   <ol class="rail-list" role="list">
@@ -80,7 +73,7 @@ const liveMeta = [
               ))}
             </ul>
             {i === 0 && (
-              /* First session is a free preview — link out to the LMS (new tab,
+              /* First lesson is a free preview — link out to the LMS (new tab,
                  never embedded — golden rule 8). data-track fires outbound_click,
                  not a checkout event. */
               <a
@@ -90,7 +83,7 @@ const liveMeta = [
                 rel="noopener noreferrer"
                 data-track="demo-lesson-curriculum"
               >
-                ❯ Watch this session free
+                ❯ Watch this lesson free
                 <svg class="ext" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                   <path
                     d="M7.5 4.5h8v8M15.5 4.5l-10 10"
@@ -136,9 +129,9 @@ const liveMeta = [
 </Section>
 
 <style>
-  /* Subtle live-format cues (mono pills) under the intro — states the batch is
-     live, weekend-friendly, ~3 months, 150+ hours, without a heavy schedule table. */
-  .live-meta {
+  /* Format cues (mono pills) under the intro: self-paced, hours, access,
+     without a heavy schedule table. */
+  .format-meta {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -146,7 +139,7 @@ const liveMeta = [
     padding: 0;
     list-style: none;
   }
-  .live-meta li {
+  .format-meta li {
     font-family: var(--font-mono);
     font-size: 0.72rem;
     letter-spacing: 0.04em;
@@ -155,7 +148,7 @@ const liveMeta = [
     border: 1px solid var(--color-line);
     border-radius: var(--radius-pill);
   }
-  .live-meta .live-badge {
+  .format-meta .format-badge {
     color: var(--color-text);
     border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-line));
   }
@@ -267,7 +260,7 @@ const liveMeta = [
     border-radius: var(--radius-pill);
   }
 
-  /* First-session watch link — inside the open accordion, aligned with the
+  /* First-lesson watch link — inside the open accordion, aligned with the
      bullets. Mono, primary, with an external-link arrow. */
   .free-watch {
     display: inline-flex;

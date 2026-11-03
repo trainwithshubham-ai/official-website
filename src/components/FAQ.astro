@@ -1,12 +1,13 @@
 ---
 // FAQ — native <details>/<summary> accordion, ZERO JS (ARCHITECTURE.md §4.12).
-// Data: faq.json (validated via content/data). Answers may use {classDays},
-// {classTime}, {batchStart} and {batchVerb} tokens. They are resolved by
-// `fillFaqTokens` in site.ts — shared with StructuredData.astro, which renders the same
-// answers into the FAQPage JSON-LD, so the two can never resolve a different token set.
+// Data: faq.json (validated via content/data). Plain text answers, rendered here and
+// into the FAQPage JSON-LD (StructuredData.astro).
 import Section from "./primitives/Section.astro";
 import { faq } from "../content/data";
-import { fillFaqTokens } from "../config/site";
+
+// Plain-text answers may contain a bare URL (e.g. the Hindi site). Render it as a real
+// link in the page; JSON-LD and the markdown outputs keep the plain text.
+const parts = (a: string) => a.split(/(https?:\/\/\S+)/g);
 ---
 
 <Section id="faq" eyebrow="faq" title="Questions, answered">
@@ -27,7 +28,21 @@ import { fillFaqTokens } from "../config/site";
                 />
               </svg>
             </summary>
-            <p class="answer text-pretty text-muted">{fillFaqTokens(item.a)}</p>
+            <p class="answer text-pretty text-muted">
+              {parts(item.a).map((part) =>
+                /^https?:\/\//.test(part) ? (
+                  <a
+                    href={part}
+                    data-track="hindi-site-faq"
+                    class="text-primary underline underline-offset-2 hover:no-underline"
+                  >
+                    {part.replace(/^https?:\/\//, "")}
+                  </a>
+                ) : (
+                  part
+                ),
+              )}
+            </p>
           </details>
         </li>
       ))

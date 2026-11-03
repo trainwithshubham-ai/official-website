@@ -13,8 +13,7 @@ import { site } from "../config/site";
 
 <Section eyebrow="courses" title="Learn by building" as="h1">
   <p class="mb-10 max-w-2xl text-pretty text-muted">
-    Live cohorts and self-paced courses. Pick the one for where you are and start
-    building. Every one is taught the way it's done in production.
+    Pick the one for where you are and start building. Every one is taught the way it's done in production.
   </p>
 
   <ul class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list">
@@ -75,5 +74,16 @@ import { site } from "../config/site";
     >
       Browse the store →
     </a>
+  </p>
+  <p class="mt-3 text-sm text-muted">
+    <span class="font-mono text-primary" aria-hidden="true">❯</span> Prefer Hindi? Our Hindi
+    courses are at{" "}
+    <a
+      href={site.altSites.hindi}
+      data-track="hindi-site-courses"
+      class="text-primary underline underline-offset-2 transition-colors hover:no-underline"
+    >
+      {site.altSites.hindi.replace("https://", "")}
+    </a>.
   </p>
 </Section>

@@ -3,6 +3,16 @@
 // will be able to DO. Data: outcomes.json.
 import Section from "./primitives/Section.astro";
 import { outcomes } from "../content/data";
+
+// Inline 24px stroke icons, one per card in outcomes.json order (pipeline, cluster,
+// infrastructure, AI). Decorative: the title carries the meaning. Falls back to the
+// mono prompt glyph if a card is added without an icon.
+const icons = [
+  "M4 12h4m8 0h4M8 12a2 2 0 104 0 2 2 0 10-4 0zm4 0h4M12 4v4m0 8v4",
+  "M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3zm0 9l8-4.5M12 12L4 7.5M12 12v9",
+  "M4 7h16M4 12h16M4 17h16M8 5v4M16 10v4M10 15v4",
+  "M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zm7 12l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z",
+];
 ---
 
 <Section
@@ -12,10 +22,19 @@ import { outcomes } from "../content/data";
 >
   <ul class="grid gap-5 sm:grid-cols-2" role="list">
     {
-      outcomes.map((o) => (
+      outcomes.map((o, i) => (
         <li class="surface-card rounded-[var(--radius-card)] border border-line bg-surface p-6">
+          <span class="mb-4 inline-grid size-11 place-items-center rounded-xl border border-line bg-ink text-primary">
+            {icons[i] ? (
+              <svg class="size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d={icons[i]} stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            ) : (
+              <span class="font-mono" aria-hidden="true">❯</span>
+            )}
+          </span>
           <h3 class="text-text">{o.title}</h3>
-          <p class="mt-2 text-pretty text-muted">{o.body}</p>
+          <p class="mt-1.5 text-pretty text-muted">{o.body}</p>
         </li>
       ))
     }

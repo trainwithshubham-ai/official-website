@@ -8,28 +8,15 @@ export const site = {
   product: "DevOps: Zero to Hero (AI Powered)",
   tagline: "Happy Learning", // warm sign-off (footer / instructor / closing CTA)
 
-  // --- batch ---
-  batchStartISO: "2026-07-26T19:00:00+05:30",
-  classDays: "Sat & Sun",
-  classTime: "7–10 PM IST",
-  // Machine-readable mirror of classDays/classTime, used by the "next live session"
-  // countdown. The timer COMPUTES the next session from these and rolls itself over
-  // each weekend — nothing here goes stale, so no weekly commit is needed on a static
-  // site. Keep in sync with the two human-readable strings above.
-  session: {
-    days: [6, 0], // JS getDay() in IST — 6 = Saturday, 0 = Sunday
-    hourIST: 19, // 19:00 IST = 7 PM, the start of each live session
-  },
-  // Live-schedule facts authored from the ops sheet (references only — the sheet
-  // is NEVER embedded/fetched; golden rule 8). Update here if the batch changes.
-  programLength: "3-month", // 26 Jul → late Oct 2026
-  liveHours: "150+", // hours of live instruction across the batch (sheet total: 151)
+  // --- course format ---
+  // Self-paced since the live cohort ended. Recorded runtime and access term are real,
+  // owner-confirmed figures; components read them from here, never retype them.
+  videoHours: "150+", // hours of recorded lessons
+  access: "4 years", // access to every recording, resource and the community
 
-  // --- daily bonus (honest "evergreen") ---
-  // A REAL, repeatable bonus: enroll on any given day (before midnight IST) and
-  // get the ebook. The bonus timer counts to TONIGHT'S midnight IST and genuinely
-  // rolls each day — a real end-of-day deadline, NOT a fake per-visit 24h reset
-  // (golden rule 6). Set enabled:false to remove it instantly.
+  // --- ebook perk (optional) ---
+  // Off since the free bonus became the two bundled courses. No timer is attached to it
+  // (golden rule 6: no deadline unless it is real). Set enabled:true to show it in Community.
   bonus: {
     // Retired: the free bonus is now the two bundled courses (Python for DevOps +
     // Agentic AI for DevOps), promoted via BonusBar + the homepage BonusCourses strip.
@@ -141,8 +128,8 @@ export const site = {
   //
   // SCOPE (changed 14 Aug 2026): "students" means ANY PAID enrolment, not just the
   // flagship. /python's `includes` and FAQ promise Discord access to a ₹2,999 buyer, and
-  // the owner confirmed the invite reaches non-flagship buyers. Learners on a free course
-  // (none today) would NOT be included, so a free course page must not claim it.
+  // the owner confirmed the invite reaches non-flagship buyers. Free-course learners
+  // (/claude-code, /linux) are NOT included, so no free course page claims it.
   community: {
     challenge: {
       name: "#90DaysOfDevOps",
@@ -181,6 +168,20 @@ export const site = {
     instagram: "https://www.instagram.com/trainwithshubham.ai",
   },
 
+  // --- entity links (AEO / SEO) ---
+  // Related properties, used for JSON-LD `sameAs` and llms.txt. The .com site is the
+  // separate Hindi/Hinglish main site: related, NOT a canonical or a duplicate.
+  altSites: {
+    hindi: "https://trainwithshubham.com",
+  },
+  github: "https://github.com/TrainWithShubham",
+  // TODO: add the real X/Twitter handle (e.g. "@handle") to emit twitter:site.
+  twitterHandle: "TODO_TWITTER_HANDLE",
+  // One factual sentence, reused by meta description, JSON-LD and llms.txt so they never
+  // drift. Every figure must stay true (golden rule 4); numbers come from this file.
+  summary:
+    "DevOps: Zero to Hero (AI Powered) is a self-paced, recorded course by Shubham Londhe that takes beginners to production-grade DevOps: Linux, Docker, Kubernetes, Terraform, AWS, CI/CD, observability and Agentic AI.",
+
   contactEmail: "trainwithshubham.ai@gmail.com",
   // Low-friction secondary CTA (alongside Enroll, never replacing it) — a real
   // number, not a placeholder. Opens WhatsApp in a new tab; no message
@@ -199,52 +200,6 @@ export const site = {
 // change in the block above and can never leave a displayed price out of step with
 // the button beside it. (Course pages pass their own price/checkout explicitly, so
 // the DevOps sale can't leak onto /python.)
-// Has the cohort already begun? Enrolment stays open into a running batch, so the page
-// has to say "batch started 26 July" rather than "starts 26 July" — advertising a past
-// date in the future tense is the kind of thing a reader notices and stops trusting.
-//
-// ⚠️ EVALUATED AT BUILD TIME AND THEN FROZEN. This is a static site and the deploy
-// workflow only runs on push, so this does NOT flip by itself when the date arrives.
-// Set a future batch date, push, and on the start day the Countdown island will flip
-// itself client-side to "batch is live" while Hero, the sr-only sentence and the FAQ all
-// still say "starts" — the page contradicting its own timer, which is the exact bug this
-// exists to prevent. **Redeploy on the batch start day** (an empty push or a
-// workflow_dispatch run is enough). See the cohort-change checklist in CLAUDE.md.
-export const batchStarted: boolean =
-  new Date(site.batchStartISO).getTime() < Date.now();
-
-// Resolves the tokens faq.json is allowed to use. Lives HERE, next to the values it
-// substitutes, because two places render those answers: FAQ.astro (the visible copy) and
-// StructuredData.astro (the FAQPage JSON-LD). They used to keep separate replace chains,
-// so adding a token to one shipped a literal "{batchVerb}" in the other. One resolver
-// means that can't happen again.
-export const fillFaqTokens = (s: string): string => {
-  const out = s
-    .replaceAll("{classDays}", site.classDays)
-    .replaceAll("{classTime}", site.classTime)
-    .replaceAll("{batchVerb}", batchStarted ? "started" : "starts")
-    .replaceAll(
-      "{batchStart}",
-      new Date(site.batchStartISO).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      }),
-    );
-  // Fail the build on a token that didn't resolve. A typo like {batchverb} would
-  // otherwise ship the literal braces to the visible FAQ AND into the FAQPage JSON-LD
-  // with a green build. Sharing one resolver stops the two renderers DIVERGING; it does
-  // nothing about a misspelled token, which is what this catches.
-  const unresolved = out.match(/\{[a-zA-Z]+\}/);
-  if (unresolved) {
-    throw new Error(
-      `Unresolved FAQ token ${unresolved[0]} in: "${s}". ` +
-        `Known tokens: {classDays} {classTime} {batchStart} {batchVerb}.`,
-    );
-  }
-  return out;
-};
-
 export const saleLive: boolean = site.sale.enabled;
 export const activePrice = saleLive ? site.sale.price : site.price;
 export const activeCheckout =

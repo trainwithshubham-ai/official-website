@@ -4,6 +4,7 @@
 // Components import typed data from this module (not the raw JSON).
 // (reviews.json is validated separately via its Astro content collection.)
 import { z } from "astro:content";
+import { site } from "../config/site";
 import {
   curriculumSchema,
   outcomeSchema,
@@ -24,8 +25,25 @@ import companiesRaw from "./companies.json";
 export const curriculum = z.array(curriculumSchema).parse(curriculumRaw);
 export const outcomes = z.array(outcomeSchema).parse(outcomesRaw);
 export const projects = z.array(projectSchema).parse(projectsRaw);
-export const faq = z.array(faqSchema).parse(faqRaw);
+// Copy may use {videoHours} and {access}; they resolve from site.ts HERE, once, so the
+// FAQ component, the FAQPage JSON-LD, Pricing and the markdown/llms.txt outputs all read
+// the same already-resolved text and a retyped figure can't drift (golden rule 1).
+// An unknown {token} fails the build instead of shipping literal braces.
+const fill = (s: string): string => {
+  const out = s
+    .replaceAll("{videoHours}", site.videoHours)
+    .replaceAll("{access}", site.access)
+    .replaceAll("{hindiSite}", site.altSites.hindi);
+  const bad = out.match(/\{[a-zA-Z]+\}/);
+  if (bad) throw new Error(`Unresolved content token ${bad[0]} in: "${s}". Known: {videoHours} {access} {hindiSite}.`);
+  return out;
+};
+
+export const faq = z
+  .array(faqSchema)
+  .parse(faqRaw)
+  .map((f) => ({ ...f, a: fill(f.a) }));
 export const audience = audienceSchema.parse(audienceRaw);
 export const tools = z.array(z.string()).parse(toolsRaw);
-export const inclusions = z.array(z.string()).parse(inclusionsRaw);
+export const inclusions = z.array(z.string()).parse(inclusionsRaw).map(fill);
 export const companies = z.array(z.string()).parse(companiesRaw);

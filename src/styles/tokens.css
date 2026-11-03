@@ -60,6 +60,8 @@
   html {
     color-scheme: dark;
     scroll-behavior: smooth;
+    /* sticky header (h-20) + breathing room, so #pricing etc. land below it */
+    scroll-padding-top: 5.5rem;
     -webkit-text-size-adjust: 100%;
     /* background lives on html so the grain layer (z-index:-1) sits above the
        base color but below content — it can never affect text contrast. */

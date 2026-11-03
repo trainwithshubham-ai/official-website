@@ -101,6 +101,20 @@ const lmsLinks = [{ href: site.lms.signIn, label: "Log in", track: "login" }];
             Courses
           </a>
         </li>
+        {/* Subtle cross-link to the Hindi sibling site (same brand, own domain). Opens in a
+            new tab; deliberately no nofollow, it is our own property. */}
+        <li>
+          <a
+            href={site.altSites.hindi}
+            data-track="hindi-site-footer"
+            target="_blank"
+            rel="noopener"
+            aria-label="Hindi courses (opens in new tab)"
+            class="text-sm text-muted transition-colors hover:text-text"
+          >
+            Hindi courses
+          </a>
+        </li>
         {
           lmsLinks.map((l) => (
             <li>

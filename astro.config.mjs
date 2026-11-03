@@ -37,7 +37,9 @@ export default defineConfig({
       changefreq: "weekly",
       // Keep draft course routes out. A page carrying `noindex` should not also be
       // submitted for indexing — the two signals would contradict each other.
+      // /brand is a noindex internal guide, so it stays out of the sitemap too.
       filter: (page) =>
+        !page.endsWith("/brand/") &&
         !draftSlugs.some((slug) => page.endsWith(`/${slug}/`)),
       // No `lastmod`: the option stamps EVERY entry with the same build timestamp,
       // which would claim every page changed on every deploy. Omitting it is more

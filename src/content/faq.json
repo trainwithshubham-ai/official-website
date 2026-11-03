@@ -1,42 +1,42 @@
 [
   {
     "q": "Do I need prior experience?",
-    "a": "No. This is a zero-to-hero course — we start from the fundamentals and build up to production-grade skills. Come ready to practice."
-  },
-  {
-    "q": "Will the sessions be recorded?",
-    "a": "Yes. You get access to the recordings so you can revisit anything at your own pace."
-  },
-  {
-    "q": "What are the class days and timings?",
-    "a": "Live classes run on weekends — {classDays}, {classTime}. The batch {batchVerb} {batchStart}, and recordings are available if you ever miss one."
+    "a": "No. We start from the fundamentals and build up to production-grade skills."
   },
   {
     "q": "Is it live or self-paced?",
-    "a": "Live, interactive cohort sessions — you learn and build alongside others, with recordings to catch up if you miss one."
+    "a": "Self-paced. Every lesson is recorded, so you start today and learn on your own schedule."
   },
   {
-    "q": "What if I miss a live class?",
-    "a": "No problem — every session is recorded and in your dashboard within hours, plus weekly doubt-clearing sessions to catch up. You never fall behind."
+    "q": "How long does it take?",
+    "a": "There are {videoHours} hours of recorded lessons. Most learners finish in a few months, and you can go faster or slower."
   },
   {
     "q": "How long do I have access?",
-    "a": "Four years — to every recording, resource, and the learner community, long after the live cohort wraps."
+    "a": "{access}, to every recording, resource and the learner community."
+  },
+  {
+    "q": "Where do I ask doubts?",
+    "a": "In the private learner community on Discord. You get the invite after you enroll."
   },
   {
     "q": "Do I get a certificate or credential?",
-    "a": "Yes — finish the cohort and you earn a verifiable DevOps Engineer (Associate) credential: a shareable digital badge you can add to LinkedIn and your résumé."
+    "a": "Yes. Finish the course and you earn a verifiable DevOps Engineer (Associate) credential, a shareable badge for LinkedIn and your résumé."
   },
   {
-    "q": "What language are the sessions in?",
-    "a": "Sessions are delivered in clear, accessible English."
+    "q": "What language are the lessons in?",
+    "a": "Clear, accessible English."
+  },
+  {
+    "q": "Are there courses in Hindi?",
+    "a": "Yes. Our Hindi courses are on {hindiSite}"
   },
   {
     "q": "Can I expense this with my employer?",
-    "a": "Yes — you'll get an invoice after enrollment that you can submit to your company's L&D or reimbursement team."
+    "a": "Yes. You get an invoice after enrollment that you can send to your L&D or reimbursement team."
   },
   {
     "q": "How do I enroll?",
-    "a": "Hit Enroll, complete checkout, and you'll receive your batch details by email."
+    "a": "Hit Enroll, complete checkout, and you get your access details by email."
   }
 ]
