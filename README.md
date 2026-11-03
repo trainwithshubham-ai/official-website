@@ -1,8 +1,11 @@
 # trainwithshubham.ai
 
-Single-page, dark-theme sales site for **DevOps: Zero to Hero (AI Powered)**.
-Static **Astro 7 + Tailwind v4**, deployed to **GitHub Pages** at the apex
-`trainwithshubham.ai`. No backend. The only shipping JavaScript is the countdown.
+Dark-theme sales site for **DevOps: Zero to Hero (AI Powered)**, a self-paced,
+recorded course, plus standalone course pages (`/python`, `/claude-code`, `/linux`,
+`/agentic-ai`) and a `/courses` index. Static **Astro 7 + Tailwind v4**, deployed to
+**GitHub Pages** at the apex `trainwithshubham.ai` (the English edition; the Hindi site is
+`trainwithshubham.com`). No backend. Shipping JavaScript is limited to the sale countdown
+(only when a sale runs), the video teaser facade and a small UTM helper.
 
 > Read `CLAUDE.md`, `BRAND.md`, and `ARCHITECTURE.md` before changing anything —
 > they are the source of truth for how this site is built.
@@ -23,14 +26,15 @@ files.
 
 | To change… | Edit |
 | --- | --- |
-| Prices, dates, deadline, checkout URL, emails, social links, analytics IDs | `src/config/site.ts` |
+| Prices, sale, course format (`videoHours`, `access`), checkout URL, emails, social and sibling-site links, analytics IDs | `src/config/site.ts` |
+| Standalone course pages | `src/config/courses.ts` |
 | Curriculum stages | `src/content/curriculum.json` |
 | What's included (pricing) | `src/content/inclusions.json` |
 | "For you / not for you" | `src/content/audience.json` |
 | Outcome cards | `src/content/outcomes.json` |
 | Projects | `src/content/projects.json` |
 | Tools wall | `src/content/tools.json` |
-| FAQ | `src/content/faq.json` |
+| FAQ (may use `{videoHours}`, `{access}`, `{hindiSite}`) | `src/content/faq.json` |
 | Google reviews (real only) | `src/content/reviews.json` |
 
 JSON shapes are validated on `npm run build` (zod schemas in
@@ -39,9 +43,8 @@ instead of shipping broken.
 
 ### Still-needed real values (currently `TODO_` placeholders in `site.ts`)
 
-`refundPolicy` · `ga4Id` · `metaPixelId` · `googleProfileUrl`. Analytics and the
-refund line stay hidden until their real values are set. (`checkout.india` /
-`checkout.world`, `classDays`, `classTime` are now set.)
+`refundPolicy` · `metaPixelId` · `googleProfileUrl` · `twitterHandle`. Each stays hidden
+until its real value is set. (`ga4Id` and both checkout URLs are set.)
 
 The seeded **curriculum / inclusions / audience / outcomes / projects / tools /
 faq** content is a sensible draft — confirm/replace it with the real specifics.
@@ -54,13 +57,28 @@ runs `npm ci` → `astro build` → uploads `./dist` → publishes to GitHub Pag
 One-time GitHub setup: **Settings → Pages → Build and deployment → Source =
 GitHub Actions**.
 
+## Search, AEO and agents
+
+Everything an answer engine reads is generated at build from the same data as the pages:
+
+- `public/robots.txt` allows all crawlers, including AI bots, and lists the sitemap.
+- `@astrojs/sitemap` writes `sitemap-index.xml` (no drafts, no `/brand`).
+- `/llms.txt`, `/llms-full.txt` and a `.md` twin of every public page (`/index.md`,
+  `/python.md`, ...) come from `src/lib/markdown.ts`. Add facts to the data files, never to
+  the endpoints.
+- JSON-LD lives in `src/components/StructuredData.astro` (Organization, Person, WebSite,
+  Course, FAQPage, BreadcrumbList, ItemList).
+
+After a deploy, submit the sitemap in Google Search Console and Bing Webmaster Tools.
+
+## Running a sale / ending one
+
+`.claude/commands/sale-start.md` and `sale-end.md` hold the checklists. With no sale
+running the site shows no countdown at all.
+
 Social cards use the real course posters in `public/posters/`, not a generated card.
 `BaseLayout` defaults to `/posters/devops.jpg`; each course page passes its own via
 `ogImage` in `src/config/courses.ts`.
-
-`public/og-image.svg` is a leftover from the old generated card and is **not** referenced
-by any page. `scripts/generate-og.mjs` would rasterise it to `og-image.png`, which is not
-committed, so do not point anything at that filename without running it first.
 
 After adding a new poster JPG, generate its WebP variants (the poster is the LCP element
 on a course page):

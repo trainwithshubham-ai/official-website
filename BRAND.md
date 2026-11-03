@@ -8,10 +8,9 @@ design decision. If the code and this file disagree, this file wins.
 
 ## 1. What we're building
 
-A one-page, dark-theme, conversion-focused sales page for a **DevOps cohort
-batch** that starts **26 Jul 2026**. The page has exactly one job: turn a
-motivated learner into an enrolled student before the early-bird window closes
-(**3 Jul 2026, 23:59 IST**).
+A dark-theme, conversion-focused sales site. The flagship is a **self-paced
+DevOps course** (recorded lessons, 4-year access). The page has exactly one job:
+turn a motivated learner into an enrolled student.
 
 - **Audience:** anyone who wants to become an AI-powered DevOps engineer — from
   complete beginners to working Cloud / Platform engineers. This is a **zero to
@@ -35,8 +34,8 @@ the CI/CD pipeline — is the spine of the design.
   project). Stages connect along a vertical/horizontal **rail** with status dots.
 - **Eyebrows** (section labels) use a mono terminal prompt: `❯ curriculum`,
   `❯ who this is for`. Lowercase, monospace, deliberate.
-- The **countdown** is framed as a **deploy window** — the window to ship your
-  enrollment at early-bird price.
+- The **countdown**, when a sale is running, is framed as a **deploy window**: the
+  window to ship your enrollment at the sale price.
 - Status semantics from observability tooling carry meaning, not decoration:
   **purple = healthy/done**, **yellow = the action to take**, **amber = urgency**.
 
@@ -62,7 +61,7 @@ engineers already read every day.
 | `--accent`        | `#C084FC`  | Energy accent — Hero/pipeline gradients + rail sweep ONLY (luminous violet) |
 | `--cta`           | `#FACC15`  | **CTA only** — Enroll / primary action (vivid yellow) |
 | `--cta-deep`      | `#EAB308`  | CTA hover / pressed                               |
-| `--signal`        | `#F5A524`  | Urgency — countdown, "early bird ends", scarcity  |
+| `--signal`        | `#F5A524`  | Urgency — sale countdown, sale-ends messaging     |
 | `--text`          | `#E8EEF2`  | Primary text (off-white)                          |
 | `--muted`         | `#8A97A6`  | Secondary text, captions, mono labels             |
 
@@ -75,8 +74,8 @@ engineers already read every day.
   **light** `--primary` (#A78BFA, ~7:1 on ink) for any text/icon/small element;
   reserve the **deep** `--primary-deep` (#7C3AED, ~3.4:1) for fills, gradient
   stops, and large/decorative areas only — never small text.
-- Amber (`--signal`) appears only where time pressure is real: the countdown and
-  the early-bird messaging. Don't sprinkle it. It sits warm-but-distinct from the
+- Amber (`--signal`) appears only where time pressure is real: the sale countdown and
+  the sale-ends messaging. Don't sprinkle it. It sits warm-but-distinct from the
   purer yellow CTA — keep them from touching where possible.
 - No gradients on text. Tasteful gradients are allowed in the **pipeline
   (primary→accent)**, the hero glow, and the **gradient hairline border on the two
@@ -145,12 +144,12 @@ workhorse body, and a real monospace that does actual semantic work.
 
 - **Primary CTA button:** yellow fill, ink text, `8px` radius, weight 600,
   subtle lift on hover (translateY -1px + cta-deep). Label is a verb:
-  "Enroll now", "Get the early-bird seat". Never "Submit", never "Click here".
+  "Enroll now". Never "Submit", never "Click here".
 - **Secondary button:** transparent, `--primary` 1px border, purple text. For
   "See the curriculum".
-- **Countdown:** mono digits, amber accent, labeled `❯ early-bird window closes`.
-  When it expires it does **not** disappear — it flips to a calm "Early-bird
-  ended · full price now live" state and pricing updates. Honesty over fake urgency.
+- **Countdown:** mono digits, amber accent, labeled with the sale name (e.g. `❯ sale ends`).
+  It exists only while a real sale runs. When it expires it does **not** disappear:
+  it flips to a calm "sale ended" state. Honesty over fake urgency.
 - **Stage card (curriculum):** surface bg, left status dot (purple = the arc is
   real), mono stage label (`stage 03 · containers`), title, 3–4 outcome bullets.
 - **Status dot:** 8px purple circle = a real, sequential stage. Only use numbered
@@ -199,7 +198,7 @@ hype, and never condescending or gatekeeping. Beginners and pros both feel at ho
 
 **Microcopy**
 - Errors/empty states (e.g. form): plain and directive — "Enter a work email so
-  we can send your batch details." Errors don't apologize.
+  we can send your course details." Errors don't apologize.
 - A button's label and the result match: "Enroll now" → leads to checkout, not
   to a newsletter.
 
@@ -213,8 +212,8 @@ hype, and never condescending or gatekeeping. Beginners and pros both feel at ho
 - Use on dark backgrounds only. Maintain clear space ≥ the mark's height around it.
 - Do not recolor, stretch, add shadows, or place on busy backgrounds.
 - Min display height 28px (nav) / never below 20px.
-- Provide a favicon + a 1200×630 OG image (dark, pipeline motif, batch + date +
-  price) — both live in `public/`.
+- Provide a favicon and an OG/social image. The per-course 1280×720 posters in
+  `public/posters/` serve as the OG card; both live in `public/`.
 
 ---
 

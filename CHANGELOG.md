@@ -6,7 +6,59 @@ records *what* changed and *why* so future sessions have context.
 
 ---
 
-## 2026-10-11 — /claude-code and /linux become paid
+## 2026-11-03 — Hindi cross-links, logo and favicon
+
+- Subtle pointers to the Hindi sibling site (`site.altSites.hindi`): footer "Hindi courses"
+  link, a line under the catalog on `/courses`, and an FAQ entry ("Are there courses in
+  Hindi?", `{hindiSite}` token resolved in `src/content/data.ts`). Each link has its own
+  `data-track` tag (`hindi-site-footer`, `hindi-site-courses`, `hindi-site-faq`).
+- New logo (`public/logo.png`, cropped and exported at 256px from `public/brand/`) and a
+  rocket favicon set (`favicon.ico`, `favicon-32.png`, `favicon-192.png`,
+  `apple-touch-icon.png`); the old teal placeholder `favicon.svg` is gone.
+- README rewritten for the self-paced site, the AEO outputs and the sale checklists.
+
+## 2026-11-03 — AEO / LLM SEO: robots, llms.txt, markdown twins, richer JSON-LD
+
+- `robots.txt` names the major search and AI crawlers (all allowed) and points at the sitemap.
+- New endpoints from one builder, `src/lib/markdown.ts`: `/llms.txt`, `/llms-full.txt`,
+  `/index.md`, `/courses.md`, `/<course>.md`. Drafts excluded. Pages advertise their twin with
+  `<link rel="alternate" type="text/markdown">`.
+- JSON-LD: Organization is now also an EducationalOrganization (contactPoint, sameAs incl.
+  trainwithshubham.com and the GitHub org); standalone Person with a stable `@id`; WebSite on
+  the home page; BreadcrumbList on course pages; ItemList on `/courses`; `inLanguage`,
+  `educationalLevel`, `teaches` on courses.
+- The sitemap filter already skips `/brand` (for the coming brand guide). `og:locale` is `en_IN`; `twitter:site`
+  renders once `site.twitterHandle` is a real handle.
+- New `site.ts` fields: `altSites`, `github`, `twitterHandle` (TODO), `summary`.
+- Not done on purpose: `hreflang` (no confirmed English/Hindi page pairs yet), per-review and
+  VideoObject schema (no real data), `lastmod` (no per-page date tracked). Student photo alt
+  stays empty because the reviewer name sits right beside each photo.
+
+## 2026-11-03 — Flagship goes self-paced; live sessions ended
+
+The live cohort is over. `/` now sells a recorded, self-paced course (150+ hours, 4 years
+of access, start any day). Price unchanged.
+
+- Removed from `site.ts`: `batchStartISO`, `classDays`, `classTime`, `session`,
+  `batchStarted`, `fillFaqTokens`, `programLength`, `liveHours`. Added `videoHours`, `access`.
+- Removed every default countdown (header next-session strip, Hero, Pricing). `Countdown`
+  now needs an explicit `deadline` and only has `full` / `chip` / `marker` variants, so a
+  timer appears only for a sale (or a future live course). Daily and session modes are gone.
+- Copy: FAQ (no tokens, shorter), inclusions (live and weekly doubt sessions out),
+  audience, outcomes (icons, shorter), Pricing inclusions as a chip grid, Hero strip
+  "Start today · 150+ hrs recorded · 4 years access", Curriculum format pills.
+- JSON-LD: dropped `startDate`, added `courseWorkload: PT150H`. Default meta description reworded.
+- Deleted: `change-batch-date` command, `public/og-image.svg`, `scripts/generate-og.mjs`.
+- Reviews left verbatim (golden rule 4), including two that say "cohort" / "live batch".
+
+## 2026-11-03 — /claude-code and /linux are free again
+
+Reverted the 11 Oct paid flip for both courses (`courses.ts` restored to its pre-9e3fb40
+state: `free: true`, Learnyst `enrollUrl`, no price/checkout, no access-term claim, no
+Discord claim). The `/python` price fix from that commit (₹2,999, priceId 285234) is kept.
+The Learnyst products must be set back to free by the owner; the repo can't verify that.
+
+## 2026-10-11 — /claude-code and /linux become paid (REVERTED 2026-11-03, both free again)
 
 Both courses were free recorded pages; they are now one-time purchases. Prices and
 priceIds come from Learnyst (product pricing query for India, owner-supplied USD ids):

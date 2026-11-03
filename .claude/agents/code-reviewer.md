@@ -32,9 +32,11 @@ Then review the diff (`git diff`, or the specific files named) for:
   Enroll CTA; colors outside the palette; light vs. deep `--primary` misuse.
 - **Golden rule 6 (honest scarcity):** a countdown or urgency claim that isn't
   tied to a real moment in `site.ts`, or that could go stale/false after the
-  date passes.
+  date passes. `Countdown` is fixed-deadline only with a required `deadline`
+  prop; flag any default deadline, daily/session mode, or timer shown when
+  `site.sale.enabled` is false.
 - **Golden rule 7 (explicit placeholders):** a missing real value (checkout
-  URL, analytics ID, schedule) silently guessed instead of a named `// TODO:`.
+  URL, analytics ID, refund terms) silently guessed instead of a named `// TODO:`.
 - **Golden rule 8 (repo is the only data source):** any embed/iframe/fetch of
   an external sheet or API at build or runtime.
 - **Quality floor:** 380px responsiveness, keyboard focus ring,

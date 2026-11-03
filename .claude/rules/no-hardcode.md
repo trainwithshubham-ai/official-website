@@ -13,9 +13,9 @@ Never write one directly into a component, layout, or page — import it.
 
 Why: this is a static site with no backend. `site.ts` is the only place a
 value can be changed and have every place it's shown update together (hero,
-countdown, FAQ, JSON-LD, nav). A hardcoded duplicate silently drifts out of
+sale countdown, FAQ, JSON-LD, nav). A hardcoded duplicate silently drifts out of
 sync with the config the next time the real value changes — e.g. a sale
-ending, a batch date moving, or a coupon being retired — and the page starts
+ending, a price changing, or a coupon being retired — and the page starts
 contradicting checkout or itself.
 
 Separately, every color lives in `src/styles/tokens.css` as a `--color-*`

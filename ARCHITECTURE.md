@@ -6,7 +6,8 @@ the checkout URL by editing **one file**, never markup.
 
 Stack: **Astro 7 + Tailwind v4**, static output, deployed to apex
 `trainwithshubham.ai` via **GitHub Actions**. No backend, no database, no client
-framework. The only JavaScript that ships is the countdown. Tailwind v4 is
+framework. The only JavaScript that ships is the countdown, the VideoTeaser
+facade and the UTM helper (see §5). Tailwind v4 is
 CSS-first: configured via `@tailwindcss/vite` with tokens in `tokens.css` — there
 is no `tailwind.config` file.
 
@@ -14,8 +15,8 @@ is no `tailwind.config` file.
 
 ## 1. The one rule: single source of truth
 
-Every value that changes — price, dates, the early-bird deadline, the checkout
-link, social counts, contact email — lives in **`src/config/site.ts`**. Components
+Every value that changes — price, the sale deadline, course format figures, the
+checkout link, social counts, contact email — lives in **`src/config/site.ts`**. Components
 import from it. **Nothing volatile is ever hardcoded in a component.**
 
 ```ts
@@ -24,21 +25,20 @@ export const site = {
   domain: "https://trainwithshubham.ai",
   brand: "TrainWithShubham",
   product: "DevOps: Zero to Hero (AI Powered)",
-  tagline: "Production-grade DevOps. Not demos.",
+  tagline: "Happy Learning",
 
-  // --- batch ---
-  batchStartISO: "2026-07-26T20:00:00+05:30",
-  classDays: "TODO — confirm days (e.g. Sat & Sun)",
-  classTime: "TODO — confirm time IST",
-  oneOffBatch: true,
+  // --- course format (self-paced, recorded) ---
+  videoHours: "150+",
+  access: "4 years",
 
-  // --- scarcity ---
-  earlyBirdEndsISO: "2026-07-03T23:59:00+05:30", // countdown target
+  // --- sale (the only timer on the default page; enabled:false = no timer) ---
+  sale: { enabled: false, name: "…", endsISO: "…", price: { … }, coupon: "…" },
 
-  // --- pricing (USD) ---
-  priceFull: 249,
-  priceEarlyIndia: 149,
-  priceEarlyUS: 199,
+  // --- pricing (pre-formatted display strings, India + world) ---
+  price: {
+    india: { now: "₹19,999", list: "₹25,000" },
+    world: { now: "$249", list: "$299" },
+  },
 
   // --- conversion ---
   checkout: { india: "…", world: "…" }, // two Learnyst checkout URLs (per region)
@@ -69,8 +69,8 @@ export const site = {
 } as const;
 ```
 
-When the checkout URL arrives, it's a one-line change. When early bird shifts a
-day, it's one timestamp.
+When the checkout URL changes, it's a one-line change. When a sale's end moves,
+it's one timestamp (`sale.endsISO`).
 
 ---
 
@@ -85,8 +85,7 @@ Shubham edits JSON; components map over it.
   each through its exported zod schema at build and re-exports typed data.
   Components import from `content/data` (not the raw JSON). A malformed edit
   fails the build with a clear error instead of shipping broken.
-- FAQ answers may use `{classDays}` / `{classTime}` / `{batchStart}` tokens;
-  `FAQ.astro` resolves them from `site.ts` so the schedule stays single-source.
+- FAQ answers are plain text with no tokens; `FAQ.astro` renders `faq.json` as is.
 
 ```
 src/content/
@@ -94,7 +93,7 @@ src/content/
   outcomes.json      # [{ title, body }]              (3–4 cards)
   projects.json      # [{ title, desc, tools[] }]     (6+ projects)
   tools.json         # [{ name, logo }]               (tool wall)
-  inclusions.json    # ["Live sessions", "4-yr recordings", ...]
+  inclusions.json    # ["4-yr access", "150+ hrs of recordings", ...]
   faq.json           # [{ q, a }]
   reviews.json       # [{ name, rating, dateLabel, text, url }]  ← REAL Google reviews (seeded)
   audience.json      # { forYou[], notForYou[] }
@@ -106,20 +105,20 @@ contributor link. Never invent or edit reviews; cards show a trimmed excerpt
 that links to the full review on Google. If a review field is ever blank, the
 component omits that card rather than fabricating content.
 
-### Schedule & curriculum — source of truth
+### Curriculum and format — source of truth
 
 The page renders **only from data committed to this repo** — never from an
 external sheet or doc at build or runtime:
 
 - **Curriculum (topics/modules)** → `src/content/curriculum.json`. A *curated
   marketing view* of the course, not a raw dump of the ops timetable.
-- **Schedule shown on the page** (batch start, class days, class time, early-bird
+- **Course format shown on the page** (recorded hours, access term, sale
   deadline) → `src/config/site.ts`.
-- **Full dated per-session timetable** is operational — it stays on Learnyst /
-  the team's sheet / post-enrollment, **not** on this sales page.
+- **Lesson-level detail** is operational. It stays on Learnyst, **not** on this
+  sales page.
 
-The team's planning spreadsheet (e.g. the "Batch N live classes" Google Sheet) is
-an **internal reference only**. We do **not** embed, iframe, or fetch it:
+Any external planning spreadsheet or doc is an **internal reference only**. We do
+**not** embed, iframe, or fetch it:
 
 - No backend/JS budget for a live embed; an iframe breaks the dark/premium brand,
   the 380px layout, Lighthouse ≥95 and accessibility.
@@ -130,8 +129,8 @@ an **internal reference only**. We do **not** embed, iframe, or fetch it:
 
 To update: edit the repo JSON / `site.ts` and push to `main`; the Actions
 workflow redeploys. **Author/plan in the spreadsheet; publish from the repo.**
-We deliberately avoid an auto-sync — the sheet's module/hours/dates shape doesn't
-map cleanly to the curated page model, so a parser would be brittle.
+We deliberately avoid an auto-sync: an ops sheet's shape doesn't map cleanly to
+the curated page model, so a parser would be brittle.
 
 ---
 
@@ -141,7 +140,7 @@ map cleanly to the curated page model, so a parser would be brittle.
 trainwithshubham-ai/
 ├─ public/
 │  ├─ logo.png                 # downloaded TWS mark
-│  ├─ favicon.svg
+│  ├─ favicon.ico, favicon-32.png, favicon-192.png, apple-touch-icon.png
 │  ├─ posters/<slug>.jpg       # 1280×720 course poster = the OG/social card
 │  │                           # (+ .webp and -640.webp via scripts/generate-posters.mjs)
 │  └─ CNAME                    # "trainwithshubham.ai"
@@ -188,9 +187,10 @@ trainwithshubham-ai/
 
 `index.astro` is a thin file that imports and stacks these, in order:
 
-1. `Nav` — sticky, scroll-aware; contains a compact `Countdown` chip.
-2. `Hero` — badge (DevOps · Zero to Hero [Live]), H1, subhead, batch date/time,
-   animated pipeline, `Countdown`, dual CTA (`Button` yellow CTA + ghost). No price line.
+1. `Nav` — sticky, scroll-aware. Carries a sale row with a compact `Countdown`
+   only while `site.sale.enabled`; otherwise no timer.
+2. `Hero` — badge (DevOps · Zero to Hero), H1, subhead, self-paced line
+   (`videoHours`, `access`), animated pipeline, dual CTA (`Button` yellow CTA + ghost). No price line.
 3. `TrustBar` — `studentsTrained` (10,000+) + **4.9 ★ · 260 Google reviews**
    badge + social counts.
 4. `LogoMarquee` — "our learners now work at" CSS-only auto-scrolling wordmark
@@ -213,14 +213,15 @@ trainwithshubham-ai/
 11. `Instructor` — Shubham (real photo), "Hello Dosto" note, socials.
 12. `Audience` — "this is for you / not for you" two-column. **Placed right before
     Pricing — last qualifier before the price.**
-13. `Pricing` — **centered/symmetric** card: leads with the India price ("from
-    ₹14,999 · regularly ₹2̶5̶,̶0̶0̶0̶"), one currency on screen (no competing numbers).
-    The world price ($199 · $249) lives in the screen-reader breakdown + at
-    checkout (golden rule 6 transparency). Centered `Countdown`, `inclusions.json`,
+13. `Pricing` — **centered/symmetric** card: leads with the India price ("now
+    ₹19,999 · list ₹2̶5̶,̶0̶0̶0̶"), one currency on screen (no competing numbers).
+    The world price ($249) lives in the screen-reader breakdown + at
+    checkout (golden rule 6 transparency). Sale `Countdown` only while a sale runs;
+    `inclusions.json`,
     trust row, and two **price-free** region CTAs (`EnrollButtons` → flag/globe →
     `site.checkout.india` / `site.checkout.world`, UTM-appended). **Late.**
 14. `FAQ` — `faq.json`, native `<details>`.
-15. `FinalCTA` — closing band + `Countdown` + `EnrollButtons` (no separate price
+15. `FinalCTA` — closing band + `EnrollButtons` (no separate price
     line).
 16. `Footer` — legal, socials, contact, "Made in India 🇮🇳 for the world 🌐".
 
@@ -242,18 +243,16 @@ no cross-talk.**
 ## 5. Interactivity budget (almost none)
 
 - **`Countdown.astro`** is the single client island. Vanilla TS, no framework.
-  - Reads `site.earlyBirdEndsISO`, ticks once/sec, renders `dd hh mm ss` in mono.
-  - On expiry: emits a state so `Pricing` shows full price and the label flips to
-    "Early-bird ended · full price live." Implemented as a tiny `<script>` that
-    toggles `data-expired` on a root element; CSS handles the visual swap so there
-    is no layout shift and it works even if JS is slow.
-  - Reused in nav / hero / pricing / final CTA — **one component, four mounts.**
-  - **Two modes, one shared script.** `mode="fixed"` (default) counts each node's
-    `data-deadline` (the early-bird date). `mode="daily"` (the `BonusBar` timer)
-    counts to the next **midnight IST** and rolls to the following day — a real
-    end-of-day deadline for the repeatable `site.bonus`, never a fake per-visit
-    reset (golden rule 6). The script ticks all `[data-countdown]` nodes from one
-    `setInterval`; daily nodes never "expire."
+  - Fixed-deadline only. The required `deadline` prop is an ISO string from
+    `site.ts` (e.g. `site.sale.endsISO`); there is no default deadline and no
+    daily or session mode. Variants: `full`, `chip`, `marker`.
+  - Ticks once/sec, renders `dd hh mm ss` in mono. The script ticks all
+    `[data-countdown]` nodes from one `setInterval`.
+  - On expiry it toggles `data-expired` on a root element and the label flips to a
+    calm ended state. CSS handles the visual swap so there is no layout shift and
+    it works even if JS is slow. It never resets or invents a new deadline.
+  - On the default page the only mount is the sale marker. With
+    `site.sale.enabled:false` there is no timer at all.
 - **`VideoTeaser.astro`** is the ONE sanctioned exception (owner decision, 14 Aug 2026).
   A course page lives or dies on "show me the teaching before I sign up", and the
   alternative — linking out to YouTube — hands the viewer a sidebar full of competitors
@@ -296,6 +295,21 @@ The page has no database, but attribution still works:
   silently: no JS → both buttons equal, neutral note, new tab still works.
 
 ---
+
+## 6b. Agent and search discovery (AEO)
+
+Everything an answer engine or agent reads is generated from the same data as the pages:
+
+- `src/lib/markdown.ts` is the single builder. `src/pages/llms.txt.ts`, `llms-full.txt.ts`,
+  `index.md.ts`, `courses.md.ts` and `[slug].md.ts` are thin endpoints over it, so the
+  markdown can never disagree with the page. Draft courses are excluded (`isDraftCourse`).
+- `BaseLayout.astro` links each page to its `.md` twin only when one exists.
+- `StructuredData.astro` emits one `@graph` per page type (Organization/EducationalOrganization,
+  Person, WebSite, Course, FAQPage, BreadcrumbList, ItemList) with stable `@id`s.
+- `public/robots.txt` allows all crawlers on purpose; `@astrojs/sitemap` lists indexable
+  routes only (no `/brand`, no drafts).
+- `trainwithshubham.com` (Hindi) is related via `sameAs` only. No hreflang until real
+  page-to-page pairs exist.
 
 ## 7. Deploy module
 

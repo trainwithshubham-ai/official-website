@@ -9,7 +9,7 @@ those two files win over your instincts.
 ## Project
 
 A dark-theme, conversion-focused **sales site**. The flagship product is
-**DevOps: Zero to Hero (AI Powered)**, a live cohort, sold on `/`. There are
+**DevOps: Zero to Hero (AI Powered)**, a self-paced recorded course, sold on `/`. There are
 also standalone course pages (`/python`, `/claude-code`, `/linux`,
 `/agentic-ai`) and an index at `/courses` — see § Structure. The page's only
 job: convert a motivated learner — anyone from a complete beginner to a working
@@ -36,7 +36,8 @@ no prior experience required.
 - Fonts self-hosted via `@fontsource` (Space Grotesk, Inter, JetBrains Mono),
   imported in `BaseLayout.astro`.
 - Deploy: **GitHub Actions** → GitHub Pages.
-- The only runtime JS that ships is the **Countdown**, the **VideoTeaser**
+- The only runtime JS that ships is the **Countdown** (sale expiry only, and absent
+  when no sale runs), the **VideoTeaser**
   click-to-load facade on course pages (the one sanctioned second island — see
   ARCHITECTURE.md §5 for why and for the rules it has to keep), and the tiny
   inline UTM-capture helper in `BaseLayout` (ARCHITECTURE.md §6). Nothing else.
@@ -62,7 +63,7 @@ npm run preview      # preview the build
    need a volatile value, import it from `site.ts`. If it's missing, add it there.
    Detail + mechanical backstop: `.claude/rules/no-hardcode.md`.
 2. **No backend, no database, no client framework.** Don't reach for React/Vue.
-   Astro components are static HTML. Interactivity budget is the countdown plus
+   Astro components are static HTML. Interactivity budget is the sale countdown plus
    the VideoTeaser facade, and nothing else (see ARCHITECTURE.md §5, which also
    sets the bar any future island would have to clear). Accordions use native
    `<details>`.
@@ -82,24 +83,19 @@ npm run preview      # preview the build
    `--primary-deep` (#7C3AED) only for fills/gradients. Amber (`--signal`) is
    urgency. See BRAND.md §3. Don't introduce colors outside the palette.
 6. **Honest scarcity.** Every countdown ties to a real moment and flips to a calm
-   ended state rather than resetting or inventing new urgency. `earlyBirdEndsISO`
-   no longer exists — early bird was retired. The header timer counts to the **next
-   live class**, computed from `site.session`, so it rolls itself over each weekend
-   and can never advertise a session that has passed. A course page with a
-   `batchStartISO` counts to that session start. No "X seats left" unless it's
-   literally true. The **daily bonus timer** (`Countdown mode="daily"`,
-   `BonusBar`) is allowed because it is real: a genuinely repeatable bonus
-   (`site.bonus`) with the timer counting to **tonight's midnight IST**, which
-   then truly rolls to the next day — a real end-of-day deadline, NOT a fake
-   per-visit 24h reset. If the bonus stops being offered, set `bonus.enabled:false`.
+   ended state rather than resetting or inventing new urgency. The flagship is
+   self-paced, so with no sale running the page shows **no timer at all**. The
+   Countdown takes a required real `deadline`: today only the sale's `endsISO`
+   (an invisible `marker`), or a future live course's `batchStartISO`. No "X seats
+   left" unless it's literally true, and no per-visit 24h resets.
 7. **TODO placeholders are explicit.** Where a real value is missing
-   (`checkoutUrl`, `ga4Id`, `metaPixelId`, class days/time, refund terms), wire a
+   (`checkoutUrl`, `ga4Id`, `metaPixelId`, refund terms), wire a
    clearly-named placeholder and leave a `// TODO:` so Shubham can swap it. Don't
    guess and don't silently omit.
 8. **The repo is the only data the page renders.** External sheets/docs/APIs
-   (e.g. the team's "Batch N live classes" Google Sheet) are **references for
+   (e.g. any ops Google Sheet) are **references for
    authoring only** — never embedded, iframed, or fetched at build or runtime.
-   Schedule + class times live in `site.ts`; curriculum topics (a curated
+   Course format (`videoHours`, `access`) lives in `site.ts`; curriculum topics (a curated
    marketing view, not a raw dump of the ops sheet) in `curriculum.json`. To
    change them, edit the repo and push — Actions redeploys. (See ARCHITECTURE.md
    §2.) Why: an embed breaks the brand/perf/a11y budget and can silently break a
@@ -132,6 +128,13 @@ npm run preview      # preview the build
   component reads only `site.ts` and its own JSON file. No cross-component
   coupling.
 - `src/pages/index.astro` — thin; stacks sections in IA order (ARCHITECTURE.md §4).
+- **AEO / agent discovery.** `src/lib/markdown.ts` builds markdown from `site.ts`,
+  `courses.ts` and `src/content/*`; it feeds `src/pages/llms.txt.ts`,
+  `llms-full.txt.ts`, `index.md.ts`, `courses.md.ts` and `[slug].md.ts` (a `.md` twin of
+  every public page). New facts go in the data files, never into these endpoints.
+  `robots.txt` deliberately allows every crawler incl. AI bots; the sitemap omits
+  `/brand` (noindex) and drafts. `trainwithshubham.com` is the separate Hindi site: it is
+  linked via JSON-LD `sameAs` (`site.altSites`), not canonical-ed or redirected.
 
 ## Claude Code project structure
 
@@ -233,28 +236,15 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
 
 ## Key facts (mirror of `site.ts` — edit there, not here)
 
-- Product: DevOps: Zero to Hero (AI Powered) · cohort batch · **started 26 Jul 2026**,
-  enrolment still open into the running batch
-  · open to all levels (beginners welcome, no prior experience required)
-- No early-bird window — the offer has ended. There is NO countdown-to-price and
-  NO price flip; the Countdown now counts down to the **batch start** (`batchStartISO`).
+- Product: DevOps: Zero to Hero (AI Powered) · **self-paced, recorded** (live cohort
+  ended; 150+ hrs of recordings, 4 years of access, start any day) · open to all
+  levels (beginners welcome, no prior experience required)
+- No early-bird window and no default countdown. Urgency exists only while a sale runs.
 - Price (dual currency, no IP geo-switch): standing price is India ~~₹25,000~~ →
   **₹19,999**; rest of world ~~$299~~ → **$249**. Shown as a standing `now`/`list`
   discount (never "early bird"). Page leads with the India price; the world price
   lives in the SR breakdown + at checkout. Region pay buttons are price-free
   (flag / globe).
-- **Changing the batch date — checklist.** `batchStartISO` is the only field to edit;
-  the hero line, both countdowns, the FAQ and the JSON-LD `startDate` all derive from
-  it. But `batchStarted` (site.ts) is evaluated **at build time and then frozen**,
-  because this is a static site and the deploy workflow only runs on push. So:
-  1. Set the new `batchStartISO` and push. The page reads "Starts <date>" and the
-     countdowns tick.
-  2. **Redeploy on the batch start day** (empty commit, or run the workflow manually).
-     Without it the Countdown island flips itself client-side to "batch is live" while
-     the hero, the screen-reader sentence and the FAQ still say "starts" — the page
-     contradicting its own timer.
-  A `schedule:` cron on `deploy.yml` would remove step 2; it is deliberately not there
-  yet, so the manual step stands.
 - **NO SALE RUNNING.** `site.sale.enabled` is `false`. The Teachers' Day sale (₹14,999 /
   $199 via coupon **OFFER5000**) ended **7 Sep 2026, 23:59 IST** and was torn down on
   9 Sep (`enabled:false`, commit d292ea0). Prices are back to the standing ₹19,999 / $249
@@ -263,19 +253,14 @@ the near-zero-JS + Lighthouse ≥ 95 floor.
   that was done. The earlier Independence Day sale ran to 15 Aug 2026 and was torn down
   on 16 Aug.
 - **Standalone course prices** live in `src/config/courses.ts`, not here. Checked against
-  Learnyst on 11 Oct 2026: Python ₹2,999 / $19, Claude Code ₹499 / $10, Linux ₹999 /
-  $19. Before changing any price, read Learnyst's `showProductPricings` and match it.
+  Learnyst on 11 Oct 2026: Python ₹2,999 / $19. Claude Code and Linux are FREE again (3 Nov 2026). Before changing any price, read Learnyst's `showProductPricings` and match it.
 - **To run the next sale:** fill in `site.sale` (name, `endsISO`, `price`, `off`,
   `coupon`) and set `enabled: true`. Components render the derived `activePrice` /
   `activeCheckout`, never `site.price` directly, so one flag moves every price on
   the page and the buttons beside them together. The offer renders as a **slim row
-  inside the sticky header** (`Nav.astro`, `.nav-sale`), which replaces the
-  `.nav-urgency` next-session strip while a sale runs. Anchor India to the STANDING
+  inside the sticky header** (`Nav.astro`, `.nav-sale`), which only exists
+  while a sale runs. Anchor India to the STANDING
   price, never ₹25,000, so an "₹X off" claim is literally true.
-  - **Seconds in the pinned header:** the sale row omits them; the `.nav-urgency`
-    next-session row shows them, at Shubham's explicit request after this was argued
-    both ways. Keep it that way. It does mean a 1s DOM write runs for the whole visit,
-    since session mode never expires and so never hits `clearInterval`.
   - If the discount comes from a **coupon** rather than a repriced product, the
     Pricing card MUST state the code right above the pay buttons (and in the SR
     breakdown), or the page and the checkout will disagree.

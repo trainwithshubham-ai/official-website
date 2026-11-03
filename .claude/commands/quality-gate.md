@@ -13,7 +13,10 @@ Run the pre-deploy gate before any deploy, per CLAUDE.md's Skills table:
    - Lighthouse Performance ≥ 95, Accessibility ≥ 95; near-zero JS.
    - Body-text contrast ≥ 4.5:1.
    - Semantic landmarks, real heading order.
-   - OG image (1200×630) + favicon present; `<title>`/meta description set.
+   - OG/social image (per-course poster in `public/posters/`) + favicon present; `<title>`/meta description set.
+   - Discovery: `dist/robots.txt` allows AI bots and lists the sitemap; `dist/llms.txt`,
+     `llms-full.txt` and each `*.md` exist, every URL in `llms.txt` resolves in `dist/`;
+     JSON-LD `@id` references resolve; draft and `/brand` pages absent from the sitemap.
    - Every Enroll CTA forwards incoming UTM params to `checkoutUrl` and fires
      one `enroll_click` event (ARCHITECTURE.md §6).
 3. If any focused area needs a deeper look, run `accessibility`,
